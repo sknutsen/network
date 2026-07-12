@@ -1,0 +1,17 @@
+# zdk.no ingress — Service/backend defined when github.com/sknutsen/Zdk ships Deployment
+# Uncomment and set service name/port when Zdk app is deployable.
+#
+# apiVersion: traefik.io/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   name: zdk
+#   namespace: default
+# spec:
+#   entryPoints:
+#     - web
+#   routes:
+#     - match: Host(`zdk.no`)
+#       kind: Rule
+#       services:
+#         - name: zdk
+#           port: 80

@@ -1,0 +1,36 @@
+# Deploy on TrueNAS SCALE (10.10.30.20)
+# Mount datasets under tank/services/
+
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - /mnt/tank/services/caddy/data:/data
+      - /mnt/tank/services/caddy/config:/config
+    networks:
+      - edge
+
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:9
+    restart: unless-stopped
+    environment:
+      - FORGEJO__server__ROOT_URL=https://code.zdk.no
+      - FORGEJO__server__SSH_DOMAIN=code.zdk.no
+      - FORGEJO__server__SSH_PORT=2222
+    volumes:
+      - /mnt/tank/services/forgejo/data:/data
+      - /mnt/tank/services/forgejo/config:/etc/gitea
+    networks:
+      - edge
+    # SSH not exposed on WAN — bind for internal/VPN use only if needed
+    # ports:
+    #   - "2222:22"
+
+networks:
+  edge:
+    driver: bridge

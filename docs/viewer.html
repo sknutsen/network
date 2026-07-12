@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>net — Network Plan</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --bg-sidebar: #1a2332;
+      --bg-content: #151b24;
+      --text: #e6edf3;
+      --text-muted: #8b9cb3;
+      --border: #2d3a4f;
+      --accent: #58a6ff;
+      --accent-dim: #388bfd66;
+      --code-bg: #1c2430;
+      --table-stripe: #1a2230;
+      --warning-bg: #3d2e00;
+      --warning-text: #f0c14b;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f8fa;
+        --bg-sidebar: #ffffff;
+        --bg-content: #ffffff;
+        --text: #1f2328;
+        --text-muted: #656d76;
+        --border: #d0d7de;
+        --accent: #0969da;
+        --accent-dim: #0969da22;
+        --code-bg: #f6f8fa;
+        --table-stripe: #f6f8fa;
+        --warning-bg: #fff8c5;
+        --warning-text: #7d4e00;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; }
+    }
+
+    .sidebar {
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      padding: 1.25rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar h1 {
+      font-size: 1.1rem;
+      margin: 0 0 0.25rem;
+      font-weight: 600;
+    }
+
+    .sidebar .subtitle {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .nav-docs {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .nav-docs button {
+      text-align: left;
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      color: var(--text);
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .nav-docs button:hover { background: var(--accent-dim); }
+
+    .nav-docs button.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .toc {
+      font-size: 0.8rem;
+    }
+
+    .toc h2 {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin: 0 0 0.5rem;
+    }
+
+    .toc ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .toc li { margin: 0.15rem 0; }
+
+    .toc a {
+      color: var(--text-muted);
+      text-decoration: none;
+      display: block;
+      padding: 0.15rem 0;
+      line-height: 1.35;
+    }
+
+    .toc a:hover { color: var(--accent); }
+
+    .toc .h3 { padding-left: 0.75rem; }
+    .toc .h4 { padding-left: 1.5rem; }
+
+    main {
+      padding: 2rem 2.5rem 4rem;
+      max-width: 52rem;
+      background: var(--bg-content);
+    }
+
+    .banner {
+      display: none;
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      border: 1px solid var(--warning-text);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .banner.visible { display: block; }
+
+    .banner code {
+      background: rgba(0,0,0,0.15);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+
+    .loading, .error {
+      color: var(--text-muted);
+      padding: 2rem 0;
+    }
+
+    .error { color: #f85149; }
+
+    .content h1 { font-size: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; margin-top: 0; }
+    .content h2 { font-size: 1.5rem; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+    .content h3 { font-size: 1.2rem; margin-top: 1.5rem; }
+    .content h4 { font-size: 1rem; margin-top: 1.25rem; }
+
+    .content a { color: var(--accent); }
+    .content p, .content ul, .content ol { margin: 0.75rem 0; }
+    .content li { margin: 0.25rem 0; }
+
+    .content code {
+      background: var(--code-bg);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+      border: 1px solid var(--border);
+    }
+
+    .content pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+
+    .content pre code {
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    .content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+      display: block;
+      overflow-x: auto;
+    }
+
+    .content th, .content td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+
+    .content th { background: var(--table-stripe); font-weight: 600; }
+    .content tr:nth-child(even) td { background: var(--table-stripe); }
+
+    .content blockquote {
+      border-left: 4px solid var(--accent);
+      margin: 1rem 0;
+      padding: 0.25rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    .content input[type="checkbox"] {
+      margin-right: 0.4rem;
+      pointer-events: none;
+    }
+
+    .mermaid {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      text-align: center;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h1>net</h1>
+      <p class="subtitle">Home network architecture</p>
+      <nav class="nav-docs" aria-label="Documents">
+        <button type="button" data-doc="readme" class="active">README</button>
+        <button type="button" data-doc="plan">Architecture Plan</button>
+      </nav>
+      <nav class="toc" id="toc" hidden>
+        <h2>On this page</h2>
+        <ul id="toc-list"></ul>
+      </nav>
+    </aside>
+    <main>
+      <div class="banner" id="banner" role="alert">
+        Browsers block loading local files directly. From the repo root, run
+        <code>python3 -m http.server 8080</code>
+        then open
+        <code>http://localhost:8080/docs/viewer.html</code>
+      </div>
+      <article class="content" id="content">
+        <p class="loading">Loading…</p>
+      </article>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+  <script>
+    const DOCS = {
+      readme: { path: "../README.md", label: "README" },
+      plan: { path: "plan.md", label: "Architecture Plan" },
+    };
+
+    let currentDoc = "readme";
+
+    const renderer = new marked.Renderer();
+
+    renderer.code = function (code, infostring) {
+      const lang = (infostring || "").trim().toLowerCase();
+      if (lang === "mermaid") {
+        return '<div class="mermaid">' + escapeHtml(code) + "</div>";
+      }
+      return (
+        '<pre><code class="language-' +
+        escapeHtml(lang) +
+        '">' +
+        escapeHtml(code) +
+        "</code></pre>"
+      );
+    };
+
+    marked.setOptions({
+      renderer,
+      gfm: true,
+      breaks: false,
+    });
+
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: window.matchMedia("(prefers-color-scheme: light)").matches
+        ? "default"
+        : "dark",
+      securityLevel: "strict",
+    });
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function slugify(text) {
+      return text
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim();
+    }
+
+    function buildToc(container) {
+      const tocList = document.getElementById("toc-list");
+      const tocNav = document.getElementById("toc");
+      tocList.innerHTML = "";
+
+      const headings = container.querySelectorAll("h2, h3, h4");
+      if (headings.length === 0) {
+        tocNav.hidden = true;
+        return;
+      }
+
+      headings.forEach((heading) => {
+        if (!heading.id) {
+          heading.id = slugify(heading.textContent);
+        }
+        const li = document.createElement("li");
+        li.className = heading.tagName.toLowerCase();
+        const a = document.createElement("a");
+        a.href = "#" + heading.id;
+        a.textContent = heading.textContent;
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      tocNav.hidden = false;
+    }
+
+    async function renderMermaid() {
+      const blocks = document.querySelectorAll(".mermaid");
+      if (blocks.length === 0) return;
+
+      try {
+        await mermaid.run({ nodes: blocks });
+      } catch (err) {
+        console.error("Mermaid render error:", err);
+      }
+    }
+
+    async function loadDoc(key) {
+      const doc = DOCS[key];
+      const content = document.getElementById("content");
+      const banner = document.getElementById("banner");
+
+      content.innerHTML = '<p class="loading">Loading ' + doc.label + "…</p>";
+      banner.classList.remove("visible");
+
+      try {
+        const res = await fetch(doc.path);
+        if (!res.ok) throw new Error(res.status + " " + res.statusText);
+        const md = await res.text();
+
+        content.innerHTML = marked.parse(md);
+        buildToc(content);
+        await renderMermaid();
+
+        document.title = doc.label + " — net";
+      } catch (err) {
+        if (location.protocol === "file:") {
+          banner.classList.add("visible");
+        }
+        content.innerHTML =
+          '<p class="error">Could not load <code>' +
+          escapeHtml(doc.path) +
+          "</code>: " +
+          escapeHtml(err.message) +
+          "</p>";
+        document.getElementById("toc").hidden = true;
+      }
+    }
+
+    document.querySelectorAll(".nav-docs button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const key = btn.dataset.doc;
+        if (key === currentDoc) return;
+
+        document.querySelectorAll(".nav-docs button").forEach((b) => {
+          b.classList.toggle("active", b === btn);
+        });
+
+        currentDoc = key;
+        loadDoc(key);
+        window.scrollTo(0, 0);
+      });
+    });
+
+    loadDoc(currentDoc);
+  </script>
+</body>
+</html>
