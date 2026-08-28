@@ -10,5 +10,6 @@
     ./monitoring.nix
     ./ssh.nix
     ./dnsupdater.nix
+    ./caddy.nix
   ];
 }

@@ -57,7 +57,9 @@
 
   hosts = {
     truenas = "10.10.30.20";
+    caddy = "10.10.30.1"; # janus servers-VLAN address; Unbound for Caddy names
     blocky = "10.10.30.21";
+    crs310 = "10.10.10.2";
     nordri = "10.10.30.11";
     sudri = "10.10.30.12";
     austri = "10.10.30.13";
@@ -80,7 +82,6 @@
 
   vpn = {
     network = "10.10.255.0/24";
-    # Listen port TBD — see OPEN-QUESTIONS.md
     listenPort = 51820;
   };
 
@@ -90,5 +91,12 @@
     informPort = 8080;
     stunPort = 3478;
     discoveryPort = 10001;
+  };
+
+  # Loopback only — Caddy proxies headscale.lab.zdk.no. Do not bind :8080
+  # (UniFi Inform) or :11443 (UniFi UI).
+  headscale = {
+    listenAddress = "127.0.0.1";
+    listenPort = 8081;
   };
 }

@@ -9,7 +9,8 @@ in
   config = lib.mkIf cfg.enableUnifi {
     virtualisation.podman.enable = true;
 
-    # Persistence for UniFi OS Server data (installer default may differ — verify).
+    # Persistence path is canonical; bind-mount here if the installer differs.
+    # Inform :8080 — Headscale must not bind this port (use 127.0.0.1:8081).
     systemd.tmpfiles.rules = [
       "d /var/lib/unifi-os-server 0750 root root -"
     ];
@@ -29,6 +30,8 @@ in
     #   2. Ensure podman + slirp4netns meet Ubiquiti minimums
     #   3. Run installer as root; complete first-run wizard
     #   4. Devices → Device Updates & Settings → Inform Host Override
-    #      = router LAN IP the AP can reach (often 10.10.10.1)
+    #      = 10.10.10.1 (mgmt GW). AP native VLAN is 10; do not point
+    #      Inform at 10.10.30.1 (Caddy). UniFi is this host only — do
+    #      not run UniFi Network Application on TrueNAS.
   };
 }

@@ -1,5 +1,6 @@
-{ lib, ... }:
+{ config, lib, ... }:
 let
+  cfg = config.homelab.router;
   C = import ../lib/constants.nix;
 
   # MAC → IP reservations filled at deploy (see docs/inventory.md).
@@ -8,6 +9,15 @@ let
   ];
 
   gw = cidr: lib.head (lib.splitString "/" cidr);
+
+  iotDns =
+    if cfg.enableBlocky then C.hosts.blocky else gw C.vlans.iot.ipv4;
+
+  domainSearchLine = name:
+    if name == "iot" && cfg.enableBlocky then
+      "# IoT: no domain-search — Blocky denies lab names; don't probe\n"
+    else
+      "dhcp-option=tag:${name},option:domain-search,${C.domain}\n";
 
   vlanDhcpSections = lib.concatStrings (
     lib.mapAttrsToList (
@@ -18,14 +28,13 @@ let
         dhcp-option=tag:${name},option:router,${gw vlan.ipv4}
         dhcp-option=tag:${name},option:dns-server,${
           if name == "iot" then
-            C.hosts.blocky
+            iotDns
           else if name == "guest" then
             "1.1.1.1,9.9.9.9"
           else
             gw vlan.ipv4
         }
-        dhcp-option=tag:${name},option:domain-search,${C.domain}
-
+        ${domainSearchLine name}
       ''
     ) C.vlans
   );

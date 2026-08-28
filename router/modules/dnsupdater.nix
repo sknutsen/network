@@ -3,8 +3,9 @@ let
   cfg = config.homelab.router;
 in
 {
-  # DNSUpdater → Domeneshop for zdk.no / code (Stage 2+, before Stage 7 WAN).
-  # Binary/config details TBD — see https://github.com/sknutsen/DNSUpdater
+  # DNSUpdater → Domeneshop for zdk.no / code (before Stage 7 WAN).
+  # Packaging lives in https://github.com/sknutsen/DNSUpdater — do not add a
+  # derivation in this flake until that repo ships a package/flake.
   config = lib.mkIf cfg.enableDnsUpdater {
     # sops.secrets."dnsupdater/env" = { };
     systemd.services.dnsupdater = {

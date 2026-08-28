@@ -3,9 +3,15 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  sshKeys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMUD4Q4Mg/bYYjZp1NWhXCOzmOTfwDePpkA+jGAU0QGx sondreknutsen1@gmail.com"
+  ];
+in {
   imports = [
     ./hardware.nix
+    ./hardware-configuration.nix
+    ./disko.nix
     ../../modules
   ];
 
@@ -14,11 +20,20 @@
     hostname = "janus";
     wanInterface = "wan0"; # I217LM 34:17:eb:96:84:20
     lanTrunkInterface = "lan0"; # i350-T2 port 1 a0:36:9f:33:ae:96
-    enableIpv6 = false;
+    enableIpv6 = false; # Stage 2: true once WAN is up (PD). Leave blockyIpv6 null until GUA known.
+    blockyIpv6 = null; # set after PD, e.g. "<servers-/64>::21"
     enableWireGuard = false;
     enableDnsUpdater = false;
     enableUnifi = true;
+    enableCaddy = true;
+    enableWanCaddy = false; # Stage 7 — WAN 80/443 to local Caddy
+    caddyEmail = null;
+    enableBlocky = false; # Stage 4 — flip after Blocky answers on 10.10.30.21
   };
+
+  # Confirm on the installer: lsblk -d -o NAME,SIZE,MODEL && ls -l /dev/disk/by-id/
+  # Prefer a stable by-id path once you have it.
+  disko.devices.disk.main.device = "/dev/sda";
 
   # Persistent names from burned-in MACs (port order: lower MAC = i350 port 1).
   systemd.network.links = {
@@ -46,11 +61,17 @@
   time.timeZone = "Europe/Oslo";
   i18n.defaultLocale = "en_US.UTF-8";
 
-  users.users.root.openssh.authorizedKeys.keys = [
-    # TODO: add deploy key (OPEN-QUESTIONS #9)
-    # "ssh-ed25519 AAAA... you@host"
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMUD4Q4Mg/bYYjZp1NWhXCOzmOTfwDePpkA+jGAU0QGx sondreknutsen1@gmail.com"
-  ];
+  users.users.root.openssh.authorizedKeys.keys = sshKeys;
+
+  users.users.zdk = {
+    isNormalUser = true;
+    extraGroups = ["wheel"];
+    openssh.authorizedKeys.keys = sshKeys;
+  };
+
+  # No hashedPassword: SSH is key-only, so wheel sudo cannot prompt.
+  security.sudo.wheelNeedsPassword = false;
+  nix.settings.trusted-users = ["root" "zdk"];
 
   environment.systemPackages = with pkgs; [
     vim
@@ -62,7 +83,9 @@
     usbutils
   ];
 
-  # sops-nix — enable once secrets/router.yaml + age key exist
+  # sops-nix — enable once secrets/router.yaml + age key exist.
+  # Key path is canonical: generate on janus, backup offline, add pubkey
+  # (and a workstation identity) to secrets/.sops.yaml.
   # sops.defaultSopsFile = ../../../secrets/router.yaml;
   # sops.age.keyFile = "/var/lib/sops-nix/key.txt";
 

@@ -1,70 +1,82 @@
 # Router (OptiPlex 9020 MT)
 
-NixOS flake for the homelab edge router. Design sources:
+NixOS modules for the homelab edge router. The flake is at the **repo root**
+(`nixosConfigurations.optiplex`). Design sources:
 
 - [docs/vlan-plan.md](../docs/vlan-plan.md)
 - [docs/firewall-matrix.md](../docs/firewall-matrix.md)
 - [docs/decisions.md](../docs/decisions.md)
 
-Open bring-up questions: **[OPEN-QUESTIONS.md](OPEN-QUESTIONS.md)**.
+Remaining first-boot leftovers: **[OPEN-QUESTIONS.md](OPEN-QUESTIONS.md)**. Resolved answers: [docs/decisions.md](../docs/decisions.md).
 
-## Install (fresh NixOS)
+## Install (nixos-anywhere)
 
-**Recommended disk layout** (single internal disk, UEFI):
+Disk layout is `hosts/optiplex/disko.nix`: GPT, 512 MiB ESP label `BOOT` -> `/boot`, remainder ext4 label `nixos` -> `/`. No ZFS/btrfs for v1. UniFi OS Server wants tens of GB free on `/`. Optional 4 GiB swap only if RAM is 8 GiB or less.
 
-| Partition | Size | FS | Label | Mount |
-|-----------|------|-----|-------|-------|
-| ESP | 512 MiB | FAT32 | `BOOT` | `/boot` |
-| root | remainder | ext4 | `nixos` | `/` |
-| swap (optional) | 4 GiB | swap | `swap` | — only if RAM ≤ 8 GiB |
+**Firmware:** UEFI, Secure Boot off, SATA AHCI. After install, SSH is accepted only from the trusted VLAN (`10.10.20.0/24`). SSH keys for `zdk` (admin) and `root` are already in `configuration.nix`. Keep a keyboard and monitor attached until that path works.
 
-NixOS generations already give rollback; keep the layout simple (no ZFS/btrfs required for v1). UniFi OS Server wants tens of GB free on `/`.
+### 1. Bootstrap SSH on the OptiPlex
 
-Example from the installer (`/dev/sda` — check with `lsblk`):
+nixos-anywhere needs Linux + SSH as root (or passwordless sudo). A Windows install cannot kexec.
+
+- **Existing Linux:** enable root SSH. Leave about 2 GiB RAM free for kexec.
+- **Blank disk:** boot a NixOS installer ISO in UEFI mode. On the live system start `sshd`, set a temporary root password, and note the IPv4 (`ip -br addr`). Identify the target disk (`lsblk -d -o NAME,SIZE,MODEL` and `/dev/disk/by-id/`).
+
+Give the live system internet on **one** NIC (I217LM into the current LAN is fine). Do not connect i350 port 1 to the production switch until cutover: the installed system will serve `10.10.x.0/24` DHCP on tagged VLANs.
+
+Set `disko.devices.disk.main.device` in `hosts/optiplex/configuration.nix` to that disk (`/dev/sda` is the default; prefer a `/dev/disk/by-id/...` path).
+
+### 2. Run nixos-anywhere from a workstation
+
+From the **repo root**. This Mac cannot build `x86_64-linux` locally, so pass `--build-on remote` (the OptiPlex builds the closure). Pingu (NixOS, same architecture) can build locally and omit that flag.
+
+Git flakes ignore untracked files. Stage the tree, or pass `--flake path:$PWD#optiplex`.
 
 ```bash
-sudo parted /dev/sda -- mklabel gpt
-sudo parted /dev/sda -- mkpart ESP fat32 1MiB 513MiB
-sudo parted /dev/sda -- set 1 esp on
-sudo parted /dev/sda -- mkpart root ext4 513MiB 100%
-sudo mkfs.fat -F 32 -n BOOT /dev/sda1
-sudo mkfs.ext4 -L nixos /dev/sda2
-sudo mount /dev/disk/by-label/nixos /mnt
-sudo mkdir -p /mnt/boot
-sudo mount /dev/disk/by-label/BOOT /mnt/boot
+cd /path/to/net
+
+nix run github:nix-community/nixos-anywhere -- \
+  --flake .#optiplex \
+  --target-host root@INSTALLER_IP \
+  --build-on remote \
+  --generate-hardware-config nixos-generate-config ./router/hosts/optiplex/hardware-configuration.nix \
+  --phases kexec,disko,install
 ```
 
-Then either:
+If you are already on a NixOS installer, nixos-anywhere skips kexec. Leave reboot out of `--phases` so you can set a console root password with `nixos-enter` on `/mnt` before the machine becomes the gateway. Then reboot from the live session.
 
-1. Minimal `nixos-install` with a tiny config, clone this repo, `nixos-rebuild switch --flake .#optiplex`, or
-2. Copy `router/` into `/mnt/etc/nixos` style flake and install with `nixos-install --flake /mnt/path/to/router#optiplex`.
+The SSH host key changes. After reboot the installer DHCP address is gone.
+
+If the remote build runs out of memory (8 GiB OptiPlex building a full closure), run nixos-anywhere from Pingu instead, or add RAM.
 
 **NICs (already in flake):**
 
 | MAC | Name | Role |
 |-----|------|------|
-| `34:17:eb:96:84:20` | `wan0` | I217LM → modem |
-| `a0:36:9f:33:ae:96` | `lan0` | i350 port 1 → CRS310 trunk |
+| `34:17:eb:96:84:20` | `wan0` | I217LM -> modem |
+| `a0:36:9f:33:ae:96` | `lan0` | i350 port 1 -> CRS310 trunk |
 | `a0:36:9f:33:ae:97` | `spare0` | i350 port 2, forced down |
 
-Confirm port 1 ↔ `ae:96` with a physical cable test after first boot.
+Confirm port 1 <-> `ae:96` with a physical cable test after first boot.
 
-**WAN:** DHCP. **SSH:** trusted VLAN (`10.10.20.0/24`) only — add an authorized key before locking yourself out.
+**WAN:** DHCP. **SSH:** trusted VLAN only.
 
 ## Layout
 
 ```
 router/
-├── flake.nix
 ├── lib/constants.nix       # VLANs, hosts, ports (sync with docs)
 ├── hosts/optiplex/
-│   ├── configuration.nix   # site knobs (iface names, toggles)
-│   └── hardware.nix        # stub — replace from nixos-generate-config
+│   ├── configuration.nix   # site knobs (iface names, disk, toggles)
+│   ├── disko.nix           # GPT ESP + ext4
+│   ├── hardware.nix        # bootloader + NIC kernel modules
+│   └── hardware-configuration.nix  # generated at install
 └── modules/
     ├── networking.nix      # WAN + VLAN trunk
-    ├── dhcp.nix            # dnsmasq
+    ├── dhcp.nix            # dnsmasq (IoT DNS follows enableBlocky)
     ├── dns.nix             # Unbound split-horizon
     ├── firewall.nix        # nftables from firewall-matrix
+    ├── caddy.nix           # Caddy; Caddyfile in services/caddy/
     ├── vpn.nix             # WireGuard (Stage 6, off by default)
     ├── unifi.nix           # Podman prep for UniFi OS Server
     ├── dnsupdater.nix      # Domeneshop DDNS timer stub
@@ -72,14 +84,19 @@ router/
     └── ssh.nix
 ```
 
+**Stage flags** in `hosts/optiplex/configuration.nix`: `enableBlocky` stays **false** until Blocky answers at `10.10.30.21`. `enableWanCaddy` stays **false** until Stage 7. Lab TLS is DNS-01 (Domeneshop plugin + sops) — see `caddy.nix`. Caddyfile: `services/caddy/Caddyfile`.
+
 ## Build / deploy (once hardware knobs are set)
 
 ```bash
-# On a workstation with Nix:
+# From repo root (Linux builder or on janus):
 nix build .#nixosConfigurations.optiplex.config.system.build.toplevel
 
-# On the OptiPlex (after install):
-nixos-rebuild switch --flake /path/to/net/router#optiplex
+# On janus (after install):
+nixos-rebuild switch --flake /path/to/net#optiplex
+
+# From a Linux workstation (SSH from trusted VLAN):
+nixos-rebuild switch --flake .#optiplex --target-host root@10.10.20.1
 ```
 
 ## UniFi OS Server
@@ -88,5 +105,7 @@ Not packaged in the flake. After NixOS is up:
 
 1. Install UniFi OS Server (vendor Podman installer).
 2. Open UI on `:11443` from trusted VLAN.
-3. Set Inform Host Override to the router IP the AP reaches (often `10.10.10.1`).
-4. Adopt U7 Lite; map SSIDs per vlan-plan.
+3. Set Inform Host Override to **`10.10.10.1`**. The AP's native VLAN is 10, so it cannot use `10.10.30.1` for Inform. Caddy A records stay on `10.10.30.1` (`:443`); UniFi UI is `:11443` — no port clash, and mgmt DNS stays infrastructure-only.
+4. Adopt U7 Lite; map SSIDs per vlan-plan (`Hai-Fi Wai-Fi` / `(IoT)` / `(Guest)`). UniFi OS Server runs **only** on this router — do not resurrect the TrueNAS Network Application.
+
+**Ports:** Inform `:8080`, UI `:11443`. Headscale (Stage 6) listens on **`127.0.0.1:8081`** so it does not collide with Inform. Caddy LAN INPUT is trusted + servers (+ VPN), not mgmt.
