@@ -34,7 +34,7 @@ fi
 
 echo "==> nix flake check"
 if command -v nix >/dev/null 2>&1; then
-  if ! nix --extra-experimental-features 'nix-command flakes' flake check "$root"; then
+  if ! nix --extra-experimental-features 'nix-command flakes' flake check --all-systems "$root"; then
     echo "flake check failed (common on Darwin for x86_64-linux). Falling back to eval." >&2
     nix --extra-experimental-features 'nix-command flakes' \
       eval "${root}#nixosConfigurations.optiplex.config.networking.hostName"
