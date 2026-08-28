@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Build a standalone HTML viewer from the markdown docs.
 
-Markdown in docs/ (and README.md) is the source of truth. This script parses
-those files and writes a self-contained HTML page that can be opened as a
-file — no HTTP server, and no second copy of the markdown kept in git.
+Markdown in the repo is the source of truth. This script parses the docs,
+READMEs, and remaining open questions and writes a self-contained HTML page
+that can be opened as a file — no HTTP server, and no second copy of the
+markdown kept in git.
 
 Usage:
   python3 scripts/generate-viewer.py
@@ -32,6 +33,9 @@ DOCS: list[tuple[str, Path, str, str]] = [
     ("firewall", ROOT / "docs/firewall-matrix.md", "Firewall", "Network"),
     ("inventory", ROOT / "docs/inventory.md", "Inventory", "Network"),
     ("stages", ROOT / "docs/implementation-stages.md", "Stages", "Build"),
+    ("openQuestions", ROOT / "router/OPEN-QUESTIONS.md", "Remaining questions", "Build"),
+    ("routerReadme", ROOT / "router/README.md", "Router README", "Build"),
+    ("switchReadme", ROOT / "switch/README.md", "Switch README", "Build"),
     ("bsp", ROOT / "docs/plans/rk1-bsp-fork.md", "RK1 BSP fork", "Deferred"),
     ("refAuth", ROOT / "docs/reference/auth-authelia-vs-authentik.md", "Auth", "Reference"),
     ("refSecrets", ROOT / "docs/reference/secrets-sops-vs-agenix.md", "Secrets", "Reference"),
@@ -41,6 +45,8 @@ DOCS: list[tuple[str, Path, str, str]] = [
     ("refCgnat", ROOT / "docs/reference/cgnat-options.md", "CGNAT", "Reference"),
     ("refBom", ROOT / "docs/reference/hardware-bom-norway.md", "Hardware BOM", "Reference"),
     ("readme", ROOT / "README.md", "README", "Repo"),
+    ("forgejo", ROOT / "services/forgejo/README.md", "Forgejo", "Services"),
+    ("homeassistant", ROOT / "services/homeassistant/README.md", "Home Assistant", "Services"),
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)$")
