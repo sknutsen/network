@@ -1,14 +1,19 @@
 # Decision briefs
 
-Outstanding considerations from [plan.md § Open decisions](plan.md#open-decisions),
-stage checklists, and conditional rollout items. Each brief ends with a
-**recommended default** for this homelab unless noted otherwise.
+Design options and history. **Brief IDs in this file are canonical** — use
+them in `plan.md` § Remaining decisions. Canonical choices:
+[decisions.md](decisions.md).
 
-Canonical resolved choices remain in [decisions.md](decisions.md).
+Resolved briefs stay here as rationale (a **Decision** section). Unresolved
+briefs still end with a recommendation. First-boot leftovers only:
+[router/OPEN-QUESTIONS.md](../router/OPEN-QUESTIONS.md).
+
+**For agents:** Closing a brief means update `decisions.md`, set **Status:
+Resolved** here, and remove the row from `plan.md` § Remaining decisions.
 
 | # | Brief | Status | Decide by |
 |---|-------|--------|-----------|
-| 1 | [IPv6 prefix size](#1-ipv6-prefix-size) | Install-time | Stage 2 |
+| 1 | [IPv6 prefix size](#1-ipv6-prefix-size) | Install-time — ISP **OBOS Nett**; prefix TBD | Stage 2 |
 | 2 | [NPTv6 vs native /64 per VLAN](#2-nptv6-vs-native-64-per-vlan) | Resolved | — |
 | 3 | [`*.lab.zdk.no` TLS](#3-labzdkno-tls) | Resolved | — |
 | 4 | [step-ca internal CA](#4-step-ca-internal-ca) | Resolved | — |
@@ -16,17 +21,17 @@ Canonical resolved choices remain in [decisions.md](decisions.md).
 | 6 | [Longhorn storage](#6-longhorn-storage) | Resolved | — |
 | 7 | [Control-plane taint](#7-control-plane-taint) | Resolved | — |
 | 8 | [Zdk repo boundary](#8-zdk-repo-boundary) | Resolved | — |
-| 9 | [Blocky host placement](#9-blocky-host-placement) | Soft open | Stage 4 |
+| 9 | [Blocky host placement](#9-blocky-host-placement) | Resolved | — |
 | 10 | [CGNAT verification](#10-cgnat-verification) | Resolved | — |
-| 11 | [Hardware capability check](#11-hardware-capability-check) | Install-time | Stage 0–1 |
+| 11 | [Hardware capability check](#11-hardware-capability-check) | Install-time — do at Stage 1 | Stage 1 |
 | 12 | [RK1 BSP / NPU fork](#12-rk1-bsp--npu-fork) | Deferred | When NPU/GPU needed |
 | 13 | [Nintendo Switch local play](#13-nintendo-switch-local-play) | Deferred | If local play fails |
-| 14 | [Hairpin NAT](#14-hairpin-nat) | Conditional | Stage 7 if LAN tests fail |
+| 14 | [Hairpin NAT](#14-hairpin-nat) | Resolved — off | — |
 | 15 | [CrowdSec](#15-crowdsec) | Resolved | — |
-| 16 | [mDNS / Avahi reflector](#16-mdns--avahi-reflector) | Conditional | Stage 4–5 |
-| 17 | [Trusted → IoT cast rules](#17-trusted--iot-cast-rules) | Conditional | Stage 4–5 |
+| 16 | [mDNS / Avahi reflector](#16-mdns--avahi-reflector) | Resolved — static IPs first | Stage 4–5 if discovery fails |
+| 17 | [Trusted → IoT cast rules](#17-trusted--iot-cast-rules) | Resolved — wait for HA | Stage 4–5 |
 | 18 | [Future public apps](#18-future-public-apps) | Per-app | Each new WAN service |
-| 19 | [Guest DNS via Blocky](#19-guest-dns-via-blocky) | Optional later | Post Stage 4 |
+| 19 | [Guest DNS via Blocky](#19-guest-dns-via-blocky) | Resolved — public resolvers | Post Stage 4 if wanted |
 
 ---
 
@@ -38,15 +43,15 @@ Canonical resolved choices remain in [decisions.md](decisions.md).
 
 Norwegian ISPs typically delegate a `/56` or `/48` via DHCPv6-PD on the WAN
 link. Prefix size determines how many `/64` subnets you can carve for VLANs,
-WireGuard, and future growth. This is observational, not a design choice — but
-it gates the NPTv6 vs native decision (#2).
+WireGuard, and future growth. This is observational — layout is already
+**native /64 per VLAN** (#2). If the prefix is `/60` or smaller, revisit NPTv6.
 
 ### What to record
 
 | Field | Example |
 |-------|---------|
 | Delegated prefix | `2a0x:yyyy::/56` |
-| ISP | Telenor, Altibox, … |
+| ISP | **OBOS Nett** (recorded); prefix size still blank |
 ### How to capture
 
 1. Enable PD on WAN in Stage 2 router config.
@@ -92,32 +97,35 @@ delegation).
 
 ## 3. `*.lab.zdk.no` TLS
 
-**Status:** **Resolved** — split-horizon HTTP-01 via Caddy (accepted default).
+**Status:** **Resolved** — Caddy ACME **DNS-01 via Domeneshop** (v1 path).
 
 ### Context
 
 Internal hostnames (`grafana.lab.zdk.no`, `capacitor.lab.zdk.no`, etc.) are
 **split-horizon only** — never WAN-reachable. Browsers still need trusted TLS.
-Public Let's Encrypt HTTP-01 against the real internet will **fail** for these
-names.
+Let's Encrypt HTTP-01 queries **public** DNS, so it cannot issue certs for names
+that do not exist on Domeneshop. Unbound still answers `*.lab.zdk.no` → Caddy
+for *browsing*; ACME does not use that path.
 
 ### Decision
 
 | Setting | Value |
 |---------|-------|
 | Issuer | Let's Encrypt via Caddy ACME |
-| Challenge | **HTTP-01** via split-horizon |
-| DNS | Unbound: `*.lab.zdk.no` → `10.10.30.20` (Caddy) |
-| Port 80 | Caddy on TrueNAS serves ACME challenges for internal vhosts |
-| Public DNS | **No** records for `*.lab.zdk.no` |
-| Fallback | DNS-01 via Domeneshop API if HTTP-01 proves flaky |
+| Challenge | **DNS-01** via Domeneshop (`dns.providers.domainnameshop`) |
+| DNS (browse) | Unbound: `*.lab.zdk.no` → `10.10.30.1` (Caddy on janus) |
+| Public DNS | **No** A/AAAA for `*.lab.zdk.no` (temporary TXT only during issuance) |
+| Secrets | Domeneshop API token + secret in sops (same API user as DNSUpdater is fine) |
+| Caddy build | `pkgs.caddy.withPlugins` + `github.com/caddy-dns/domainnameshop` (hash filled on first Linux build) |
+| Port 80 | Not required for ACME; still served for HTTP→HTTPS once Caddy is up |
+| Public names | Same DNS-01 issuer at Stage 7; `enableWanCaddy` is for *serving*, not issuance |
 
 ### Options considered
 
 | Option | How it works | Pros | Cons |
 |--------|--------------|------|------|
-| **(a) Split-horizon HTTP-01** ✓ | Unbound returns Caddy LAN IP; Caddy completes HTTP-01 locally | No DNS API secrets; public CA trust | Must configure split-horizon + ACME path correctly |
-| **(b) DNS-01 via Domeneshop API** | TXT records via Domeneshop API | Works without internal HTTP path | API token in SOPS; fallback only |
+| **(a) Split-horizon HTTP-01** | Unbound returns Caddy LAN IP; Caddy completes HTTP-01 locally | No DNS API secrets | Let's Encrypt looks up the name on **public** DNS — fails with no `lab` records |
+| **(b) DNS-01 via Domeneshop API** ✓ | TXT records via Domeneshop API | Works with no public A records; wildcard-capable; works behind closed WAN 80 | API token in sops; needs a Caddy build with the Domeneshop module |
 | **(c) step-ca internal CA** | Private CA | Full control | Ruled out for v1 — see [brief #4](#4-step-ca-internal-ca) |
 
 ---
@@ -268,7 +276,7 @@ for `zdk.no` depends on this boundary.
 | Repo | Owns |
 |------|------|
 | **[Zdk](https://github.com/sknutsen/Zdk)** | Deployment, Service, image CI, env ConfigMaps, app secrets (SOPS or ExternalSecrets) |
-| **`net/`** | `k8s/clusters/homelab/apps/zdk/ingress.yaml` (Traefik `IngressRoute` stub), Flux `GitRepository` + `Kustomization` CR, Caddy `zdk.no` → Traefik LB |
+| **`net/`** | `k8s/clusters/homelab/apps/zdk/ingressroute.yaml` (Traefik `IngressRoute` stub), Flux `GitRepository` + `Kustomization` CR, Caddy `zdk.no` → Traefik LB |
 
 Manifest path in Zdk repo: `deploy/` or `k8s/` — to be agreed when Zdk ships
 deploy spec.
@@ -285,7 +293,7 @@ deploy spec.
 
 ## 9. Blocky host placement
 
-**Status:** Soft open — recommended default exists.
+**Status:** **Resolved** — TrueNAS Docker at `10.10.30.21`.
 
 ### Context
 
@@ -301,10 +309,10 @@ latency.
 | **k8s Deployment on workers** | GitOps lifecycle; restarts isolated from TrueNAS | Circular dependency if cluster DNS unresolved during bootstrap |
 | **Router container** | Always up with DHCP | Mixes DNS policy with router; NixOS container overhead |
 
-### Recommendation
+### Decision
 
-**TrueNAS Docker at `10.10.30.21`** — already in [vlan-plan.md](vlan-plan.md).
-Add to `services/truenas/docker-compose.yml`. Revisit k8s only if TrueNAS
+**TrueNAS Docker at `10.10.30.21`** — already in [vlan-plan.md](vlan-plan.md)
+and `services/truenas/docker-compose.yml`. Revisit k8s only if TrueNAS
 availability for DNS becomes a measured problem.
 
 ---
@@ -315,41 +323,56 @@ availability for DNS becomes a measured problem.
 
 ### Context
 
-Plan uses **dynamic public IPv4** with port forward 443/80 + WireGuard UDP
-([decisions.md](decisions.md)). Recorded in [vlan-plan.md § IPv6](vlan-plan.md).
-Fallback options if ISP later moves the link behind CGNAT:
-[reference/cgnat-options.md](reference/cgnat-options.md).
+Plan uses **dynamic public IPv4** with **WAN INPUT to Caddy** (80/443) plus
+WireGuard UDP ([decisions.md](decisions.md)). Recorded in
+[vlan-plan.md § IPv6](vlan-plan.md). Fallback if the ISP later moves the link
+behind CGNAT: [reference/cgnat-options.md](reference/cgnat-options.md).
 
-### Recommendation
+### Decision
 
-No further action. Proceed with Stage 7 IPv4 port forwards as planned.
+No further action. Stage 7 opens WAN INPUT to Caddy on janus — not DNAT to
+TrueNAS.
 
 ---
 
 ## 11. Hardware capability check
 
-**Status:** Install-time — Stage 0–1 checklist.
+**Status:** Install-time — physical verification at Stage 1 (not a design choice).
 
 ### Context
 
 Design assumes specific NIC roles, switch VLAN support, and AP SSID mapping.
-Wrong assumptions force redesign.
+Wrong assumptions force redesign. MACs and port plan are already written down;
+this brief is “prove them on the metal.”
+
+### What to do (Stage 1, in order)
+
+1. **Label** CRS310 ports 1–8 per [inventory.md](inventory.md) / vlan-plan.
+2. **Cable the LAN side first** (no ISP cutover yet): i350 port 1 → CRS310 ether1
+   trunk; AP + PoE injector → ether2; TrueNAS → ether4; Turing Pi → ether3.
+3. **After NixOS first boot**, confirm names match MACs:
+   `ip link` shows `wan0` / `lan0` / `spare0`; `ethtool -p lan0` blinks i350
+   **port 1** (or unplug test). Spare stays down.
+4. **Import** [switch/crs310.rsc](../switch/crs310.rsc); check mgmt `10.10.10.2`
+   and that a tagged client on ether1 lands in the right VLAN.
+5. **Bridge the OBOS Nett modem** at router cutover, then plug it into `wan0`.
+   Confirm public IPv4 DHCP on `wan0` (whatismyip matches the WAN address).
+6. **UniFi / AP** after Stage 2 UniFi OS Server: adopt U7 Lite; SSIDs → VLANs
+   20/40/50. Confirm a phone on each SSID gets the matching `10.10.x.0/24`.
+7. Document any deviation in [inventory.md](inventory.md).
+
+Podman vs Ubiquiti minimum is the same visit as step 6 —
+check before running the UniFi installer.
 
 ### Verify
 
 | Component | Requirement | How |
 |-----------|-------------|-----|
-| OptiPlex 9020 MT | I217LM = WAN; i350-T2 port 1 = 802.1Q trunk | `lspci`, cable labels |
-| CRS310 | 802.1Q VLAN, trunk + access ports per vlan-plan | MikroTik VLAN config export |
-| U7 Lite | Multiple SSIDs mapped to VLANs 20/40/50 | UniFi OS Server on router |
+| OptiPlex 9020 MT | I217LM = WAN; i350-T2 port 1 = 802.1Q trunk | `ip link`, `ethtool -p lan0` |
+| CRS310 | 802.1Q VLAN, trunk + access ports per vlan-plan | Import `.rsc`; ping `10.10.10.2` |
+| U7 Lite | SSIDs mapped to VLANs 20/40/50 | UniFi OS Server; DHCP subnet check |
 | Turing Pi 2.5 | Single NIC on VLAN 30 access | Link on port 3 |
 | TrueNAS | NIC on VLAN 30 access | Static `10.10.30.20` |
-
-### Recommendation
-
-**Complete Stage 0 inventory checkboxes** before cutting router config. Document
-any deviation (e.g. spare i350 port 2 for future DMZ) in
-[inventory.md](inventory.md).
 
 ---
 
@@ -405,11 +428,11 @@ UDP** rules per Nintendo troubleshooting guides before moving VLANs.
 
 ## 14. Hairpin NAT
 
-**Status:** Conditional — likely unnecessary.
+**Status:** **Resolved** — off.
 
 ### Context
 
-Split-horizon DNS sends internal clients to `10.10.30.20` for internal names.
+Split-horizon DNS sends internal clients to `10.10.30.1` (Caddy on janus) for internal names.
 Public names (`zdk.no`) may resolve to WAN IP from some clients. Hairpin NAT
 lets LAN clients reach WAN IP:443 on the router's public address.
 
@@ -419,13 +442,14 @@ lets LAN clients reach WAN IP:443 on the router's public address.
 |--------|------|
 | **Disable (default)** | Internal DNS never returns public IP for services you test from LAN |
 | **Enable hairpin NAT** | `curl https://zdk.no` from LAN hits public IP and fails without loopback |
-| **Split-horizon for public names too** | LAN clients get `10.10.30.20` for `zdk.no` — reduces hairpin need |
+| **Split-horizon for public names too** | LAN clients get `10.10.30.1` for `zdk.no` — reduces hairpin need |
 
-### Recommendation
+### Decision
 
-**Skip hairpin initially.** If LAN testing of public URLs fails, first add
-split-horizon `A`/`AAAA` for `@` and `code` → `10.10.30.20` on Unbound; enable
-hairpin only if clients bypass internal DNS.
+**Off.** Split-horizon for the public names is **already implemented:** Unbound
+`local-data` answers `zdk.no` and `code.zdk.no` → `10.10.30.1` (Caddy). LAN
+`curl https://zdk.no` should hit Caddy without hairpin NAT. Enable hairpin only
+if a client bypasses internal DNS and resolves the WAN address.
 
 ---
 
@@ -457,7 +481,7 @@ show sustained 403/401 brute force after the first month of WAN exposure.
 
 ## 16. mDNS / Avahi reflector
 
-**Status:** Conditional — Stage 4–5.
+**Status:** **Resolved** — static IPs first (accepted default).
 
 ### Context
 
@@ -473,17 +497,17 @@ Home Assistant on servers VLAN initiates to IoT; HA is **not** moved to IoT
 | **Avahi reflector router, servers ↔ IoT only** | Discovery for casting/HA | Multicast amplification; scope carefully |
 | **Wide reflection to trusted** | Easiest casting | Leaks IoT device names to trusted VLAN |
 
-### Recommendation
+### Decision
 
-**Start with static IPs** in HA per [inventory.md](inventory.md). Enable
-**scoped Avahi reflector** (VLAN 30 ↔ 40 only) only if discovery fails for
-casting or HA auto-detection.
+**Static IPs in HA** per [inventory.md](inventory.md). Enable **scoped Avahi
+reflector** (VLAN 30 ↔ 40 only) only if discovery fails for casting or HA
+auto-detection. Never reflect to guest or trusted broadly.
 
 ---
 
 ## 17. Trusted → IoT cast rules
 
-**Status:** Conditional — companion to brief #16.
+**Status:** **Resolved** — wait until Stage 4–5 / HA.
 
 ### Context
 
@@ -498,10 +522,11 @@ Phones/laptops on trusted VLAN cast to TV, Chromecast, Odyssey on IoT.
 | **Allow trusted → specific IoT IPs** (TCP/UDP cast ports) | Discovery fails but IP-based cast works |
 | **mDNS reflection (#16)** | Apps require discovery by name |
 
-### Recommendation
+### Decision
 
-**Add per-device firewall allows** (trusted → cast target IPs) before enabling
-broad mDNS reflection. Document each target in firewall-matrix.
+**Do not open cast rules at Stage 3.** Stage 3 is subnet placement only. At
+Stage 4–5 / when HA is up, add **per-device allows** (trusted → TV, Chromecast,
+Odyssey) before any Avahi reflector. Document each target in firewall-matrix.
 
 ---
 
@@ -527,7 +552,7 @@ Future WAN services may need different exposure and auth.
 
 ### Recommendation
 
-**Copy the two-tier pattern:** Caddy on TrueNAS for TLS/WAN; backend on k8s or
+**Copy the two-tier pattern:** Caddy on janus for TLS/WAN; backend on k8s or
 compose. Document each app as a row in decisions.md exposure matrix before
 Stage 7-style cutover.
 
@@ -535,7 +560,7 @@ Stage 7-style cutover.
 
 ## 19. Guest DNS via Blocky
 
-**Status:** Optional later — guest uses public resolvers today.
+**Status:** **Resolved** — public resolvers for v1.
 
 ### Context
 
@@ -551,30 +576,33 @@ filtering for guests.
 | **Blocky guest profile** | Unified filtering stack | Guest traffic through TrueNAS; privacy considerations |
 | **Router dnsmasq forward to Blocky** | Centralized | Guest isolation rules more complex |
 
-### Recommendation
+### Decision
 
-**Keep public resolvers for v1.** Revisit if you want guest query logging or
+**Keep 1.1.1.1 / 9.9.9.9 for v1.** Revisit if you want guest query logging or
 family-safe filtering on the guest SSID.
 
 ---
 
-## Quick reference: recommended defaults
+## Quick reference
 
 | Topic | Default |
 |-------|---------|
 | IPv6 layout | **Resolved:** Native /64 per VLAN from delegated `/56` |
-| Internal TLS | **Resolved:** Split-horizon HTTP-01 via Caddy |
+| Internal TLS | **Resolved:** Caddy ACME DNS-01 (Domeneshop) |
 | step-ca | **Resolved:** Not in v1 |
 | k8s API | **Resolved:** `10.10.30.11:6443`; reserve `.10` |
 | Longhorn | **Resolved:** Replica 3; NVMe at `/var/lib/longhorn` |
 | CP taint | **Resolved:** Keep on `nordri` |
 | Zdk | **Resolved:** Flux → external Zdk repo |
-| Blocky | TrueNAS `10.10.30.21` |
-| CGNAT | **Resolved:** Not active; public IPv4 port forwards OK |
-| Hairpin NAT | Off; split-horizon first |
+| Blocky | **Resolved:** TrueNAS Docker `10.10.30.21` |
+| CGNAT | **Resolved:** Not active; WAN INPUT to Caddy OK |
+| Hairpin NAT | **Resolved:** Off |
 | CrowdSec | **Resolved:** Not in v1; nftables rate-limit first |
-| mDNS | Static IPs first |
-| Guest DNS | Public resolvers |
+| mDNS | **Resolved:** Static IPs first; Avahi only if discovery fails |
+| Cast rules | **Resolved:** Wait for Stage 4–5 / HA |
+| Guest DNS | **Resolved:** Public resolvers |
+| Headscale | **Resolved:** Janus, `127.0.0.1:8081`, Caddy `headscale.lab.zdk.no` (not :8080) |
+| ISP | **OBOS Nett**; PD at Stage 2; modem bridge at cutover |
 
-After each decision is made, update [decisions.md](decisions.md) and close the
-matching row in [plan.md § Open decisions](plan.md#open-decisions).
+After each decision is made, update [decisions.md](decisions.md) and remove the
+matching row from [plan.md § Remaining decisions](plan.md#remaining-decisions).

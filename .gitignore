@@ -1,2 +1,7 @@
 # Built by scripts/generate-viewer.py — not source of truth
 /docs/generated/
+
+# Authelia secrets and live user DB (examples stay in git)
+/services/authelia/.env
+/services/authelia/users_database.yml
+

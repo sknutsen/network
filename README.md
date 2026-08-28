@@ -14,22 +14,27 @@ Declarative home network configuration and documentation.
 | [docs/inventory.md](docs/inventory.md) | Devices and reservations |
 | [docs/architecture.md](docs/architecture.md) | Diagrams and service map |
 | [docs/implementation-stages.md](docs/implementation-stages.md) | Stage 0–8 checklists |
-| [docs/decision-briefs.md](docs/decision-briefs.md) | Open decisions — briefs with recommendations |
+| [docs/decision-briefs.md](docs/decision-briefs.md) | Design options with recommendations |
+| [router/OPEN-QUESTIONS.md](router/OPEN-QUESTIONS.md) | Unanswered first-boot leftovers |
 | [docs/reference/](docs/reference/) | Alternatives not chosen |
 
 **Public services (Stage 7):** `zdk.no` ([Zdk](https://github.com/sknutsen/Zdk) on k8s) and `code.zdk.no` (Forgejo on TrueNAS). HTTPS-only Git over WAN; LAN SSH on trusted VLAN + VPN.
 
-**Browser viewer:** from the repo root, `python3 scripts/generate-viewer.py --open`. That parses the markdown and writes a standalone `docs/generated/index.html` you can open as a file (no HTTP server). Markdown stays the source of truth.
+**Browser viewer:** from the repo root, `python3 scripts/generate-viewer.py --open`. That parses **all** markdown in the plan (docs, READMEs, remaining questions) and writes `docs/generated/index.html`. Markdown stays the source of truth.
 
-## Repo layout (target)
+## Target repo layout
+
+`nodes/` is not created yet. DNSUpdater is a Nix stub, not `services/dnsupdater/`.
 
 ```
 net/
+├── flake.nix      # NixOS configs (optiplex / janus)
 ├── docs/          # plan, decisions, vlan, firewall, inventory, reference
-├── router/        # NixOS flake for DIY router
-├── nodes/         # NixOS flake for RK1 cluster
-├── services/      # truenas compose, Caddy, Authelia, DNS, DNSUpdater
-├── k8s/           # Flux GitOps; apps/zdk/ ingress stub
-├── secrets/       # sops/age encrypted secrets
+├── router/        # janus NixOS modules
+├── nodes/         # target — RK1 NixOS flake
+├── switch/        # CRS310 RouterOS (L2 VLANs)
+├── services/      # truenas compose, Caddy, Authelia, DNS, Promtail
+├── k8s/           # Zdk IngressRoute stub; Flux bootstrap later
+├── secrets/       # examples + .sops.yaml; live yaml not committed
 └── scripts/       # validate.sh, generate-viewer.py
 ```

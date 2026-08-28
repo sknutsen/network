@@ -21,13 +21,11 @@
 
 **AdGuard Home** — heavier, UI-centric. Blocky chosen for Git-friendly config.
 
-## Caddy placement (rejected)
+## Caddy placement
 
-- Caddy on NixOS router
-- Caddy in k8s hostNetwork
-- RK1 LXC for edge
+**Chosen:** Caddy on janus (NixOS), Caddyfile in `services/caddy/`.
 
-**Chosen:** Caddy on TrueNAS Docker only.
+Rejected: Caddy on TrueNAS Docker (port clash with NAS UI; extra hop for WAN); Caddy in k8s hostNetwork; RK1 LXC for edge.
 
 ## Inter-VLAN routing (rejected)
 

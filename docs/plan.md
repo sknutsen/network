@@ -12,16 +12,17 @@ Declarative homelab: NixOS router, VLAN segmentation, TrueNAS edge, k3s on Turin
 | [inventory.md](inventory.md) | Devices, ports, reservations |
 | [architecture.md](architecture.md) | Diagrams, traffic flows, service map |
 | [implementation-stages.md](implementation-stages.md) | Stage 0–8 checklists |
-| [decision-briefs.md](decision-briefs.md) | Open items — options, pros/cons, recommendations |
+| [decision-briefs.md](decision-briefs.md) | Design options and history (**brief IDs are canonical**) |
+| [../router/OPEN-QUESTIONS.md](../router/OPEN-QUESTIONS.md) | Unanswered first-boot leftovers only |
 | [reference/](reference/) | Alternatives not chosen |
 | [plans/rk1-bsp-fork.md](plans/rk1-bsp-fork.md) | Deferred NPU/GPU kernel work |
 
 ## Principles
 
 - Self-hosted first — no Cloudflare, Tailscale SaaS, or tunnel vendors unless unavoidable.
-- Router is the policy enforcement point; config lives in Git (NixOS flakes, Flux, Compose, SOPS).
+- Router is the policy point **and** always-on edge (Caddy, Unbound, UniFi, Headscale); config lives in Git.
 - VPN-first admin (WireGuard + Headscale); publish `zdk.no` and `code.zdk.no` only in Stage 7.
-- `*.lab.zdk.no` is internal-only — split-horizon DNS, Authelia, never WAN-reachable.
+- `*.lab.zdk.no` is internal-only. Authelia on lab UIs except `auth` / `code.lab` / `headscale.lab`.
 
 ## Decisions (summary)
 
@@ -31,7 +32,7 @@ Full table: **[decisions.md](decisions.md)**.
 |-------|--------|
 | Router | NixOS on Dell OptiPlex 9020 MT + i350-T2 (acquired); UniFi OS Server |
 | Switch / WiFi | CRS310 + U7 Lite + PoE injector (all acquired); UPS deferred |
-| Edge | Caddy + Authelia + HA + Forgejo on TrueNAS Docker |
+| Edge | Caddy on janus; Authelia + HA + Forgejo on TrueNAS Docker |
 | K8s | 4× RK1, NixOS, k3s, Flux, Traefik, Capacitor |
 | Monitoring | kube-prometheus-stack in k8s (incl. Loki) |
 | Public | `zdk.no` (k8s), `code.zdk.no` (Forgejo) — no Authelia on current public apps |
@@ -42,10 +43,11 @@ Full table: **[decisions.md](decisions.md)**.
 flowchart TB
   ISP[ISP] --> Router[NixOS router]
   Router --> VLANs[VLANs 10/20/30/40/50]
-  VLANs --> TrueNAS[TrueNAS Caddy stack]
+  VLANs --> TrueNAS[TrueNAS]
   VLANs --> K8s[RK1 k3s cluster]
-  Internet -->|443| TrueNAS
-  TrueNAS -->|HTTP| K8s
+  Internet -->|443| Router
+  Router -->|HTTP| TrueNAS
+  Router -->|HTTP| K8s
 ```
 
 Detail: [architecture.md](architecture.md).
@@ -66,9 +68,8 @@ IPs, DHCP, DNS, mDNS: [vlan-plan.md](vlan-plan.md). Firewall: [firewall-matrix.m
 
 | Where | Services |
 |-------|----------|
-| **Router** | nftables, dnsmasq, Unbound, WireGuard, DNSUpdater, node_exporter |
-| **Router** (OptiPlex) | nftables, dnsmasq, Unbound, WireGuard, DNSUpdater, **UniFi OS Server** |
-| **TrueNAS** `10.10.30.20` | Caddy, Home Assistant, Forgejo, Authelia, Blocky, Promtail |
+| **Router** (janus) | nftables, dnsmasq, Unbound, Caddy, WireGuard, Headscale, DNSUpdater, UniFi OS Server, node_exporter |
+| **TrueNAS** `10.10.30.20` | Home Assistant, Forgejo, Authelia, Blocky, Promtail |
 | **k8s** | k3s, Traefik, Flux, Capacitor, kube-prometheus-stack, Zdk (when ready) |
 | **Zpi** `10.10.30.15` | Audio casting to speakers |
 
@@ -76,11 +77,14 @@ Public services: [architecture.md § Public services](architecture.md#public-ser
 
 ## Public vs internal exposure
 
+Full matrix: [decisions.md § Exposure matrix](decisions.md#exposure-matrix).
+
 | Hostname | WAN | Authelia |
 |----------|-----|----------|
 | `zdk.no` | Stage 7 | No |
 | `code.zdk.no` | Stage 7 | No |
-| `*.lab.zdk.no` | **Never** | Yes |
+| `auth` / `code.lab` / `headscale.lab` | Never | **No** |
+| Other `*.lab.zdk.no` | **Never** | Yes |
 | Future public apps | Per-app | Optional |
 
 ## Implementation
@@ -90,83 +94,41 @@ Stages 0–8 with checklists: **[implementation-stages.md](implementation-stages
 - **Stage 5:** Internal HA, Forgejo (LAN SSH), Authelia, Blocky, k8s stack — no WAN.
 - **Stage 7:** Enable WAN for `code.zdk.no` and/or `zdk.no` when ready.
 
-## Open decisions
+## Remaining decisions
 
-Items to resolve during implementation. Resolved choices are noted inline.
-Full options and recommendations: **[decision-briefs.md](decision-briefs.md)**.
+Canonical log: **[decisions.md](decisions.md)**. Options and history:
+**[decision-briefs.md](decision-briefs.md)**. IDs below **are the brief IDs**.
 
-### Network and ISP
+**For agents:** When the user answers an item, write it in `decisions.md`, set
+the brief to **Resolved**, and **delete the row here**. Do not keep resolved
+choices on this list. Do not invent a parallel numbering scheme.
 
-| # | Topic | Status / options |
-|---|-------|------------------|
-| 1 | IPv6 prefix size | Document in [vlan-plan.md](vlan-plan.md) at Stage 2 |
-| 2 | CGNAT | **Resolved:** Not active — dynamic public IPv4; port forwarding works |
-| 2a | UniFi host | **Resolved:** UniFi OS Server on OptiPlex (Podman); UI `:11443`, inform `:8080`. Not on TrueNAS (port clash). NixOS: Podman + vendor installer (impure state) |
-| 3 | VPN IPv6 routes | **Resolved:** VPN clients get v6 routes to lab subnets |
-| 4 | Hairpin NAT | **Likely not needed** — split-horizon sends LAN clients to `10.10.30.20` directly. Enable only if internal clients resolve public IP |
-| 5 | NPTv6 vs native v6 per VLAN | **Resolved:** Native /64 per VLAN from delegated prefix; WAN inbound v6 default deny; revisit NPTv6 only if ISP delegates `/60` or smaller |
+| Brief # | Topic | Status |
+|---------|-------|--------|
+| 1 | IPv6 prefix size | Install-time — document OBOS Nett PD in [vlan-plan.md](vlan-plan.md) at Stage 2 |
+| 11 | Hardware capability check | Stage 1 physical verify ([brief](decision-briefs.md#11-hardware-capability-check)) |
+| 12 | RK1 BSP / NPU fork | Deferred — [plans/rk1-bsp-fork.md](plans/rk1-bsp-fork.md) |
+| 13 | Nintendo Switch local play | Deferred until local play is tested |
+| 18 | Future public apps | Per-app checklist in the brief |
 
-### DNS and filtering
+MAC reservations are leftover first-boot work, not a brief: [OPEN-QUESTIONS.md](../router/OPEN-QUESTIONS.md).
 
-| # | Topic | Status / options |
-|---|-------|------------------|
-| 6 | Blocky host | **Recommended:** TrueNAS Docker at `10.10.30.21` (see vlan-plan). Alternative: k8s Deployment |
-| 7 | IoT `*.lab.zdk.no` | **Resolved:** Deny by default; whitelist specific names if a device needs one |
-| 8 | Guest DNS | **Resolved:** Public resolvers (1.1.1.1 / 9.9.9.9). Restricted DNS via Blocky possible later |
-| 9 | Public `lab` DNS record | **Resolved:** Not needed — `lab.zdk.no` is internal split-horizon only |
+## Target repo layout
 
-### Services
-
-| # | Topic | Status / options |
-|---|-------|------------------|
-| 10 | Authelia host | **Resolved:** TrueNAS Docker |
-| 11 | TrueNAS container logs | **Resolved:** Promtail in compose → Loki in k8s. Alternatives: Vector agent, syslog to Loki gateway |
-| 12 | Compose layout | **Resolved:** Single `services/truenas/docker-compose.yml` only |
-| 13 | MetalLB pool | **Resolved:** `10.10.30.100–110` — no conflicts with current static IPs |
-| 14 | k8s API VIP (`10.10.30.10`) | **Resolved:** API at `10.10.30.11:6443` directly; reserve `.10` for future kube-vip if second CP added |
-| 15 | Longhorn | **Resolved:** Default StorageClass; replica count **3**; NVMe at `/var/lib/longhorn` on all four RK1s (256 GB+ each); off-cluster backup via Velero or TrueNAS ZFS snapshots |
-| 16 | Control-plane taint | **Resolved:** Keep default CP taint on `nordri`; workloads schedule on `sudri`–`vestri` only |
-| 17 | Zdk repo boundary | **Resolved:** Flux `GitRepository` + `Kustomization` → [Zdk](https://github.com/sknutsen/Zdk) repo; `net/` keeps `k8s/clusters/homelab/apps/zdk/ingress.yaml` + Flux CR; Zdk repo owns Deployment, Service, image CI, app secrets |
-
-### Security
-
-| # | Topic | Status / options |
-|---|-------|------------------|
-| 18 | CrowdSec | **Resolved:** Not in v1; nftables rate-limit on 443 at Stage 7; deploy CrowdSec only if Caddy access logs show sustained brute force |
-| 19 | Headscale | **Resolved:** Deploy alongside WireGuard in Stage 6 |
-| 20 | Nintendo local play | **Deferred** |
-
-### TLS
-
-| # | Topic | Status / options |
-|---|-------|------------------|
-| 21 | `*.lab.zdk.no` certs | **Resolved:** Caddy ACME via **split-horizon HTTP-01** (Unbound → `10.10.30.20`); DNS-01 via Domeneshop API as fallback only; no public DNS for `lab` names |
-| 22 | step-ca | **Resolved:** Not in v1; Caddy ACME covers edge TLS |
-| 23 | Caddy → Traefik mTLS | **Non-goal for v1** |
-
-### K8s platform
-
-| # | Topic | Status / options |
-|---|-------|------------------|
-| 24 | RK1 OS | **Resolved:** NixOS (GiyoMoon mainline). Escape hatches are reference only |
-| 25 | BSP / NPU fork | Deferred — [plans/rk1-bsp-fork.md](plans/rk1-bsp-fork.md) |
-
-## Repo layout
+Directories that do not exist yet are Stage 5–8 scaffolding (`nodes/`, fuller
+`k8s/`). DNSUpdater stays a Nix stub until [that repo](https://github.com/sknutsen/DNSUpdater) ships a package.
 
 ```
 net/
-├── docs/
-├── router/                      # NixOS flake (OptiPlex); UniFi OS Server via Podman (vendor)
-├── nodes/                       # NixOS flake (RK1)
-├── services/
-│   ├── truenas/docker-compose.yml
-│   ├── caddy/Caddyfile
-│   ├── authelia/
-│   ├── dns/
-│   └── dnsupdater/
-├── k8s/clusters/homelab/
-├── secrets/
-└── scripts/validate.sh
+├── flake.nix                    # NixOS configs (optiplex / janus) — exists
+├── docs/                        # exists
+├── router/                      # exists
+├── nodes/                       # target — RK1 NixOS flake
+├── switch/                      # exists
+├── services/                    # exists (truenas, caddy, authelia, dns, promtail, HA/Forgejo READMEs)
+├── k8s/clusters/homelab/        # stub (Zdk IngressRoute only)
+├── secrets/                     # examples + .sops.yaml; live yaml not committed
+└── scripts/                     # validate.sh, generate-viewer.py
 ```
 
 ## Reference material

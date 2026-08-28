@@ -17,7 +17,8 @@
 ```
 services/authelia/
 ├── configuration.yml
-└── users_database.yml
+├── .env.example              # copy → .env (not committed)
+└── users_database.yml.example  # copy → users_database.yml (not committed)
 ```
 
 Deployed via `services/truenas/docker-compose.yml`.

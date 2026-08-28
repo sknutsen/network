@@ -16,6 +16,8 @@
 ```
 secrets/
 ├── .sops.yaml
-├── router.yaml
-└── cluster.yaml
+├── router.yaml.example   # copy → router.yaml, then sops encrypt
+├── cluster.yaml.example  # copy → cluster.yaml for Flux/k8s (Stage 5+)
+├── router.yaml           # encrypted, not committed until created
+└── cluster.yaml          # encrypted, not committed until created
 ```

@@ -14,7 +14,7 @@ flowchart TB
     Router[NixOS router]
     UniFi[UniFi OS Server]
     WG[WireGuard + Headscale]
-    Caddy[Caddy on TrueNAS]
+    Caddy[Caddy on janus]
   end
 
   subgraph vlans [VLANs]
@@ -29,6 +29,7 @@ flowchart TB
     HA[Home Assistant]
     Forgejo[Forgejo]
     Authelia[Authelia]
+    Blocky[Blocky 10.10.30.21]
   end
 
   subgraph k8s [Kubernetes VLAN 30]
@@ -40,27 +41,30 @@ flowchart TB
 
   ISP --> Router
   UniFi --- Router
+  Caddy --- Router
   Router --> MGMT & TRUSTED & SERVERS & IOT & GUEST
   WG --> Router
   Caddy --> Traefik
   Caddy --> Forgejo
   Caddy --> Authelia
+  Caddy --> HA
+  Blocky --> Router
   Traefik --> Zdk
   HA --> IOT
   InternetUsers[Internet] -->|zdk.no code.zdk.no| Caddy
 ```
 
-**Principle:** The router is the **policy enforcement point**. DNS, proxy, monitoring, and apps run on hosts in defined VLANs, configured from Git. UniFi OS Server is an intentional exception on the OptiPlex (WiFi control plane next to L2).
+**Principle:** The router is the **policy enforcement point** and the **always-on edge box**: nftables plus Unbound, dnsmasq, Caddy, UniFi OS Server, Headscale, and DNSUpdater. Blocky, HA, Forgejo, Authelia, and k8s stay on VLAN hosts.
 
 ## Service map
 
 | Service | Host | Deploy |
 |---------|------|--------|
-| Firewall, DHCP, Unbound, WireGuard, DNSUpdater | NixOS router (OptiPlex) | `router/` flake |
-| UniFi OS Server | NixOS router (OptiPlex) | Official installer + Podman (see Stage 2) |
-| Caddy, HA, Forgejo, Authelia, Blocky | TrueNAS `10.10.30.20` | `services/truenas/docker-compose.yml` |
-| k3s, Traefik, Flux, Capacitor, monitoring | RK1 cluster | `nodes/` + `k8s/` |
-| Zdk app | k8s (when ready) | Flux `GitRepository` + `Kustomization` → [Zdk repo](https://github.com/sknutsen/Zdk); `net/` ingress stub at `k8s/clusters/homelab/apps/zdk/` |
+| Firewall, DHCP, Unbound, Caddy, WireGuard, Headscale (`127.0.0.1:8081`), DNSUpdater | NixOS router (janus) | `router/` flake + `services/caddy/Caddyfile` |
+| UniFi OS Server | NixOS router (janus) | Official installer + Podman; data `/var/lib/unifi-os-server` |
+| HA, Forgejo, Authelia, Blocky, Promtail | TrueNAS `10.10.30.20` | `services/truenas/docker-compose.yml` |
+| k3s, Traefik, Flux, Capacitor, monitoring | RK1 cluster | `nodes/` (target) + `k8s/` stub |
+| Zdk app | k8s (when ready) | Flux `GitRepository` + `Kustomization` → [Zdk repo](https://github.com/sknutsen/Zdk); `net/` stub at `k8s/clusters/homelab/apps/zdk/ingressroute.yaml` |
 
 ## External access
 
@@ -90,7 +94,7 @@ sequenceDiagram
 
 | Tier | Role | Host |
 |------|------|------|
-| **Caddy** (edge) | WAN TLS, ACME, Authelia, static backends | TrueNAS Docker |
+| **Caddy** (edge) | WAN TLS, ACME DNS-01 (Domeneshop), Authelia, static backends | janus (NixOS) |
 | **Traefik** (in-cluster) | Dynamic pod routing, IngressRoute | k8s MetalLB `10.10.30.100` |
 
 ```mermaid
@@ -115,13 +119,18 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 |----------|---------|------|
 | `zdk.no` | Traefik `10.10.30.100:80` | None |
 | `code.zdk.no` | Forgejo `:3000` | Forgejo-native |
+| `auth.lab.zdk.no` | Authelia `:9091` | None (portal) |
+| `code.lab.zdk.no` | Forgejo `:3000` | Forgejo-native |
+| `ha.lab.zdk.no` | HA `:8123` | Authelia |
+| `headscale.lab.zdk.no` | `127.0.0.1:8081` | Headscale-native (Stage 6) |
+| `unifi.lab.zdk.no` | UniFi `:11443` | Authelia once vhost exists; until then `:11443` direct |
 | `capacitor.lab.zdk.no` | Capacitor Service | Authelia |
 | `grafana.lab.zdk.no` | Grafana (k8s) | Authelia |
 
 ## VPN
 
-- **WireGuard** on router — primary remote access.
-- **Headscale** deployed alongside WireGuard for mesh/overlay (self-hosted control plane).
+- **WireGuard** on janus (`51820/udp`) — primary remote access.
+- **Headscale** on janus **`127.0.0.1:8081`** (Stage 6). UniFi Inform owns `:8080`. Caddy `headscale.lab.zdk.no`, no Authelia.
 - VPN pool `10.10.255.0/24`; routes to `10.10.0.0/16` and lab IPv6 subnets when enabled.
 
 ## Monitoring and logging
@@ -132,23 +141,25 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 | node_exporter | Router + each Linux host |
 | TrueNAS Docker logs | Promtail sidecar/agent → Loki in k8s |
 
-**TrueNAS log options:** (a) Promtail container in compose shipping to Loki; (b) Vector agent on TrueNAS host; (c) syslog forward to Loki gateway. Recommended: **Promtail in compose** for Caddy/HA/Forgejo containers. UniFi OS Server logs stay on the router (`journalctl` / UniFi UI) unless forwarded later.
+**TrueNAS log options:** (a) Promtail in compose shipping to Loki (HA/Forgejo/Authelia/Blocky); (b) Vector agent on TrueNAS host. **Caddy logs** are on janus (`journalctl -u caddy`). UniFi OS Server logs stay on the router unless forwarded later.
 
 ## DDNS
 
-[DNSUpdater](https://github.com/sknutsen/DNSUpdater) on router via systemd timer → Domeneshop. Updates `@` and `code` records only. Run before Stage 7 WAN enable.
+[DNSUpdater](https://github.com/sknutsen/DNSUpdater) on router via systemd timer → Domeneshop. Updates `@` and `code` records only. Packaging lives in the DNSUpdater repo; this flake stays a placeholder until that ships. Run before Stage 7 WAN enable.
 
-## Declarative repo layout
+## Target repo layout
+
+`nodes/` and a full Flux tree are still scaffolding. See
+[plan.md § Target repo layout](plan.md#target-repo-layout).
 
 ```
 net/
-├── docs/           # plans, vlan, firewall, inventory, reference
-├── router/         # NixOS flake (OptiPlex)
-├── nodes/          # NixOS flake (RK1 cluster)
-├── services/       # Caddy, truenas compose, dns, authelia, dnsupdater
-├── k8s/            # Flux bootstrap, infrastructure, apps/zdk
-├── secrets/        # sops/age encrypted
-└── scripts/        # validate.sh
+├── docs/           # exists
+├── router/         # exists
+├── nodes/          # target — RK1 flake
+├── switch/         # exists
+├── services/       # exists (no dnsupdater dir — Nix stub)
+├── k8s/            # Zdk IngressRoute stub
+├── secrets/        # examples; live yaml not committed
+└── scripts/        # validate.sh, generate-viewer.py
 ```
-
-Full tree: see [plan.md](plan.md#repo-layout).

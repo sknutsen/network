@@ -1,6 +1,6 @@
 # CGNAT options (reference)
 
-**Your setup:** Dynamic **public** IPv4 — CGNAT is **not active**. Port forwarding works. See [vlan-plan.md](../vlan-plan.md).
+**Your setup:** Dynamic **public** IPv4 — CGNAT is **not active**. **WAN INPUT to Caddy** on janus works. See [vlan-plan.md](../vlan-plan.md).
 
 This page is fallback reference only. CGNAT means no unique public IPv4; inbound port forwarding cannot work. Detect: router WAN IP differs from whatismyip.com, or WAN is `100.64.x.x`.
 
