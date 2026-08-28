@@ -1,0 +1,28 @@
+# Blocky — IoT DNS (10.10.30.21). Upstream is Unbound on the servers gateway.
+# Flip homelab.router.enableBlocky only after this answers on :53.
+upstream:
+  default:
+    - 10.10.30.1
+
+bootstrapDns:
+  - tcp+udp:1.1.1.1
+
+connectIPVersion: v4
+
+ports:
+  dns: 53
+  http: 4000
+
+blocking:
+  denylists:
+    ads:
+      - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+    lab:
+      - /app/iot-lab-deny.txt
+  clientGroupsBlock:
+    default:
+      - ads
+      - lab
+  blockType: nxDomain
+
+# DoT :853 omitted until Blocky has a cert (firewall DNATs 853; fail closed).

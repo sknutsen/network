@@ -1,0 +1,10 @@
+# Copy to users_database.yml (gitignored).
+# Hash: docker run --rm authelia/authelia:4 authelia crypto hash generate argon2 --password 'yourpassword'
+users:
+  zdk:
+    disabled: false
+    displayname: zdk
+    password: "$argon2id$v=19$m=65536,t=3,p=4$REPLACE_WITH_GENERATED_HASH"
+    email: zdk@lab.zdk.no
+    groups:
+      - admins

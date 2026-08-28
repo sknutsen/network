@@ -6,15 +6,15 @@ Self-hosted Git forge on TrueNAS Docker. Deployed via `services/truenas/docker-c
 
 | Setting | Value |
 |---------|-------|
-| Public URL | `https://code.zdk.no` |
-| ROOT_URL | `https://code.zdk.no` |
+| Public URL | `https://code.zdk.no` (Stage 7) |
+| ROOT_URL | `https://code.lab.zdk.no` until Stage 7, then `https://code.zdk.no` |
 | Data | `/mnt/tank/services/forgejo/data` |
 | Config | `/mnt/tank/services/forgejo/config` |
 
 ## Git transport
 
 - **WAN:** HTTPS only (`git clone https://code.zdk.no/user/repo.git`)
-- **WAN SSH:** disabled — no router port-forward for `:22`
+- **WAN SSH:** disabled — no WAN INPUT for `:22`
 - **Internal/VPN:** SSH optional via WireGuard or trusted VLAN (container SSH on port 2222 if enabled)
 
 ## Stage 7 checklist

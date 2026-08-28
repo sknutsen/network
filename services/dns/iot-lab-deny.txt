@@ -1,0 +1,4 @@
+# IoT must not resolve internal names (vlan-plan). Whitelist a FQDN here only
+# if a device needs one specific lab name.
+*.lab.zdk.no
+lab.zdk.no

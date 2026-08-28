@@ -1,35 +1,86 @@
-# Deploy on TrueNAS SCALE (10.10.30.20)
-# Mount datasets under tank/services/
+# Deploy on TrueNAS (10.10.30.20). Datasets under tank/services/.
+# Caddy runs on janus (NixOS), not here. Publish backend ports on this
+# host IP only — nftables drops forwarded 3000/8123/9091 so clients
+# cannot skip Authelia. Janus Caddy uses OUTPUT (not forward).
+#
+# Blocky binds 10.10.30.21 — add a /32 alias on the TrueNAS VLAN 30 NIC
+# (gateway 10.10.30.1) before starting this stack.
+#
+# Authelia: copy services/authelia/.env.example → .env and
+# users_database.yml.example → users_database.yml, then generate hashes.
 
 services:
-  caddy:
-    image: caddy:2
+  authelia:
+    image: authelia/authelia:4
     restart: unless-stopped
+    env_file:
+      - ../authelia/.env
     ports:
-      - "80:80"
-      - "443:443"
+      - "10.10.30.20:9091:9091"
     volumes:
-      - ../caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - /mnt/tank/services/caddy/data:/data
-      - /mnt/tank/services/caddy/config:/config
+      - ../authelia/configuration.yml:/config/configuration.yml:ro
+      - ../authelia/users_database.yml:/config/users_database.yml:ro
+      - /mnt/tank/services/authelia/data:/data
     networks:
       - edge
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Oslo
+    ports:
+      - "10.10.30.20:8123:8123"
+    volumes:
+      - /mnt/tank/services/homeassistant/config:/config
+    networks:
+      - edge
+    # Traffic to IoT exits via TrueNAS 10.10.30.20 (nftables servers→IoT).
 
   forgejo:
     image: codeberg.org/forgejo/forgejo:9
     restart: unless-stopped
     environment:
-      - FORGEJO__server__ROOT_URL=https://code.zdk.no
-      - FORGEJO__server__SSH_DOMAIN=code.zdk.no
+      # Stage 5 internal. At Stage 7 switch ROOT_URL/SSH_DOMAIN to https://code.zdk.no
+      - FORGEJO__server__ROOT_URL=https://code.lab.zdk.no
+      - FORGEJO__server__SSH_DOMAIN=code.lab.zdk.no
       - FORGEJO__server__SSH_PORT=2222
     volumes:
       - /mnt/tank/services/forgejo/data:/data
       - /mnt/tank/services/forgejo/config:/etc/gitea
     networks:
       - edge
-    # SSH not exposed on WAN — bind for internal/VPN use only if needed
-    # ports:
-    #   - "2222:22"
+    ports:
+      - "10.10.30.20:3000:3000"
+      - "10.10.30.20:2222:22"
+
+  blocky:
+    image: ghcr.io/0xerr0r/blocky:v0.26
+    restart: unless-stopped
+    ports:
+      - "10.10.30.21:53:53/udp"
+      - "10.10.30.21:53:53/tcp"
+    volumes:
+      - ../dns/blocky.yml:/app/config.yml:ro
+      - ../dns/iot-lab-deny.txt:/app/iot-lab-deny.txt:ro
+    networks:
+      - edge
+
+  # Stub: do not start until Loki answers. Then:
+  #   docker compose --profile logging up -d
+  promtail:
+    image: grafana/promtail:3.4
+    restart: unless-stopped
+    profiles:
+      - logging
+    volumes:
+      - ../promtail/config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /mnt/tank/services/promtail:/positions
+    command:
+      - -config.file=/etc/promtail/config.yml
+    networks:
+      - edge
 
 networks:
   edge:

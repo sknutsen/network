@@ -1,0 +1,49 @@
+# Authelia — internal SSO for lab UIs.
+# Caddy forward_auth except auth.lab (portal), code.lab (Forgejo), headscale.lab.
+
+server:
+  address: tcp://0.0.0.0:9091
+
+log:
+  level: info
+
+theme: auto
+
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+    password:
+      algorithm: argon2
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain: auth.lab.zdk.no
+      policy: bypass
+    # Caddy does not forward_auth these; listed so a mistaken import is safe.
+    - domain: code.lab.zdk.no
+      policy: bypass
+    - domain: headscale.lab.zdk.no
+      policy: bypass
+    - domain: "*.lab.zdk.no"
+      policy: one_factor
+
+session:
+  cookies:
+    - name: authelia_session
+      domain: lab.zdk.no
+      authelia_url: https://auth.lab.zdk.no
+      expiration: 1h
+      inactivity: 5m
+
+storage:
+  local:
+    path: /data/db.sqlite3
+
+notifier:
+  filesystem:
+    filename: /data/notification.txt
+
+totp:
+  disable: false
+  issuer: lab.zdk.no

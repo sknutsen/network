@@ -1,24 +1,77 @@
-# Edge proxy on TrueNAS (10.10.30.20)
-# WAN port-forward: 443/80 only. ACME certs stored in tank/services/caddy/data
+# Edge proxy on janus (NixOS). Caddyfile is the source of truth;
+# router/modules/caddy.nix loads it. Backends are on TrueNAS / Traefik.
+#
+# Stage 5: *.lab.zdk.no only. Uncomment public sites at Stage 7
+# (enableWanCaddy). ACME is DNS-01 via Domeneshop (decision-briefs #3):
+# no public A records for lab names; HTTP-01 is not the v1 path.
+# Live `acme_dns` stays in caddy.nix until the Caddy binary includes
+# github.com/caddy-dns/domainnameshop (`withPlugins` on nixos-unstable).
 
-# Public services (Stage 7)
-# zdk.no — enable when github.com/sknutsen/Zdk ships a deployable container
-zdk.no {
+(authelia) {
+	forward_auth 10.10.30.20:9091 {
+		uri /api/authz/forward-auth
+		copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+	}
+}
+
+# Authelia portal — no forward_auth (would loop)
+auth.lab.zdk.no {
+	reverse_proxy 10.10.30.20:9091
+	encode gzip
+}
+
+ha.lab.zdk.no {
+	import authelia
+	reverse_proxy 10.10.30.20:8123
+	encode gzip
+}
+
+# Forgejo internal until Stage 7 — Forgejo-native auth, no Authelia
+code.lab.zdk.no {
+	reverse_proxy 10.10.30.20:3000
+	encode gzip
+}
+
+# Stage 6 — Headscale on 127.0.0.1:8081 (UniFi Inform owns :8080).
+# No Authelia — Tailscale clients use this as login-server.
+# headscale.lab.zdk.no {
+# 	reverse_proxy 127.0.0.1:8081
+# 	encode gzip
+# }
+
+# UniFi UI is :11443 on janus. unifi.lab.zdk.no → Caddy (.30.1) in Unbound.
+# Until this vhost exists, browse https://10.10.10.1:11443 (trusted/mgmt).
+# Inform stays http://10.10.10.1:8080 — do not proxy Inform.
+# unifi.lab.zdk.no {
+# 	import authelia
+# 	reverse_proxy https://127.0.0.1:11443 {
+# 		transport http {
+# 			tls_insecure_skip_verify
+# 		}
+# 	}
+# 	encode gzip
+# }
+
+# k8s UIs — 502 until Traefik is up (Stage 5 k8s)
+grafana.lab.zdk.no {
+	import authelia
 	reverse_proxy 10.10.30.100:80
 	encode gzip
 }
 
-code.zdk.no {
-	reverse_proxy forgejo:3000
+capacitor.lab.zdk.no {
+	import authelia
+	reverse_proxy 10.10.30.100:80
 	encode gzip
 }
 
-# Internal homelab services (*.lab.zdk.no) — VPN/trusted VLAN; Authelia forward_auth
-# Example (uncomment and extend when deploying):
+# --- Stage 7: uncomment and set enableWanCaddy = true ---
+# zdk.no {
+# 	reverse_proxy 10.10.30.100:80
+# 	encode gzip
+# }
 #
-# grafana.lab.zdk.no {
-#     forward_auth http://authelia:9091 {
-#         uri /api/authz/forward-auth
-#     }
-#     reverse_proxy 10.10.30.100:80
+# code.zdk.no {
+# 	reverse_proxy 10.10.30.20:3000
+# 	encode gzip
 # }
