@@ -1,6 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-resources: []
-# When Zdk repo ships manifests, either:
-# - add Flux GitRepository → github.com/sknutsen/Zdk and reference here, or
-# - uncomment ingressroute.yaml and add Deployment from Zdk image
+resources:
+  - ingressroute.yaml
+# App Deployment/Service come from Flux GitRepository → github.com/sknutsen/Zdk
+# when that repo ships manifests. This IngressRoute 502s until then.
