@@ -43,6 +43,17 @@ else
   echo "nix not found — skip flake check"
 fi
 
+echo "==> nodes flake eval"
+if command -v nix >/dev/null 2>&1; then
+  if ! nix --extra-experimental-features 'nix-command flakes' \
+    eval "path:${root}/nodes#nixosConfigurations.nordri.config.networking.hostName"; then
+    echo "nodes flake eval failed" >&2
+    fail=1
+  fi
+else
+  echo "nix not found — skip nodes flake eval"
+fi
+
 if [ "$fail" -ne 0 ]; then
   exit 1
 fi

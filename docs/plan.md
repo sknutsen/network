@@ -115,15 +115,15 @@ MAC reservations are leftover first-boot work, not a brief: [OPEN-QUESTIONS.md](
 
 ## Target repo layout
 
-Directories that do not exist yet are Stage 5–8 scaffolding (`nodes/`, fuller
-`k8s/`). DNSUpdater stays a Nix stub until [that repo](https://github.com/sknutsen/DNSUpdater) ships a package.
+Remaining Stage 5–8 scaffolding is a fuller `k8s/` Flux tree. `nodes/` exists
+(k3s off). DNSUpdater stays a Nix stub until [that repo](https://github.com/sknutsen/DNSUpdater) ships a package.
 
 ```
 net/
 ├── flake.nix                    # NixOS configs (optiplex / janus) — exists
 ├── docs/                        # exists
 ├── router/                      # exists
-├── nodes/                       # target — RK1 NixOS flake
+├── nodes/                       # RK1 NixOS flake (k3s off until Stage 5)
 ├── switch/                      # exists
 ├── services/                    # exists (truenas, caddy, authelia, dns, promtail, HA/Forgejo READMEs)
 ├── k8s/clusters/homelab/        # stub (Zdk IngressRoute only)

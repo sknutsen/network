@@ -146,7 +146,8 @@ exposure** happens here.
 ## Ongoing — Repo scaffolding (parallel from day 0)
 
 - [x] Scaffold `router/` NixOS flake (+ OPEN-QUESTIONS.md)
-- [ ] Scaffold `nodes/`, finish `services/`, `secrets/`, `k8s/`
+- [x] Scaffold `nodes/` RK1 NixOS flake (k3s off until Stage 5)
+- [ ] Finish `services/`, `secrets/`, fuller `k8s/` Flux tree
 
 ## Parallel workstreams
 
@@ -166,13 +167,12 @@ Stage 7 needs Caddy on janus (Stage 2) plus TrueNAS backends from E.
 
 ## Suggested next commits
 
-Already in tree: vlan/firewall/inventory docs, router flake, CRS310 `.rsc`,
-TrueNAS compose, Caddyfile, Authelia/Blocky/Promtail stubs, Zdk IngressRoute
-stub.
+Already in tree: vlan/firewall/inventory docs, router flake, `nodes/` RK1
+flake, CRS310 `.rsc`, TrueNAS compose, Caddyfile, Authelia/Blocky/Promtail
+stubs, Zdk IngressRoute stub.
 
 Still to add:
 
-1. `nodes/` RK1 NixOS flake
-2. Flux bootstrap + infrastructure HelmReleases under `k8s/clusters/homelab/`
-3. Encrypted `secrets/router.yaml` (age key on janus — do not commit the key)
-4. `docs/runbooks/` (router restore, WG rotation, ACME, Capacitor)
+1. Flux bootstrap + infrastructure HelmReleases under `k8s/clusters/homelab/`
+2. Encrypted `secrets/router.yaml` (age key on janus — do not commit the key)
+3. `docs/runbooks/` (router restore, WG rotation, ACME, Capacitor)

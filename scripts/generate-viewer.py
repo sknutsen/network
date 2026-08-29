@@ -36,6 +36,7 @@ DOCS: list[tuple[str, Path, str, str]] = [
     ("openQuestions", ROOT / "router/OPEN-QUESTIONS.md", "Remaining questions", "Build"),
     ("routerReadme", ROOT / "router/README.md", "Router README", "Build"),
     ("switchReadme", ROOT / "switch/README.md", "Switch README", "Build"),
+    ("nodesReadme", ROOT / "nodes/README.md", "Nodes README", "Build"),
     ("bsp", ROOT / "docs/plans/rk1-bsp-fork.md", "RK1 BSP fork", "Deferred"),
     ("refAuth", ROOT / "docs/reference/auth-authelia-vs-authentik.md", "Auth", "Reference"),
     ("refSecrets", ROOT / "docs/reference/secrets-sops-vs-agenix.md", "Secrets", "Reference"),

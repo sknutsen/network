@@ -1,4 +1,5 @@
-# Shared addressing — keep in sync with docs/vlan-plan.md and docs/inventory.md.
+# Shared addressing — keep in sync with docs/vlan-plan.md, docs/inventory.md,
+# and nodes/lib/constants.nix (nodes flake cannot import this file).
 {
   domain = "lab.zdk.no";
 

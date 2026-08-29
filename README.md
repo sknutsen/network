@@ -24,14 +24,14 @@ Declarative home network configuration and documentation.
 
 ## Target repo layout
 
-`nodes/` is not created yet. DNSUpdater is a Nix stub, not `services/dnsupdater/`.
+`nodes/` is a NixOS flake (k3s off until Stage 5). DNSUpdater is a Nix stub, not `services/dnsupdater/`.
 
 ```
 net/
 ├── flake.nix      # NixOS configs (optiplex / janus)
 ├── docs/          # plan, decisions, vlan, firewall, inventory, reference
 ├── router/        # janus NixOS modules
-├── nodes/         # target — RK1 NixOS flake
+├── nodes/         # RK1 NixOS flake (nordri–vestri; k3s off)
 ├── switch/        # CRS310 RouterOS (L2 VLANs)
 ├── services/      # truenas compose, Caddy, Authelia, DNS, Promtail
 ├── k8s/           # Zdk IngressRoute stub; Flux bootstrap later

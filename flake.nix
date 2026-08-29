@@ -32,6 +32,9 @@
       ];
     };
 
+    # RK1 cluster is a separate aarch64 flake:
+    #   nix eval './nodes#nixosConfigurations.nordri.config.networking.hostName'
+
     formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
   };
 }
