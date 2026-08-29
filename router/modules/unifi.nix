@@ -1,5 +1,9 @@
-{ config, lib, pkgs, ... }:
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   cfg = config.homelab.router;
   C = import ../lib/constants.nix;
   uosEnv = [
@@ -21,8 +25,7 @@ let
     RuntimeDirectoryMode = "0700";
     Environment = uosEnv;
   };
-in
-{
+in {
   # UniFi OS Server is a vendor Podman install (impure), not a nixpkgs service.
   # The linux-x64 installer cannot write /etc/systemd/system (Nix store symlink).
   # Run the installer once for binaries; units + rootless storage live here.
@@ -50,7 +53,7 @@ in
       [storage]
       driver = "overlay"
       runroot = "/run/uosserver-runtime/storage"
-      graphroot = "/var/lib/uosserver/storage"
+      graphroot = "/home/uosserver/.local/share/containers/storage"
     '';
 
     systemd.tmpfiles.rules = [
@@ -65,6 +68,8 @@ in
       "d /home/uosserver/.config/containers 0750 uosserver uosserver -"
       "d /home/uosserver/.local 0750 uosserver uosserver -"
       "d /home/uosserver/.local/share 0750 uosserver uosserver -"
+      "d /home/uosserver/.local/share/containers 0750 uosserver uosserver -"
+      "d /home/uosserver/.local/share/containers/storage 0750 uosserver uosserver -"
       "d /var/lib/unifi-os-server 0750 root root -"
       "L+ /usr/bin/podman - - - - ${lib.getExe pkgs.podman}"
       "L+ /var/lib/uosserver/bin/netavark - - - - ${lib.getExe' pkgs.netavark "netavark"}"
@@ -81,9 +86,11 @@ in
       after = ["network-online.target"];
       wants = ["network-online.target"];
       path = [pkgs.podman pkgs.netavark pkgs.aardvark-dns pkgs.crun pkgs.conmon pkgs.slirp4netns pkgs.passt pkgs.coreutils];
-      serviceConfig = uosServiceConfig // {
-        ExecStart = "/var/lib/uosserver/bin/uosserver-service";
-      };
+      serviceConfig =
+        uosServiceConfig
+        // {
+          ExecStart = "/var/lib/uosserver/bin/uosserver-service";
+        };
     };
 
     # Vendor updater is optional; enabling it at boot makes nixos-rebuild fail
@@ -92,9 +99,11 @@ in
       description = "UniFi OS Server updater";
       after = ["uosserver.service"];
       path = [pkgs.podman pkgs.netavark pkgs.aardvark-dns pkgs.crun pkgs.conmon pkgs.slirp4netns pkgs.passt pkgs.coreutils];
-      serviceConfig = uosServiceConfig // {
-        ExecStart = "/var/lib/uosserver/bin/updater-service";
-      };
+      serviceConfig =
+        uosServiceConfig
+        // {
+          ExecStart = "/var/lib/uosserver/bin/updater-service";
+        };
     };
 
     environment.systemPackages = with pkgs; [
