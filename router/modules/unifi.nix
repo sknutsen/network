@@ -90,12 +90,14 @@ in {
         uosServiceConfig
         // {
           ExecStart = "/var/lib/uosserver/bin/uosserver-service";
+          RuntimeDirectoryPreserve = "yes";
         };
     };
 
     # Vendor updater is optional; enabling it at boot makes nixos-rebuild fail
     # when the binary exits 1 (no container yet / not configured).
     systemd.services.uosserver-updater = {
+      enable = false;
       description = "UniFi OS Server updater";
       after = ["uosserver.service"];
       path = [pkgs.podman pkgs.netavark pkgs.aardvark-dns pkgs.crun pkgs.conmon pkgs.slirp4netns pkgs.passt pkgs.coreutils];
