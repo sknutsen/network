@@ -67,11 +67,11 @@ in
       "d /home/uosserver/.local/share 0750 uosserver uosserver -"
       "d /var/lib/unifi-os-server 0750 root root -"
       "L+ /usr/bin/podman - - - - ${lib.getExe pkgs.podman}"
-      "L+ /var/lib/uosserver/bin/netavark - - - - ${lib.getExe pkgs.netavark}"
+      "L+ /var/lib/uosserver/bin/netavark - - - - ${lib.getExe' pkgs.netavark "netavark"}"
       "L+ /var/lib/uosserver/bin/aardvark-dns - - - - ${pkgs.aardvark-dns}/bin/aardvark-dns"
       "L+ /var/lib/uosserver/bin/crun - - - - ${lib.getExe pkgs.crun}"
       "L+ /var/lib/uosserver/bin/conmon - - - - ${lib.getExe pkgs.conmon}"
-      "L+ /usr/libexec/podman/netavark - - - - ${lib.getExe pkgs.netavark}"
+      "L+ /usr/libexec/podman/netavark - - - - ${lib.getExe' pkgs.netavark "netavark"}"
       "L+ /usr/libexec/podman/aardvark-dns - - - - ${pkgs.aardvark-dns}/bin/aardvark-dns"
     ];
 
@@ -86,9 +86,10 @@ in
       };
     };
 
+    # Vendor updater is optional; enabling it at boot makes nixos-rebuild fail
+    # when the binary exits 1 (no container yet / not configured).
     systemd.services.uosserver-updater = {
       description = "UniFi OS Server updater";
-      wantedBy = ["multi-user.target"];
       after = ["uosserver.service"];
       path = [pkgs.podman pkgs.netavark pkgs.aardvark-dns pkgs.crun pkgs.conmon pkgs.slirp4netns pkgs.passt pkgs.coreutils];
       serviceConfig = uosServiceConfig // {
