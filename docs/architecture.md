@@ -61,7 +61,7 @@ flowchart TB
 | Service | Host | Deploy |
 |---------|------|--------|
 | Firewall, DHCP, Unbound, Caddy, WireGuard, Headscale (`127.0.0.1:8081`), DNSUpdater | NixOS router (janus) | `router/` flake + `services/caddy/Caddyfile` |
-| UniFi OS Server | NixOS router (janus) | Official installer + Podman; data `/var/lib/unifi-os-server` |
+| UniFi OS Server | NixOS router (janus) | **Functional** — vendor binaries + `unifi.nix` (rootless Podman, systemd `uosserver`); data `/var/lib/unifi-os-server` |
 | HA, Forgejo, Authelia, Blocky, Promtail | TrueNAS `10.10.30.20` | `services/truenas/docker-compose.yml` |
 | k3s, Traefik, Flux, Capacitor, monitoring | RK1 cluster | `nodes/` (target) + `k8s/` stub |
 | Zdk app | k8s (when ready) | Flux `GitRepository` + `Kustomization` → [Zdk repo](https://github.com/sknutsen/Zdk); `net/` stub at `k8s/clusters/homelab/apps/zdk/ingressroute.yaml` |

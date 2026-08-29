@@ -357,12 +357,10 @@ this brief is “prove them on the metal.”
    and that a tagged client on ether1 lands in the right VLAN.
 5. **Bridge the OBOS Nett modem** at router cutover, then plug it into `wan0`.
    Confirm public IPv4 DHCP on `wan0` (whatismyip matches the WAN address).
-6. **UniFi / AP** after Stage 2 UniFi OS Server: adopt U7 Lite; SSIDs → VLANs
-   20/40/50. Confirm a phone on each SSID gets the matching `10.10.x.0/24`.
+6. **UniFi / AP** — UniFi OS Server is **functional** on the router. Adopt U7
+   Lite; SSIDs → VLANs 20/40/50. Confirm a phone on each SSID gets the matching
+   `10.10.x.0/24`.
 7. Document any deviation in [inventory.md](inventory.md).
-
-Podman vs Ubiquiti minimum is the same visit as step 6 —
-check before running the UniFi installer.
 
 ### Verify
 

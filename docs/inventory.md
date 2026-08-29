@@ -19,7 +19,7 @@ VLAN assignments, static IPs, switch ports, and dnsmasq reservations. Network de
 
 | Name | Hardware | Connection | Notes |
 |------|----------|------------|-------|
-| **janus** | Dell OptiPlex 9020 MT + i350-T2 | I217LM → WAN; i350 port 1 → CRS310 trunk | `janus.lab.zdk.no` → `10.10.30.1`; NixOS + UniFi OS Server + Headscale (`:8081`) |
+| **janus** | Dell OptiPlex 9020 MT + i350-T2 | I217LM → WAN; i350 port 1 → CRS310 trunk | `janus.lab.zdk.no` → `10.10.30.1`; NixOS + **UniFi OS Server (functional)** + Headscale (`:8081`) |
 | **CRS310** | MikroTik CRS310-8G+2S+IN | Router trunk on port 1; mgmt `10.10.10.2` | **Acquired**; L2 only — [switch/crs310.rsc](../switch/crs310.rsc); no PoE — AP uses owned injector |
 | **U7 Lite** | Ubiquiti UniFi AP (WiFi 7) | CRS310 port 2 (trunk) + owned PoE injector | **Acquired**; SSIDs → VLANs 20/40/50 via UniFi OS Server on router |
 

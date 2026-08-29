@@ -33,7 +33,7 @@ are canonical.
 | Switch            | **MikroTik CRS310-8G+2S+IN** (acquired)                        | 802.1Q VLANs, 2.5G ports, SNMP                                  |
 | WiFi AP           | **Ubiquiti U7 Lite** (1×, acquired)                            | WiFi 7; 2.5 GbE uplink; VLAN-capable SSIDs; ~115 m² coverage    |
 | UPS               | **Deferred** — not required for v1                             | Procure later; optional Stage 8 power test                      |
-| UniFi             | **UniFi OS Server on OptiPlex only**; data `/var/lib/unifi-os-server` | Official self-host via Podman; UI `:11443`, inform `:8080` at `10.10.10.1`; `unifi.lab.zdk.no` → Caddy `.30.1`; **not** on TrueNAS |
+| UniFi             | **UniFi OS Server on OptiPlex only** (functional); data `/var/lib/unifi-os-server` | Vendor binaries + flake units (`unifi.nix`, rootless Podman); UI `:11443`, inform `:8080` at `10.10.10.1`; `unifi.lab.zdk.no` → Caddy `.30.1`; **not** on TrueNAS |
 | DHCP              | **dnsmasq** on router                                          | Simple per-VLAN pools; NixOS-native                             |
 | DNS (internal)    | **Unbound** on router                                          | Split-horizon, recursive resolver                               |
 | DNS (IoT filter)  | **Blocky** on TrueNAS Docker at `10.10.30.21`                  | Git-friendly blocklists; IoT-only; not k8s or router            |

@@ -78,7 +78,7 @@ router/
     ├── firewall.nix        # nftables from firewall-matrix
     ├── caddy.nix           # Caddy; Caddyfile in services/caddy/
     ├── vpn.nix             # WireGuard (Stage 6, off by default)
-    ├── unifi.nix           # Podman prep for UniFi OS Server
+    ├── unifi.nix           # UniFi OS Server (rootless Podman + systemd)
     ├── dnsupdater.nix      # Domeneshop DDNS timer stub
     ├── monitoring.nix      # node_exporter
     └── ssh.nix
@@ -101,11 +101,27 @@ nixos-rebuild switch --flake '.#optiplex' --target-host root@10.10.20.1
 
 ## UniFi OS Server
 
-Not packaged in the flake. After NixOS is up:
+**Functional** on janus. Vendor linux-x64 binaries (impure) plus flake units in
+`unifi.nix`: rootless Podman as `uosserver`, systemd `uosserver.service`. Not a
+nixpkgs service — the installer cannot write `/etc/systemd/system` (Nix store
+symlink). `enableUnifi` is on. `nix-ld` is required for the vendor ELF.
 
-1. Rebuild janus so `nix-ld` is on (`programs.nix-ld` in `unifi.nix`), then run the vendor linux-x64 installer as root (`sudo ./linux-x64-*-x64`). Generic glibc ELFs will not run until that rebuild.
-2. Open UI on `:11443` from trusted VLAN.
-3. Set Inform Host Override to **`10.10.10.1`**. The AP's native VLAN is 10, so it cannot use `10.10.30.1` for Inform. Caddy A records stay on `10.10.30.1` (`:443`); UniFi UI is `:11443` — no port clash, and mgmt DNS stays infrastructure-only.
-4. Adopt U7 Lite; map SSIDs per vlan-plan (`Hai-Fi Wai-Fi` / `(IoT)` / `(Guest)`). UniFi OS Server runs **only** on this router — do not resurrect the TrueNAS Network Application.
+**Access:** UI `:11443` from trusted / servers / mgmt (+ wg0). Inform `:8080`.
+Until the Caddy vhost is uncommented, browse `https://10.10.10.1:11443`.
+`unifi.lab.zdk.no` already points at Caddy (`.30.1`). Headscale (Stage 6)
+listens on **`127.0.0.1:8081`** so it does not collide with Inform.
 
-**Ports:** Inform `:8080`, UI `:11443`. Headscale (Stage 6) listens on **`127.0.0.1:8081`** so it does not collide with Inform. Caddy LAN INPUT is trusted + servers (+ VPN), not mgmt.
+**Inform Host Override:** **`10.10.10.1`**. The AP's native VLAN is 10, so it
+cannot use `10.10.30.1` (Caddy). Caddy LAN INPUT is trusted + servers (+ VPN),
+not mgmt.
+
+**Data:** `/var/lib/uosserver` (service), `/home/uosserver` (rootless storage),
+`/var/lib/unifi-os-server` (vendor). Runs **only** on this router — do not
+resurrect the TrueNAS Network Application. The updater unit stays disabled so
+`nixos-rebuild` does not fail when the binary exits 1.
+
+Stage 3 leftover: adopt U7 Lite; map SSIDs per vlan-plan (`Hai-Fi Wai-Fi` /
+`(IoT)` / `(Guest)`).
+
+**If binaries are missing** (reinstall): run the vendor installer as root
+(`sudo ./linux-x64-*-x64`), then `systemctl start uosserver`.

@@ -49,7 +49,7 @@ Not required for the current plan. Procure later for graceful shutdown / power d
 
 ## WiFi: Ubiquiti U7 Lite (acquired)
 
-WiFi 7 (802.11be), dual-band 2.4/5 GHz, ~115 m² coverage — sufficient for 60 m². 2.5 GbE uplink on CRS310 port 2 via owned PoE injector. Managed by **UniFi OS Server on the OptiPlex** (not TrueNAS).
+WiFi 7 (802.11be), dual-band 2.4/5 GHz, ~115 m² coverage — sufficient for 60 m². 2.5 GbE uplink on CRS310 port 2 via owned PoE injector. Managed by **UniFi OS Server on the OptiPlex** (functional; not TrueNAS).
 
 ## Alternates (not purchased)
 

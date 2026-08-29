@@ -30,7 +30,7 @@ Full table: **[decisions.md](decisions.md)**.
 
 | Layer | Choice |
 |-------|--------|
-| Router | NixOS on Dell OptiPlex 9020 MT + i350-T2 (acquired); UniFi OS Server |
+| Router | NixOS on Dell OptiPlex 9020 MT + i350-T2 (acquired); UniFi OS Server (functional) |
 | Switch / WiFi | CRS310 + U7 Lite + PoE injector (all acquired); UPS deferred |
 | Edge | Caddy on janus; Authelia + HA + Forgejo on TrueNAS Docker |
 | K8s | 4× RK1, NixOS, k3s, Flux, Traefik, Capacitor |
