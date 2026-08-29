@@ -56,7 +56,9 @@ in
     systemd.tmpfiles.rules = [
       "d /usr/local 0755 root root -"
       "d /usr/local/bin 0755 root root -"
+      "d /usr/libexec/podman 0755 root root -"
       "d /var/lib/uosserver 0750 uosserver uosserver -"
+      "d /var/lib/uosserver/bin 0755 root root -"
       "d /var/lib/uosserver/storage 0750 uosserver uosserver -"
       "d /home/uosserver 0750 uosserver uosserver -"
       "d /home/uosserver/.config 0750 uosserver uosserver -"
@@ -65,6 +67,12 @@ in
       "d /home/uosserver/.local/share 0750 uosserver uosserver -"
       "d /var/lib/unifi-os-server 0750 root root -"
       "L+ /usr/bin/podman - - - - ${lib.getExe pkgs.podman}"
+      "L+ /var/lib/uosserver/bin/netavark - - - - ${lib.getExe pkgs.netavark}"
+      "L+ /var/lib/uosserver/bin/aardvark-dns - - - - ${pkgs.aardvark-dns}/bin/aardvark-dns"
+      "L+ /var/lib/uosserver/bin/crun - - - - ${lib.getExe pkgs.crun}"
+      "L+ /var/lib/uosserver/bin/conmon - - - - ${lib.getExe pkgs.conmon}"
+      "L+ /usr/libexec/podman/netavark - - - - ${lib.getExe pkgs.netavark}"
+      "L+ /usr/libexec/podman/aardvark-dns - - - - ${pkgs.aardvark-dns}/bin/aardvark-dns"
     ];
 
     systemd.services.uosserver = {
@@ -72,7 +80,7 @@ in
       wantedBy = ["multi-user.target"];
       after = ["network-online.target"];
       wants = ["network-online.target"];
-      path = [pkgs.podman pkgs.slirp4netns pkgs.passt pkgs.coreutils];
+      path = [pkgs.podman pkgs.netavark pkgs.aardvark-dns pkgs.crun pkgs.conmon pkgs.slirp4netns pkgs.passt pkgs.coreutils];
       serviceConfig = uosServiceConfig // {
         ExecStart = "/var/lib/uosserver/bin/uosserver-service";
       };
@@ -82,7 +90,7 @@ in
       description = "UniFi OS Server updater";
       wantedBy = ["multi-user.target"];
       after = ["uosserver.service"];
-      path = [pkgs.podman pkgs.slirp4netns pkgs.passt pkgs.coreutils];
+      path = [pkgs.podman pkgs.netavark pkgs.aardvark-dns pkgs.crun pkgs.conmon pkgs.slirp4netns pkgs.passt pkgs.coreutils];
       serviceConfig = uosServiceConfig // {
         ExecStart = "/var/lib/uosserver/bin/updater-service";
       };
@@ -90,6 +98,10 @@ in
 
     environment.systemPackages = with pkgs; [
       podman
+      netavark
+      aardvark-dns
+      crun
+      conmon
       slirp4netns
       passt
       iperf3
