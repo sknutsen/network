@@ -5,39 +5,71 @@ let
 in
 {
   # UniFi OS Server is a vendor Podman install (impure), not a nixpkgs service.
-  # This module prepares the host: Podman, nix-ld (vendor ELF), persistence, ports.
+  # The linux-x64 installer cannot write /etc/systemd/system (Nix store symlink).
+  # Run the installer once for binaries + uosserver user; units live here.
   config = lib.mkIf cfg.enableUnifi {
     virtualisation.podman.enable = true;
 
-    # Vendor linux-x64 installer and uosserver binaries are generic glibc ELFs.
-    # Without nix-ld, NixOS stub-ld prints https://nix.dev/permalink/stub-ld.
     programs.nix-ld.enable = true;
     security.sudo.extraConfig = ''
       Defaults env_keep += "NIX_LD NIX_LD_LIBRARY_PATH"
     '';
 
-    # Persistence path is canonical; bind-mount here if the installer differs.
-    # Inform :8080 — Headscale must not bind this port (use 127.0.0.1:8081).
+    users.groups.uosserver = {};
+    users.users.uosserver = {
+      isSystemUser = true;
+      group = "uosserver";
+      home = "/home/uosserver";
+      createHome = true;
+      linger = true;
+      autoSubUidGidRange = true;
+    };
+    users.users.zdk.extraGroups = ["uosserver"];
+
     systemd.tmpfiles.rules = [
+      "d /usr/local 0755 root root -"
+      "d /usr/local/bin 0755 root root -"
+      "d /var/lib/uosserver 0750 uosserver uosserver -"
       "d /var/lib/unifi-os-server 0750 root root -"
       "L+ /usr/bin/podman - - - - ${lib.getExe pkgs.podman}"
     ];
 
+    systemd.services.uosserver = {
+      description = "UniFi OS Server";
+      wantedBy = ["multi-user.target"];
+      after = ["network-online.target"];
+      wants = ["network-online.target"];
+      serviceConfig = {
+        Type = "simple";
+        User = "uosserver";
+        Group = "uosserver";
+        ExecStart = "/var/lib/uosserver/bin/uosserver-service";
+        WorkingDirectory = "/var/lib/uosserver";
+        Restart = "on-failure";
+        RestartSec = "10s";
+      };
+    };
+
+    systemd.services.uosserver-updater = {
+      description = "UniFi OS Server updater";
+      wantedBy = ["multi-user.target"];
+      after = ["uosserver.service"];
+      serviceConfig = {
+        Type = "simple";
+        User = "uosserver";
+        Group = "uosserver";
+        ExecStart = "/var/lib/uosserver/bin/updater-service";
+        WorkingDirectory = "/var/lib/uosserver";
+        Restart = "on-failure";
+        RestartSec = "10s";
+      };
+    };
+
     environment.systemPackages = with pkgs; [
       podman
       slirp4netns
-      passt # pasta networking (Ubiquiti 4.9.3+ default)
+      passt
       iperf3
     ];
-
-    # Document expected ports (nftables opens these in firewall.nix).
-    # UI:     https://<router-lan-ip>:${toString C.unifi.uiPort}
-    # Inform: http://<router-lan-ip>:${toString C.unifi.informPort}/inform
-    #
-    # Install (manual, once), after nixos-rebuild so nix-ld is active:
-    #   1. Download UniFi OS Server linux-x64 installer from ui.com
-    #   2. sudo ./linux-x64-*-x64
-    #   3. UI :11443; Inform Host Override = 10.10.10.1 (not Caddy .30.1)
-    #   4. UniFi is this host only — do not run Network Application on TrueNAS.
   };
 }
