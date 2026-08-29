@@ -103,7 +103,7 @@ nixos-rebuild switch --flake '.#optiplex' --target-host root@10.10.20.1
 
 Not packaged in the flake. After NixOS is up:
 
-1. Install UniFi OS Server (vendor Podman installer).
+1. Rebuild janus so `nix-ld` is on (`programs.nix-ld` in `unifi.nix`), then run the vendor linux-x64 installer as root (`sudo ./linux-x64-*-x64`). Generic glibc ELFs will not run until that rebuild.
 2. Open UI on `:11443` from trusted VLAN.
 3. Set Inform Host Override to **`10.10.10.1`**. The AP's native VLAN is 10, so it cannot use `10.10.30.1` for Inform. Caddy A records stay on `10.10.30.1` (`:443`); UniFi UI is `:11443` — no port clash, and mgmt DNS stays infrastructure-only.
 4. Adopt U7 Lite; map SSIDs per vlan-plan (`Hai-Fi Wai-Fi` / `(IoT)` / `(Guest)`). UniFi OS Server runs **only** on this router — do not resurrect the TrueNAS Network Application.
