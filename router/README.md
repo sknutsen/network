@@ -30,13 +30,13 @@ Set `disko.devices.disk.main.device` in `hosts/optiplex/configuration.nix` to th
 
 From the **repo root**. This Mac cannot build `x86_64-linux` locally, so pass `--build-on remote` (the OptiPlex builds the closure). Pingu (NixOS, same architecture) can build locally and omit that flag.
 
-Git flakes ignore untracked files. Stage the tree, or pass `--flake path:$PWD#optiplex`.
+Git flakes ignore untracked files. Stage the tree, or pass `--flake "path:$PWD#optiplex"`. Quote flake URIs in zsh (`'.#optiplex'`); otherwise `#` is a glob and you get `no matches found`.
 
 ```bash
 cd /path/to/net
 
 nix run github:nix-community/nixos-anywhere -- \
-  --flake .#optiplex \
+  --flake '.#optiplex' \
   --target-host root@INSTALLER_IP \
   --build-on remote \
   --generate-hardware-config nixos-generate-config ./router/hosts/optiplex/hardware-configuration.nix \
@@ -90,13 +90,13 @@ router/
 
 ```bash
 # From repo root (Linux builder or on janus):
-nix build .#nixosConfigurations.optiplex.config.system.build.toplevel
+nix build '.#nixosConfigurations.optiplex.config.system.build.toplevel'
 
 # On janus (after install):
 nixos-rebuild switch --flake /path/to/net#optiplex
 
 # From a Linux workstation (SSH from trusted VLAN):
-nixos-rebuild switch --flake .#optiplex --target-host root@10.10.20.1
+nixos-rebuild switch --flake '.#optiplex' --target-host root@10.10.20.1
 ```
 
 ## UniFi OS Server
