@@ -38,6 +38,8 @@ IP addressing, DHCP pools, IPv6 layout, and DNS policy. Firewall rules:
 | ------------- | ------ | ---------------------------- |
 | `10.10.10.1`  | janus  | Mgmt gateway                 |
 | `10.10.10.2`  | crs310 | CRS310 CPU (RouterOS), **IPv4 only** |
+| `10.10.10.3`  | usw-nc | UniFi Flex Mini (network closet) |
+| `10.10.10.4`  | usw-lr | UniFi Flex Mini (living room) |
 | DHCP `.100–.200` | Turing Pi BMC | Mgmt NIC — no reservation until MAC known |
 
 ## DHCP pools (dnsmasq on router)
@@ -62,7 +64,7 @@ IP addressing, DHCP pools, IPv6 layout, and DNS policy. Firewall rules:
 | `Hai-Fi Wai-Fi (Guest)` | 50   | Client isolation ON        |
 
 Caddy A records (`*.lab.zdk.no` → `10.10.30.1`) are independent of Inform.
-Inform Host Override is **`10.10.10.1`** because the AP's untagged VLAN is 10.
+Inform Host Override is **`10.10.10.1`** because the AP and Flex Minis use untagged VLAN 10.
 `unifi.lab.zdk.no` is a **single** A record at Caddy (`.30.1`); no extra views
 on mgmt/trusted. Until a Caddy vhost exists, browse `https://10.10.10.1:11443`.
 Leave Caddy on `.30.1` so mgmt DNS stays infrastructure-only.
@@ -76,12 +78,35 @@ Leave Caddy on `.30.1` so mgmt DNS stays infrastructure-only.
 | 3    | access | 30   | Turing Pi 2.5          |
 | 4    | access | 30   | TrueNAS                |
 | 5    | access | 30   | Zpi (RPi 5)            |
-| 6    | access | 20   | Pingu (desktop)        |
-| 7    | access | 40   | Philips Hue hub        |
-| 8    | access | 40   | IKEA Trådfri hub       |
-| 9–10 | disabled | — | SFP+ unused |
+| 6    | native 10 + tagged 20,40 | mgmt + trusted + iot | USW-NC port 4 |
+| 7–8  | disabled | — | unused                 |
+| 9–10 | disabled | — | SFP+ unused            |
 
-Config: [switch/crs310.rsc](../switch/crs310.rsc). Switch mgmt: `10.10.10.2` (`crs310.lab.zdk.no`). AP native VLAN 10 so Inform is `10.10.10.1` (not Caddy at `10.10.30.1`).
+Config: [switch/crs310.rsc](../switch/crs310.rsc). CRS310 mgmt: `10.10.10.2` (`crs310.lab.zdk.no`). UniFi devices (AP + Flex Minis) use native VLAN 10 so Inform is `10.10.10.1` (not Caddy at `10.10.30.1`).
+
+### USW-NC (network closet) — UniFi Flex Mini `10.10.10.3`
+
+| Port | Mode | VLAN | Device |
+| ---- | ---- | ---- | ------ |
+| 2    | native 10 + tagged 40 | mgmt + iot | USW-LR port 1 |
+| 4    | native 10 + tagged 20,40 | uplink | CRS310 ether6 |
+| 5    | access | 20 | SW-O (unmanaged) |
+| 1, 3 | unused | — | — |
+
+Set the device management network to VLAN 10 and a static address `10.10.10.3/24` (gateway `10.10.10.1`).
+
+### USW-LR (living room) — UniFi Flex Mini `10.10.10.4`
+
+| Port | Mode | VLAN | Device |
+| ---- | ---- | ---- | ------ |
+| 1    | native 10 + tagged 40 | uplink | USW-NC port 2 |
+| 2–5  | access | 40 | Philips Hue, IKEA Trådfri, spare |
+
+Management network VLAN 10, static `10.10.10.4/24`.
+
+### SW-O (office) — unmanaged
+
+No 802.1Q. Every port is VLAN 20 because USW-NC port 5 is access 20. **pingu** and **Peon** (work machine) live here. Do not hang IoT or mgmt devices off SW-O.
 
 ## Router cabling
 

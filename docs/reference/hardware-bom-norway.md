@@ -22,6 +22,7 @@ Core networking gear is **procured**. Remaining optional items are out of scope 
 |------|-------|--------|---------------|
 | Router | OptiPlex 9020 MT + Intel i350-T2 | **Acquired** | 0 |
 | Switch | MikroTik CRS310-8G+2S+IN | **Acquired** | 0 (~2 200) |
+| Access switches | 2× UniFi Flex Mini (USW-NC, USW-LR) | **Acquired** | 0 |
 | AP | Ubiquiti U7 Lite | **Acquired** | 0 (~1 200) |
 | PoE injector | 802.3af for U7 Lite | **Acquired** | 0 (~300) |
 | UPS | APC 700 VA class | **Deferred** — not required for v1 | ~1 000 later |
@@ -41,7 +42,7 @@ Core networking gear is **procured**. Remaining optional items are out of scope 
 
 ## Switch: CRS310-8G+2S+IN (acquired)
 
-8× 2.5GbE + 2× 10G SFP+. **No PoE** — U7 Lite powered by owned 802.3af injector (13 W). Port plan: [inventory.md](../inventory.md). Port 2 is 2.5 GbE — matches the AP uplink.
+8× 2.5GbE + 2× 10G SFP+. **No PoE** — U7 Lite powered by owned 802.3af injector (13 W). Port plan: [inventory.md](../inventory.md). Port 2 is 2.5 GbE — matches the AP uplink. Port 6 trunks to USW-NC (1 GbE).
 
 ## UPS (deferred)
 

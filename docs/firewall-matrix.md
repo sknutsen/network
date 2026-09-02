@@ -73,7 +73,7 @@ trusted, servers (jump/k8s), or VPN — not from VLAN 10.
 | trusted + servers (+ wg0) | janus | 80, 443/tcp | **ALLOW** | Caddy lab vhosts. **Not mgmt, IoT, or guest** |
 | WAN | janus | 80, 443/tcp | **ALLOW** Stage 7 | **WAN INPUT to Caddy** (`enableWanCaddy`) |
 | trusted + servers + mgmt (+ wg0) | janus | 11443/tcp | **ALLOW** | UniFi UI. Mgmt included so you can use the AP’s native VLAN |
-| mgmt (AP) + trusted + servers | `10.10.10.1` | 8080/tcp, 3478/udp, 10001/udp | **ALLOW** | UniFi Inform / STUN / discovery. **Do not put Headscale on :8080** |
+| mgmt (AP + Flex Minis) + trusted + servers | `10.10.10.1` | 8080/tcp, 3478/udp, 10001/udp | **ALLOW** | UniFi Inform / STUN / discovery. **Do not put Headscale on :8080** |
 | wg0 | janus | 53/udp+tcp | **ALLOW** Stage 6 | Split-horizon Unbound for VPN clients |
 | localhost | Headscale | 8081/tcp | — | Caddy reverse_proxy only; no extra INPUT |
 

@@ -111,17 +111,17 @@ Until the Caddy vhost is uncommented, browse `https://10.10.10.1:11443`.
 `unifi.lab.zdk.no` already points at Caddy (`.30.1`). Headscale (Stage 6)
 listens on **`127.0.0.1:8081`** so it does not collide with Inform.
 
-**Inform Host Override:** **`10.10.10.1`**. The AP's native VLAN is 10, so it
-cannot use `10.10.30.1` (Caddy). Caddy LAN INPUT is trusted + servers (+ VPN),
-not mgmt.
+**Inform Host Override:** **`10.10.10.1`**. The AP and Flex Minis use native
+VLAN 10, so they cannot use `10.10.30.1` (Caddy). Caddy LAN INPUT is trusted +
+servers (+ VPN), not mgmt.
 
 **Data:** `/var/lib/uosserver` (service), `/home/uosserver` (rootless storage),
 `/var/lib/unifi-os-server` (vendor). Runs **only** on this router — do not
 resurrect the TrueNAS Network Application. The updater unit stays disabled so
 `nixos-rebuild` does not fail when the binary exits 1.
 
-Stage 3 leftover: adopt U7 Lite; map SSIDs per vlan-plan (`Hai-Fi Wai-Fi` /
-`(IoT)` / `(Guest)`).
+Stage 3 leftover: adopt U7 Lite and USW-NC / USW-LR; map SSIDs and Flex Mini
+port profiles per vlan-plan (`Hai-Fi Wai-Fi` / `(IoT)` / `(Guest)`).
 
 **If binaries are missing** (reinstall): run the vendor installer as root
 (`sudo ./linux-x64-*-x64`), then `systemctl start uosserver`.

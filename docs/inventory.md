@@ -21,16 +21,19 @@ VLAN assignments, static IPs, switch ports, and dnsmasq reservations. Network de
 |------|----------|------------|-------|
 | **janus** | Dell OptiPlex 9020 MT + i350-T2 | I217LM → WAN; i350 port 1 → CRS310 trunk | `janus.lab.zdk.no` → `10.10.30.1`; NixOS + **UniFi OS Server (functional)** + Headscale (`:8081`) |
 | **CRS310** | MikroTik CRS310-8G+2S+IN | Router trunk on port 1; mgmt `10.10.10.2` | **Acquired**; L2 only — [switch/crs310.rsc](../switch/crs310.rsc); no PoE — AP uses owned injector |
+| **USW-NC** | UniFi Flex Mini | CRS310 ether6 ↔ port 4; mgmt `10.10.10.3` | Network closet. Trunk native 10 + tagged 20/40. Port 2 → USW-LR; port 5 → SW-O |
+| **USW-LR** | UniFi Flex Mini | USW-NC port 2 ↔ port 1; mgmt `10.10.10.4` | Living room. Trunk native 10 + tagged 40; access 40 for Hue/Trådfri |
+| **SW-O** | Unmanaged switch | USW-NC port 5 | Office. All ports VLAN 20 (pingu, Peon). No tagging |
 | **U7 Lite** | Ubiquiti UniFi AP (WiFi 7) | CRS310 port 2 (trunk) + owned PoE injector | **Acquired**; SSIDs → VLANs 20/40/50 via UniFi OS Server on router |
 
 ## Trusted (VLAN 20) — SSID `Hai-Fi Wai-Fi`
 
 | Name | Hardware | OS | Static IP | Connection |
 |------|----------|-----|-----------|------------|
-| **Pingu** | Desktop / gaming | NixOS | `10.10.20.10` | Wired (port 6, 2.5G) |
+| **Pingu** | Desktop / gaming | NixOS | `10.10.20.10` | Wired (SW-O → USW-NC port 5) |
 | **Socrates** | ThinkPad | NixOS | `10.10.20.11` | WiFi `Hai-Fi Wai-Fi` or docked |
 | **Remorse** | MacBook Air | macOS | `10.10.20.12` | WiFi `Hai-Fi Wai-Fi` |
-| **Peon** | Work laptop | Windows | `10.10.20.13` | WiFi `Hai-Fi Wai-Fi` |
+| **Peon** | Work laptop | Windows | `10.10.20.13` | Wired (SW-O) or WiFi `Hai-Fi Wai-Fi` |
 | **Pixel 7** | Phone | Android | `10.10.20.14` | WiFi `Hai-Fi Wai-Fi` |
 
 **Peon:** Trusted for now — isolate later if work policy requires.
@@ -43,13 +46,13 @@ Only devices needing **direct IP reachability** get reservations. Hub-managed bu
 |------|----------|-----------|------------|-------|
 | **Samsung TV** | Smart TV (Tizen) | `10.10.40.10` | WiFi `Hai-Fi Wai-Fi (IoT)` | HA; casting target |
 | **Rusken** | Roborock vacuum | `10.10.40.11` | WiFi `Hai-Fi Wai-Fi (IoT)` | HA |
-| **Philips Hue hub** | Hue Bridge | `10.10.40.12` | Wired (port 7) | HA → hub; bulbs via Zigbee |
-| **IKEA Trådfri** | Dirigera/Gateway | `10.10.40.13` | Wired (port 8) | HA → hub; bulbs via Zigbee/Thread |
+| **Philips Hue hub** | Hue Bridge | `10.10.40.12` | Wired (USW-LR, access 40) | HA → hub; bulbs via Zigbee |
+| **IKEA Trådfri** | Dirigera/Gateway | `10.10.40.13` | Wired (USW-LR, access 40) | HA → hub; bulbs via Zigbee/Thread |
 | **Nintendo Switch** | Console | `10.10.40.14` | WiFi `Hai-Fi Wai-Fi (IoT)` | Online gaming; local LAN play deferred |
 | **Samsung Odyssey** | Smart Monitor | `10.10.40.15` | WiFi `Hai-Fi Wai-Fi (IoT)` | HA; casting target |
 | **Chromecast** | Google Chromecast | `10.10.40.16` | WiFi `Hai-Fi Wai-Fi (IoT)` | Casting from trusted |
 
-**Hue + Trådfri hubs:** Wired — CRS310 ports 7 and 8 (access VLAN 40).
+**Hue + Trådfri hubs:** Wired on USW-LR (access VLAN 40).
 
 ## Guest (VLAN 50) — SSID `Hai-Fi Wai-Fi (Guest)`
 
@@ -77,6 +80,8 @@ All use **servers → IoT ALLOW** from `10.10.30.20`:
 | `blocky.lab.zdk.no` | `10.10.30.21` | 30 |
 | `headscale.lab.zdk.no` | `10.10.30.1` | 30 (Caddy → `127.0.0.1:8081`) |
 | `crs310.lab.zdk.no` | `10.10.10.2` | 10 |
+| `usw-nc.lab.zdk.no` | `10.10.10.3` | 10 |
+| `usw-lr.lab.zdk.no` | `10.10.10.4` | 10 |
 | `nordri.lab.zdk.no` | `10.10.30.11` | 30 |
 | `sudri.lab.zdk.no` | `10.10.30.12` | 30 |
 | `austri.lab.zdk.no` | `10.10.30.13` | 30 |

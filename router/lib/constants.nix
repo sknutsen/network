@@ -61,6 +61,8 @@
     caddy = "10.10.30.1"; # janus servers-VLAN address; Unbound for Caddy names
     blocky = "10.10.30.21";
     crs310 = "10.10.10.2";
+    uswNc = "10.10.10.3";
+    uswLr = "10.10.10.4";
     nordri = "10.10.30.11";
     sudri = "10.10.30.12";
     austri = "10.10.30.13";

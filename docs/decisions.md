@@ -30,7 +30,7 @@ are canonical.
 | Router OS         | **NixOS** (flakes + nftables)                                  | Declarative, rollbacks, unified with RK1 nodes                  |
 | Router hardware   | **Dell OptiPlex 9020 MT** + **Intel i350-T2** (acquired)       | I217LM = WAN, i350 = LAN trunk — not router-on-a-stick          |
 | Router install    | **nixos-anywhere** + **disko**                                 | SSH from a workstation; declarative disk; Mac uses `--build-on remote` |
-| Switch            | **MikroTik CRS310-8G+2S+IN** (acquired)                        | 802.1Q VLANs, 2.5G ports, SNMP                                  |
+| Switch            | **MikroTik CRS310-8G+2S+IN** + **2× UniFi Flex Mini** (acquired) | CRS310 is core L2; Flex Minis extend trusted/iot to office and living room |
 | WiFi AP           | **Ubiquiti U7 Lite** (1×, acquired)                            | WiFi 7; 2.5 GbE uplink; VLAN-capable SSIDs; ~115 m² coverage    |
 | UPS               | **Deferred** — not required for v1                             | Procure later; optional Stage 8 power test                      |
 | UniFi             | **UniFi OS Server on OptiPlex only** (functional); data `/var/lib/unifi-os-server` | Vendor binaries + flake units (`unifi.nix`, rootless Podman); UI `:11443`, inform `:8080` at `10.10.10.1`; `unifi.lab.zdk.no` → Caddy `.30.1`; **not** on TrueNAS |

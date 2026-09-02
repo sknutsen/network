@@ -56,6 +56,26 @@ flowchart TB
 
 **Principle:** The router is the **policy enforcement point** and the **always-on edge box**: nftables plus Unbound, dnsmasq, Caddy, UniFi OS Server, Headscale, and DNSUpdater. Blocky, HA, Forgejo, Authelia, and k8s stay on VLAN hosts.
 
+## Physical L2
+
+```mermaid
+flowchart TB
+  janus[janus] -->|ether1 trunk 10/20/30/40/50| crs[CRS310]
+  crs -->|ether2 native 10 + tagged 20/40/50| ap[U7 Lite]
+  crs -->|ether3 access 30| tpi[Turing Pi]
+  crs -->|ether4 access 30| nas[TrueNAS]
+  crs -->|ether5 access 30| zpi[Zpi]
+  crs -->|ether6 native 10 + tagged 20/40| nc[USW-NC]
+  nc -->|port 2 native 10 + tagged 40| lr[USW-LR]
+  nc -->|port 5 access 20| swo[SW-O]
+  lr --- hue[Hue]
+  lr --- tradfri[Trådfri]
+  swo --- pingu[pingu]
+  swo --- peon[Peon]
+```
+
+USW-NC (closet) uplinks on its port 4. USW-LR (living room) uplinks on port 1. SW-O is unmanaged, so every office drop is VLAN 20. Mgmt IPs: CRS310 `10.10.10.2`, USW-NC `10.10.10.3`, USW-LR `10.10.10.4`. Port tables: [vlan-plan.md](vlan-plan.md).
+
 ## Service map
 
 | Service | Host | Deploy |
@@ -63,7 +83,7 @@ flowchart TB
 | Firewall, DHCP, Unbound, Caddy, WireGuard, Headscale (`127.0.0.1:8081`), DNSUpdater | NixOS router (janus) | `router/` flake + `services/caddy/Caddyfile` |
 | UniFi OS Server | NixOS router (janus) | **Functional** — vendor binaries + `unifi.nix` (rootless Podman, systemd `uosserver`); data `/var/lib/unifi-os-server` |
 | HA, Forgejo, Authelia, Blocky, Promtail | TrueNAS `10.10.30.20` | `services/truenas/docker-compose.yml` |
-| k3s, Traefik, Flux, Capacitor, monitoring | RK1 cluster | `nodes/` flake + `k8s/` stub |
+| k3s, Traefik, Flux, Capacitor, monitoring | RK1 cluster | `nodes/` flake + `k8s/` Flux tree |
 | Zdk app | k8s (when ready) | Flux `GitRepository` + `Kustomization` → [Zdk repo](https://github.com/sknutsen/Zdk); `net/` stub at `k8s/clusters/homelab/apps/zdk/ingressroute.yaml` |
 
 ## External access
@@ -149,8 +169,8 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 
 ## Target repo layout
 
-`nodes/` is scaffolded (k3s off). A full Flux tree is still outstanding. See
-[plan.md § Target repo layout](plan.md#target-repo-layout).
+`nodes/` is scaffolded (k3s off). `k8s/` has the Flux tree (bootstrap still
+Stage 5). See [plan.md § Target repo layout](plan.md#target-repo-layout).
 
 ```
 net/
@@ -159,7 +179,7 @@ net/
 ├── nodes/          # RK1 flake (k3s off until Stage 5)
 ├── switch/         # exists
 ├── services/       # exists (no dnsupdater dir — Nix stub)
-├── k8s/            # Zdk IngressRoute stub
+├── k8s/            # Flux infra + Zdk stub
 ├── secrets/        # examples; live yaml not committed
 └── scripts/        # validate.sh, generate-viewer.py
 ```

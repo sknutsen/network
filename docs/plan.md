@@ -31,7 +31,7 @@ Full table: **[decisions.md](decisions.md)**.
 | Layer | Choice |
 |-------|--------|
 | Router | NixOS on Dell OptiPlex 9020 MT + i350-T2 (acquired); UniFi OS Server (functional) |
-| Switch / WiFi | CRS310 + U7 Lite + PoE injector (all acquired); UPS deferred |
+| Switch / WiFi | CRS310 + 2× USW Flex Mini + U7 Lite + PoE injector (all acquired); UPS deferred |
 | Edge | Caddy on janus; Authelia + HA + Forgejo on TrueNAS Docker |
 | K8s | 4× RK1, NixOS, k3s, Flux, Traefik, Capacitor |
 | Monitoring | kube-prometheus-stack in k8s (incl. Loki) |
@@ -115,8 +115,9 @@ MAC reservations are leftover first-boot work, not a brief: [OPEN-QUESTIONS.md](
 
 ## Target repo layout
 
-Remaining Stage 5–8 scaffolding is a fuller `k8s/` Flux tree. `nodes/` exists
-(k3s off). DNSUpdater stays a Nix stub until [that repo](https://github.com/sknutsen/DNSUpdater) ships a package.
+Stage 5–8 leftovers: encrypted secrets and runbooks. `nodes/` and the `k8s/`
+Flux tree exist (k3s / bootstrap still off). DNSUpdater stays a Nix stub until
+[that repo](https://github.com/sknutsen/DNSUpdater) ships a package.
 
 ```
 net/
@@ -126,7 +127,7 @@ net/
 ├── nodes/                       # RK1 NixOS flake (k3s off until Stage 5)
 ├── switch/                      # exists
 ├── services/                    # exists (truenas, caddy, authelia, dns, promtail, HA/Forgejo READMEs)
-├── k8s/clusters/homelab/        # stub (Zdk IngressRoute only)
+├── k8s/clusters/homelab/        # Flux infra + Zdk stub
 ├── secrets/                     # examples + .sops.yaml; live yaml not committed
 └── scripts/                     # validate.sh, generate-viewer.py
 ```

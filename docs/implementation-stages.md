@@ -18,7 +18,7 @@ Stages marked **(parallel)** can run concurrently. Architecture:
 - [x] Verify OptiPlex 9020 MT: I217LM → WAN; i350-T2 port 1 → CRS310 trunk
       (`ethtool -p lan0`)
 - [ ] Label ports per [inventory.md](inventory.md)
-- [ ] Cable LAN first (trunk, AP, TrueNAS, Turing Pi); **bridge OBOS Nett modem
+- [ ] Cable LAN first (trunk, AP, TrueNAS, Turing Pi, USW-NC/USW-LR/SW-O); **bridge OBOS Nett modem
       at cutover**, then modem → `wan0`
 
 ## Stage 2 — Core router (depends: Stage 1 WAN link)
@@ -35,17 +35,19 @@ Stages marked **(parallel)** can run concurrently. Architecture:
 - [x] **UniFi OS Server** on OptiPlex (functional): vendor binaries +
       `unifi.nix` systemd/rootless Podman; data `/var/lib/unifi-os-server`; UI
       `:11443`; inform `:8080` (Headscale must not use `:8080`)
-- [x] Inform Host Override = **`10.10.10.1`** (AP native VLAN 10). Do not use
+- [x] Inform Host Override = **`10.10.10.1`** (AP and Flex Minis native VLAN 10). Do not use
       `10.10.30.1` — that is Caddy, not Inform.
 - [ ] node_exporter for Prometheus scraping
 
 ## Stage 3 — Switch and WiFi VLANs (parallel: Stage 2 once router VLANs exist)
 
 - [x] CRS310: import [switch/crs310.rsc](../switch/crs310.rsc) (L2 VLAN filter;
-      mgmt `10.10.10.2`)
-- [] U7 Lite: adopt in UniFi OS Server on router; SSIDs `Hai-Fi Wai-Fi` /
+      mgmt `10.10.10.2`; ether6 trunk to USW-NC)
+- [ ] U7 Lite: adopt in UniFi OS Server on router; SSIDs `Hai-Fi Wai-Fi` /
   `(IoT)` / `(Guest)` → VLANs 20/40/50; guest isolation; Inform Host
   `10.10.10.1`
+- [ ] USW-NC / USW-LR: adopt; mgmt `10.10.10.3` / `10.10.10.4` on VLAN 10;
+      port profiles per [vlan-plan.md](vlan-plan.md)
 - [ ] Test wired + wireless clients land in correct subnet
 
 ## Stage 4 — Segmentation hardening (depends: Stage 3)
@@ -147,7 +149,8 @@ exposure** happens here.
 
 - [x] Scaffold `router/` NixOS flake (+ OPEN-QUESTIONS.md)
 - [x] Scaffold `nodes/` RK1 NixOS flake (k3s off until Stage 5)
-- [ ] Finish `services/`, `secrets/`, fuller `k8s/` Flux tree
+- [x] Scaffold `k8s/` Flux tree (bootstrap + infra HelmReleases)
+- [ ] Encrypted `secrets/*.yaml` and `docs/runbooks/`
 
 ## Parallel workstreams
 
@@ -168,11 +171,10 @@ Stage 7 needs Caddy on janus (Stage 2) plus TrueNAS backends from E.
 ## Suggested next commits
 
 Already in tree: vlan/firewall/inventory docs, router flake, `nodes/` RK1
-flake, CRS310 `.rsc`, TrueNAS compose, Caddyfile, Authelia/Blocky/Promtail
-stubs, Zdk IngressRoute stub.
+flake, `k8s/` Flux tree, CRS310 `.rsc`, TrueNAS compose, Caddyfile,
+Authelia/Blocky/Promtail stubs, Zdk IngressRoute stub.
 
 Still to add:
 
-1. Flux bootstrap + infrastructure HelmReleases under `k8s/clusters/homelab/`
-2. Encrypted `secrets/router.yaml` (age key on janus — do not commit the key)
-3. `docs/runbooks/` (router restore, WG rotation, ACME, Capacitor)
+1. Encrypted `secrets/router.yaml` (age key on janus — do not commit the key)
+2. `docs/runbooks/` (router restore, WG rotation, ACME, Capacitor)

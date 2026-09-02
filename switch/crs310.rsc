@@ -7,6 +7,8 @@
 add name=bridge vlan-filtering=yes frame-types=admit-only-vlan-tagged comment="cpu: tagged only"
 
 /interface ethernet
+set [ find default-name=ether7 ] disabled=yes
+set [ find default-name=ether8 ] disabled=yes
 set [ find default-name=sfp-sfpplus1 ] disabled=yes
 set [ find default-name=sfp-sfpplus2 ] disabled=yes
 
@@ -16,15 +18,13 @@ add bridge=bridge interface=ether2 pvid=10 frame-types=admit-all comment="U7 Lit
 add bridge=bridge interface=ether3 pvid=30 frame-types=admit-only-untagged-and-priority-tagged comment="Turing Pi"
 add bridge=bridge interface=ether4 pvid=30 frame-types=admit-only-untagged-and-priority-tagged comment="TrueNAS"
 add bridge=bridge interface=ether5 pvid=30 frame-types=admit-only-untagged-and-priority-tagged comment="Zpi"
-add bridge=bridge interface=ether6 pvid=20 frame-types=admit-only-untagged-and-priority-tagged comment="Pingu"
-add bridge=bridge interface=ether7 pvid=40 frame-types=admit-only-untagged-and-priority-tagged comment="Hue"
-add bridge=bridge interface=ether8 pvid=40 frame-types=admit-only-untagged-and-priority-tagged comment="Tradfri"
+add bridge=bridge interface=ether6 pvid=10 frame-types=admit-all comment="USW-NC native mgmt 10"
 
 /interface bridge vlan
-add bridge=bridge vlan-ids=10 tagged=bridge,ether1 untagged=ether2 comment="mgmt"
-add bridge=bridge vlan-ids=20 tagged=ether1,ether2 untagged=ether6 comment="trusted"
+add bridge=bridge vlan-ids=10 tagged=bridge,ether1 untagged=ether2,ether6 comment="mgmt"
+add bridge=bridge vlan-ids=20 tagged=ether1,ether2,ether6 comment="trusted"
 add bridge=bridge vlan-ids=30 tagged=ether1 untagged=ether3,ether4,ether5 comment="servers"
-add bridge=bridge vlan-ids=40 tagged=ether1,ether2 untagged=ether7,ether8 comment="iot"
+add bridge=bridge vlan-ids=40 tagged=ether1,ether2,ether6 comment="iot"
 add bridge=bridge vlan-ids=50 tagged=ether1,ether2 comment="guest"
 
 /interface vlan

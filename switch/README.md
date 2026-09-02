@@ -1,8 +1,8 @@
 # CRS310 (MikroTik)
 
-L2-only access/trunk switch. Routing stays on janus. Port plan: [vlan-plan.md](../docs/vlan-plan.md).
+L2-only access/trunk switch. Routing stays on janus. Full port plan (including UniFi Flex Minis and SW-O): [vlan-plan.md](../docs/vlan-plan.md).
 
-**Native VLAN on the AP trunk (port 2):** untagged VLAN 10 so the U7 Lite gets a mgmt address and can reach Inform `10.10.10.1`. SSIDs are tagged 20/40/50.
+**Native VLAN 10 on trunks to UniFi gear:** port 2 (U7 Lite) and port 6 (USW-NC) carry untagged VLAN 10 so those devices get mgmt addresses and can reach Inform `10.10.10.1`. AP SSIDs are tagged 20/40/50. The USW-NC uplink is tagged 20/40 only (no guest, no servers).
 
 ## Apply (RouterOS 7)
 
@@ -21,7 +21,8 @@ Mgmt address: `10.10.10.2/24` on VLAN 10 (**IPv4 only** — `disable-ipv6=yes` o
 | 3 | ether3 | access 30 | Turing Pi |
 | 4 | ether4 | access 30 | TrueNAS |
 | 5 | ether5 | access 30 | Zpi |
-| 6 | ether6 | access 20 | Pingu |
-| 7 | ether7 | access 40 | Hue |
-| 8 | ether8 | access 40 | Trådfri |
+| 6 | ether6 | native 10 + tagged 20,40 | USW-NC (port 4) |
+| 7–8 | ether7/8 | disabled | unused |
 | 9–10 | sfp-sfpplus1/2 | disabled | unused |
+
+Downstream of ether6: USW-NC (closet) → USW-LR (living room, Hue/Trådfri) and SW-O (office, pingu + Peon). UniFi port profiles live in UniFi OS Server, not this `.rsc`.
