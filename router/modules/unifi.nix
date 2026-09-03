@@ -49,6 +49,61 @@
     export PATH="${uosPath}"
     exec /var/lib/uosserver/bin/uosserver-service
   '';
+  uosCleanupScript = pkgs.writeShellScript "uosserver-cleanup-stale" ''
+    set +e
+    SS=${pkgs.iproute2}/bin/ss
+    KILL=${pkgs.coreutils}/bin/kill
+    PKILL=${pkgs.procps}/bin/pkill
+    SED=${pkgs.gnused}/bin/sed
+    SLEEP=${pkgs.coreutils}/bin/sleep
+
+    # Host discovery client binds 127.0.0.1:11002; the binary shows as "discovery".
+    $PKILL -u ${toString uosUid} -x discovery 2>/dev/null
+    for pid in $($SS -H -ltnp 'sport = :11002' | $SED -n 's/.*pid=\([0-9]*\).*/\1/p'); do
+      [ -n "$pid" ] && $KILL "$pid" 2>/dev/null
+    done
+    $SLEEP 0.5
+  '';
+  uosPreStartScript = pkgs.writeShellScript "uosserver-pre-start" ''
+    set -eu
+    IP=${pkgs.iproute2}/bin/ip
+    GREP=${lib.getExe pkgs.gnugrep}
+    SEQ=${pkgs.coreutils}/bin/seq
+    SLEEP=${pkgs.coreutils}/bin/sleep
+    SYSTEMCTL=${config.systemd.package}/bin/systemctl
+
+    ${uosCleanupScript}
+
+    ln -sfn /usr/bin/podman /var/lib/uosserver/bin/podman
+    ln -sfn /run/wrappers/bin/newuidmap /var/lib/uosserver/bin/newuidmap
+    ln -sfn /run/wrappers/bin/newgidmap /var/lib/uosserver/bin/newgidmap
+
+    # Rootless podman and the host discovery client need the lingering user D-Bus session.
+    $SYSTEMCTL start user@${toString uosUid}.service
+    for i in $($SEQ 1 30); do
+      if [ -S ${uosRuntimeDir}/bus ]; then
+        break
+      fi
+      $SLEEP 0.2
+    done
+    if [ ! -S ${uosRuntimeDir}/bus ]; then
+      echo "uosserver preStart: timed out waiting for user@${toString uosUid} D-Bus" >&2
+      exit 1
+    fi
+
+    for i in $($SEQ 1 30); do
+      if $IP link show ${mgmtVlan} 2>/dev/null | $GREP -q 'state UP'; then
+        break
+      fi
+      $SLEEP 0.2
+    done
+
+    # Discovery joins multicast with INADDR_ANY; a 224.0.0.0/4 route on WAN wins over vlan10.
+    $IP route del 224.0.0.0/4 dev ${cfg.wanInterface} 2>/dev/null || true
+    $IP route replace 224.0.0.0/4 dev ${mgmtVlan} scope link
+
+    $SLEEP 1
+  '';
   uosEnv = [
     "HOME=/home/uosserver"
     "XDG_CONFIG_HOME=/home/uosserver/.config"
@@ -154,20 +209,18 @@ in {
         "systemd-networkd-wait-online.service"
         "user@${toString uosUid}.service"
       ];
-      preStart = ''
-        ln -sfn /usr/bin/podman /var/lib/uosserver/bin/podman
-        ln -sfn /run/wrappers/bin/newuidmap /var/lib/uosserver/bin/newuidmap
-        ln -sfn /run/wrappers/bin/newgidmap /var/lib/uosserver/bin/newgidmap
-        ${pkgs.iproute2}/bin/ip route show dev ${mgmtVlan} \
-          | ${lib.getExe pkgs.gnugrep} -q '^224\.' \
-          || ${pkgs.iproute2}/bin/ip route add 224.0.0.0/4 dev ${mgmtVlan} scope link
-      '';
+      requires = [
+        "user@${toString uosUid}.service"
+      ];
+      preStart = "${uosPreStartScript}";
+      stopPost = "${uosCleanupScript}";
       serviceConfig =
         uosServiceConfig
         // {
           ExecStart = "${uosStartScript}";
           RuntimeDirectoryPreserve = "yes";
           PermissionsStartOnly = true;
+          TimeoutStopSec = "130s";
         };
     };
 
