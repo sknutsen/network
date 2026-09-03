@@ -158,8 +158,9 @@ in {
         ln -sfn /usr/bin/podman /var/lib/uosserver/bin/podman
         ln -sfn /run/wrappers/bin/newuidmap /var/lib/uosserver/bin/newuidmap
         ln -sfn /run/wrappers/bin/newgidmap /var/lib/uosserver/bin/newgidmap
-        ip route show dev ${mgmtVlan} | grep -q '^224\.' \
-          || ip route add 224.0.0.0/4 dev ${mgmtVlan} scope link
+        ${lib.getExe pkgs.iproute2} route show dev ${mgmtVlan} \
+          | ${lib.getExe pkgs.gnugrep} -q '^224\.' \
+          || ${lib.getExe pkgs.iproute2} route add 224.0.0.0/4 dev ${mgmtVlan} scope link
       '';
       serviceConfig =
         uosServiceConfig
