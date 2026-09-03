@@ -32,20 +32,6 @@ in {
   config = lib.mkIf cfg.enableUnifi {
     virtualisation.podman.enable = true;
 
-    # Rootless Podman needs setuid wrappers; store paths cannot be setuid.
-    security.wrappers.newuidmap = {
-      source = "${pkgs.shadow}/bin/newuidmap";
-      owner = "root";
-      group = "root";
-      setuid = true;
-    };
-    security.wrappers.newgidmap = {
-      source = "${pkgs.shadow}/bin/newgidmap";
-      owner = "root";
-      group = "root";
-      setuid = true;
-    };
-
     programs.nix-ld.enable = true;
     security.sudo.extraConfig = ''
       Defaults env_keep += "NIX_LD NIX_LD_LIBRARY_PATH"
@@ -130,7 +116,6 @@ in {
       conmon
       slirp4netns
       passt
-      shadow
       iperf3
     ];
   };
