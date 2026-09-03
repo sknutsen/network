@@ -37,7 +37,7 @@
     pkgs.coreutils
     config.systemd.package
   ]}";
-  uosUid = config.users.users.uosserver.uid;
+  uosUid = 1001; # explicit — auto-assigned uid is not available at eval time for systemd user@ units
   uosRuntimeDir = "/run/user/${toString uosUid}";
   uosStartScript = pkgs.writeShellScript "uosserver-start" ''
     export HOME=/home/uosserver
@@ -78,16 +78,20 @@
     ln -sfn /run/wrappers/bin/newuidmap /var/lib/uosserver/bin/newuidmap
     ln -sfn /run/wrappers/bin/newgidmap /var/lib/uosserver/bin/newgidmap
 
+    ID=${pkgs.coreutils}/bin/id
+    UOS_UID=$($ID -u uosserver)
+    UOS_RUNTIME="/run/user/''${UOS_UID}"
+
     # Rootless podman and the host discovery client need the lingering user D-Bus session.
-    $SYSTEMCTL start user@${toString uosUid}.service
+    $SYSTEMCTL start "user@''${UOS_UID}.service"
     for i in $($SEQ 1 30); do
-      if [ -S ${uosRuntimeDir}/bus ]; then
+      if [ -S "''${UOS_RUNTIME}/bus" ]; then
         break
       fi
       $SLEEP 0.2
     done
-    if [ ! -S ${uosRuntimeDir}/bus ]; then
-      echo "uosserver preStart: timed out waiting for user@${toString uosUid} D-Bus" >&2
+    if [ ! -S "''${UOS_RUNTIME}/bus" ]; then
+      echo "uosserver preStart: timed out waiting for user@''${UOS_UID} D-Bus" >&2
       exit 1
     fi
 
@@ -140,6 +144,7 @@ in {
     users.groups.uosserver = {};
     users.users.uosserver = {
       isSystemUser = true;
+      uid = uosUid;
       group = "uosserver";
       home = "/home/uosserver";
       createHome = true;
