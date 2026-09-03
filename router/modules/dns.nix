@@ -48,7 +48,8 @@ in
         local-data = [
           ''"zdk.no. A ${C.hosts.caddy}"''
           ''"code.zdk.no. A ${C.hosts.caddy}"''
-          ''"truenas.${C.domain}. A ${C.hosts.truenas}"''
+          # TrueNAS UI via Caddy — host firewall allows same-subnet only.
+          ''"truenas.${C.domain}. A ${C.hosts.caddy}"''
           ''"blocky.${C.domain}. A ${C.hosts.blocky}"''
           ''"crs310.${C.domain}. A ${C.hosts.crs310}"''
           ''"usw-nc.${C.domain}. A ${C.hosts.uswNc}"''

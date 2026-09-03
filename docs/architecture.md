@@ -140,6 +140,7 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 | `zdk.no` | Traefik `10.10.30.100:80` | None |
 | `code.zdk.no` | Forgejo `:3000` | Forgejo-native |
 | `auth.lab.zdk.no` | Authelia `:9091` | None (portal) |
+| `truenas.lab.zdk.no` | TrueNAS `:443` | TrueNAS-native |
 | `code.lab.zdk.no` | Forgejo `:3000` | Forgejo-native |
 | `ha.lab.zdk.no` | HA `:8123` | Authelia |
 | `headscale.lab.zdk.no` | `127.0.0.1:8081` | Headscale-native (Stage 6) |

@@ -83,6 +83,7 @@ trusted, servers (jump/k8s), or VPN — not from VLAN 10.
 | Source | Destination | Ports | Action | Notes |
 |--------|-------------|-------|--------|-------|
 | janus (Caddy) | `10.10.30.100` (Traefik LB) | 80/tcp | **ALLOW** | Caddy → k8s (OUTPUT) |
+| janus (Caddy) | `10.10.30.20` | 443/tcp | **ALLOW** | TrueNAS UI proxy (OUTPUT) |
 | janus (Caddy) | `10.10.30.20` | 3000, 8123, 9091/tcp | **ALLOW** | OUTPUT, not forward |
 | iot, guest | `10.10.30.20` | all | **DENY** | |
 | iot, guest | k8s nodes / API | all | **DENY** | |

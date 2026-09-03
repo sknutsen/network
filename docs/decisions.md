@@ -79,6 +79,7 @@ are canonical.
 | `code.lab.zdk.no`        | **No**        | No       | Forgejo-native auth (internal Git) |
 | `headscale.lab.zdk.no`   | **No**        | No       | Tailscale login-server; Stage 6 |
 | `unifi.lab.zdk.no`       | **No**        | Later    | Until Caddy vhost: `https://10.10.10.1:11443` |
+| `truenas.lab.zdk.no`     | **No**        | No       | TrueNAS-native auth; Caddy proxy (not direct IP) |
 | Other `*.lab.zdk.no`     | **No**        | Yes      | ha, grafana, capacitor, … |
 | Future public apps       | Per-app       | Optional | Document a row here before WAN cutover |
 

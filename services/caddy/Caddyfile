@@ -38,6 +38,17 @@ code.lab.zdk.no {
 # 	encode gzip
 # }
 
+# TrueNAS UI — native auth, no Authelia. Caddy reaches the host on VLAN 30
+# (OUTPUT); trusted/mgmt browse via truenas.lab.zdk.no, not the raw IP.
+truenas.lab.zdk.no {
+	reverse_proxy https://10.10.30.20:443 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+	encode gzip
+}
+
 # UniFi UI is :11443 on janus. unifi.lab.zdk.no → Caddy (.30.1) in Unbound.
 # Until this vhost exists, browse https://10.10.10.1:11443 (trusted/mgmt).
 # Inform stays http://10.10.10.1:8080 — do not proxy Inform.
