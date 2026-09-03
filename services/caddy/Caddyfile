@@ -6,6 +6,11 @@
 # no public A records for lab names; HTTP-01 is not the v1 path.
 # Live `acme_dns` stays in caddy.nix until the Caddy binary includes
 # github.com/caddy-dns/domainnameshop (`withPlugins` on nixos-unstable).
+# Until then, lab vhosts use Caddy's internal CA (`tls internal`).
+
+(lab_tls) {
+	tls internal
+}
 
 (authelia) {
 	forward_auth 10.10.30.20:9091 {
@@ -16,17 +21,20 @@
 
 # Authelia portal — no forward_auth (would loop)
 auth.lab.zdk.no {
+	import lab_tls
 	reverse_proxy 10.10.30.20:9091
 	encode gzip
 }
 
 ha.lab.zdk.no {
+	import lab_tls
 	reverse_proxy 10.10.30.20:8123
 	encode gzip
 }
 
 # Forgejo internal until Stage 7 — Forgejo-native auth, no Authelia
 code.lab.zdk.no {
+	import lab_tls
 	reverse_proxy 10.10.30.20:3000
 	encode gzip
 }
@@ -41,10 +49,13 @@ code.lab.zdk.no {
 # TrueNAS UI — native auth, no Authelia. Caddy reaches the host on VLAN 30
 # (OUTPUT); trusted/mgmt browse via truenas.lab.zdk.no, not the raw IP.
 truenas.lab.zdk.no {
+	import lab_tls
 	reverse_proxy https://10.10.30.20:443 {
 		transport http {
 			tls_insecure_skip_verify
 		}
+		header_up Host 10.10.30.20
+		header_down Location https://10.10.30.20 https://truenas.lab.zdk.no
 	}
 	encode gzip
 }
@@ -53,6 +64,7 @@ truenas.lab.zdk.no {
 # Until this vhost exists, browse https://10.10.10.1:11443 (trusted/mgmt).
 # Inform stays http://10.10.10.1:8080 — do not proxy Inform.
 unifi.lab.zdk.no {
+	import lab_tls
 	reverse_proxy https://127.0.0.1:11443 {
 		transport http {
 			tls_insecure_skip_verify
@@ -63,12 +75,14 @@ unifi.lab.zdk.no {
 
 # k8s UIs — 502 until Traefik is up (Stage 5 k8s)
 grafana.lab.zdk.no {
+	import lab_tls
 	import authelia
 	reverse_proxy 10.10.30.100:80
 	encode gzip
 }
 
 capacitor.lab.zdk.no {
+	import lab_tls
 	import authelia
 	reverse_proxy 10.10.30.100:80
 	encode gzip

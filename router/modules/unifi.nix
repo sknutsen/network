@@ -85,7 +85,7 @@ in {
       wantedBy = ["multi-user.target"];
       after = ["network-online.target"];
       wants = ["network-online.target"];
-      path = [pkgs.podman pkgs.netavark pkgs.aardvark-dns pkgs.crun pkgs.conmon pkgs.slirp4netns pkgs.passt pkgs.coreutils];
+      path = [pkgs.podman pkgs.netavark pkgs.aardvark-dns pkgs.crun pkgs.conmon pkgs.slirp4netns pkgs.passt pkgs.coreutils pkgs.shadow];
       serviceConfig =
         uosServiceConfig
         // {
@@ -116,6 +116,7 @@ in {
       conmon
       slirp4netns
       passt
+      shadow
       iperf3
     ];
   };
