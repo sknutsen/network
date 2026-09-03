@@ -32,6 +32,20 @@ in {
   config = lib.mkIf cfg.enableUnifi {
     virtualisation.podman.enable = true;
 
+    # Rootless Podman needs setuid wrappers; store paths cannot be setuid.
+    security.wrappers.newuidmap = {
+      source = "${pkgs.shadow}/bin/newuidmap";
+      owner = "root";
+      group = "root";
+      setuid = true;
+    };
+    security.wrappers.newgidmap = {
+      source = "${pkgs.shadow}/bin/newgidmap";
+      owner = "root";
+      group = "root";
+      setuid = true;
+    };
+
     programs.nix-ld.enable = true;
     security.sudo.extraConfig = ''
       Defaults env_keep += "NIX_LD NIX_LD_LIBRARY_PATH"
@@ -85,7 +99,7 @@ in {
       wantedBy = ["multi-user.target"];
       after = ["network-online.target"];
       wants = ["network-online.target"];
-      path = [pkgs.podman pkgs.netavark pkgs.aardvark-dns pkgs.crun pkgs.conmon pkgs.slirp4netns pkgs.passt pkgs.coreutils pkgs.shadow];
+      path = [config.security.wrapperDir pkgs.podman pkgs.netavark pkgs.aardvark-dns pkgs.crun pkgs.conmon pkgs.slirp4netns pkgs.passt pkgs.coreutils];
       serviceConfig =
         uosServiceConfig
         // {
@@ -100,7 +114,7 @@ in {
       enable = false;
       description = "UniFi OS Server updater";
       after = ["uosserver.service"];
-      path = [pkgs.podman pkgs.netavark pkgs.aardvark-dns pkgs.crun pkgs.conmon pkgs.slirp4netns pkgs.passt pkgs.coreutils];
+      path = [config.security.wrapperDir pkgs.podman pkgs.netavark pkgs.aardvark-dns pkgs.crun pkgs.conmon pkgs.slirp4netns pkgs.passt pkgs.coreutils];
       serviceConfig =
         uosServiceConfig
         // {
