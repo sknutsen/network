@@ -6,7 +6,7 @@ VLAN assignments, static IPs, switch ports, and dnsmasq reservations. Network de
 
 | Name | Hardware | OS | Static IP | Connection | Role |
 |------|----------|-----|-----------|------------|------|
-| **TrueNAS** | NAS | TrueNAS SCALE | `10.10.30.20` (+ `.21` alias for Blocky) | Wired (port 4) | HA, Forgejo, Authelia, Blocky |
+| **TrueNAS** | NAS | TrueNAS SCALE | `10.10.30.20` (+ `.21` alias for Blocky); MAC `cc:28:aa:42:c2:9d` | Wired (port 4) | HA, Forgejo, Authelia, Blocky |
 | **nordri** | RK1 (Turing Pi) | NixOS + k3s | `10.10.30.11` | Wired (port 3) | k3s control plane |
 | **sudri** | RK1 (Turing Pi) | NixOS + k3s | `10.10.30.12` | Wired (port 3) | k3s worker |
 | **austri** | RK1 (Turing Pi) | NixOS + k3s | `10.10.30.13` | Wired (port 3) | k3s worker |
@@ -100,7 +100,7 @@ All use **servers → IoT ALLOW** from `10.10.30.20`:
 | `odyssey.iot.lab.zdk.no` | `10.10.40.15` | 40 |
 | `chromecast.iot.lab.zdk.no` | `10.10.40.16` | 40 |
 
-MAC addresses: **deferred** — fill at deploy from dnsmasq leases; do not block Stage 2.
+MAC addresses: TrueNAS is reserved in `router/modules/dhcp.nix`. Fill the rest from leases at deploy; do not block Stage 2.
 
 ## VLAN assignment rationale
 

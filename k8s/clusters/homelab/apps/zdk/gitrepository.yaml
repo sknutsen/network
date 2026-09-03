@@ -1,0 +1,29 @@
+# App Deployment/Service live in github.com/sknutsen/Zdk.
+# Suspended until that repo ships a deploy path — then set spec.path and
+# suspend: false. Do not copy the app into net/.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: zdk
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: https://github.com/sknutsen/Zdk
+  ref:
+    branch: main
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: zdk
+  namespace: flux-system
+spec:
+  interval: 10m
+  prune: true
+  wait: false
+  suspend: true
+  sourceRef:
+    kind: GitRepository
+    name: zdk
+  # Confirm when Zdk publishes manifests (deploy/ or k8s/).
+  path: ./deploy

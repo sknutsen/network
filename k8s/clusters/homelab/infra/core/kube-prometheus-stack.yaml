@@ -1,0 +1,103 @@
+# Prometheus + Grafana + Alertmanager. Loki is loki.yaml (sibling chart).
+# Chart node-exporter is off — scrape NixOS exporters instead.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 30m
+  timeout: 15m
+  dependsOn:
+    - name: longhorn
+      namespace: longhorn-system
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: "88.6.0"
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  values:
+    grafana:
+      adminPassword: changeme # replace via sops when secrets/cluster.yaml exists
+      persistence:
+        enabled: true
+        storageClassName: longhorn
+        size: 5Gi
+      grafana.ini:
+        server:
+          domain: grafana.lab.zdk.no
+          root_url: https://grafana.lab.zdk.no
+      ingress:
+        enabled: false
+    alertmanager:
+      alertmanagerSpec:
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: longhorn
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 5Gi
+    prometheus:
+      prometheusSpec:
+        retention: 15d
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 2Gi
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: longhorn
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 20Gi
+        additionalScrapeConfigs:
+          - job_name: node-exporter
+            static_configs:
+              - targets:
+                  - 10.10.30.1:9100
+                labels:
+                  instance: janus
+              - targets:
+                  - 10.10.30.11:9100
+                labels:
+                  instance: nordri
+              - targets:
+                  - 10.10.30.12:9100
+                labels:
+                  instance: sudri
+              - targets:
+                  - 10.10.30.13:9100
+                labels:
+                  instance: austri
+              - targets:
+                  - 10.10.30.14:9100
+                labels:
+                  instance: vestri
+    nodeExporter:
+      enabled: false
+    prometheus-node-exporter:
+      enabled: false
+    kubeEtcd:
+      enabled: false
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeProxy:
+      enabled: false

@@ -83,9 +83,9 @@ nix eval './nodes#nixosConfigurations.nordri.config.networking.hostName'
    `secrets/cluster.yaml`. Point each agent's `k3sTokenFile` at that secret.
 4. Set `enableK3s = true` on workers and rebuild. Do not add kube-vip;
    `.10` stays reserved.
-5. Flux bootstrap and Longhorn Helm (`replica 3`, data
-   `/var/lib/longhorn`) are `k8s/` work, not this flake. Host iscsi +
-   directory prep is already on (`enableLonghornPrep`).
+5. Flux bootstrap and HelmReleases are [k8s/README.md](../k8s/README.md),
+   not this flake. Host iscsi + `/var/lib/longhorn` prep is already on
+   (`enableLonghornPrep`).
 
 Bundled k3s Traefik, ServiceLB, and local-path are disabled so Flux can
 install Traefik, MetalLB (`10.10.30.100–110`), and Longhorn.

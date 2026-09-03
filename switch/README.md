@@ -6,11 +6,13 @@ L2-only access/trunk switch. Routing stays on janus. Full port plan (including U
 
 ## Apply (RouterOS 7)
 
-1. Reset without defaults: `/system reset-configuration no-defaults=yes skip-backup=yes`
-2. Copy `crs310.rsc` to the device (Winbox / `scp`).
-3. `/import file-name=crs310.rsc`
+The script is **idempotent** — `/import` on a live switch updates ports/VLANs in place. A no-defaults reset is only needed for a blank device.
 
-Mgmt address: `10.10.10.2/24` on VLAN 10 (**IPv4 only** — `disable-ipv6=yes` on the CPU). L2 still forwards IPv6 for clients. SSH/Winbox from `10.10.10.0/24` only.
+1. Copy `crs310.rsc` to the device (Winbox / `scp`).
+2. `/import file-name=crs310.rsc`
+3. First boot only: `/system reset-configuration no-defaults=yes skip-backup=yes`, then steps 1–2.
+
+Mgmt address: `10.10.10.2/24` on VLAN 10 (**IPv4 only** — `disable-ipv6=yes` on the CPU). L2 still forwards IPv6 for clients. SSH/Winbox from `10.10.10.0/24` and trusted `10.10.20.0/24` (`available-from` on the static service rows).
 
 ## Ports
 
@@ -25,4 +27,4 @@ Mgmt address: `10.10.10.2/24` on VLAN 10 (**IPv4 only** — `disable-ipv6=yes` o
 | 7–8 | ether7/8 | disabled | unused |
 | 9–10 | sfp-sfpplus1/2 | disabled | unused |
 
-Downstream of ether6: USW-NC (closet) → USW-LR (living room, Hue/Trådfri) and SW-O (office, pingu + Peon). UniFi port profiles live in UniFi OS Server, not this `.rsc`.
+Downstream of ether6: USW-NC (closet) → USW-LR (living room, Hue/Trådfri) and SW-O (office, pingu + Peon). Flex Mini cannot use custom tagged profiles — **All** on trunks, a single network on access ports. See [vlan-plan.md](../docs/vlan-plan.md).

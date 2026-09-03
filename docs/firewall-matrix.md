@@ -38,6 +38,7 @@ Router-enforced nftables policy on NixOS. VLAN design: [vlan-plan.md](vlan-plan.
 | 13 | servers (30) | internet | tcp/udp | **ALLOW** | |
 | 14 | mgmt (10) | servers (30) | as needed | **ALLOW** | BMC → nodes for provisioning |
 | 15 | any internal | wan | all | **ALLOW** | NAT outbound |
+| 16 | trusted (20) | CRS310 `10.10.10.2` | all | **ALLOW** | SSH/Winbox/ping from office (pingu, Peon). Not the rest of VLAN 10 |
 
 ### Trusted → IoT cast targets (Stage 4–5 / HA — not Stage 3)
 

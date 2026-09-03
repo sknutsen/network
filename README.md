@@ -34,7 +34,7 @@ net/
 ├── nodes/         # RK1 NixOS flake (nordri–vestri; k3s off)
 ├── switch/        # CRS310 RouterOS (L2 VLANs)
 ├── services/      # truenas compose, Caddy, Authelia, DNS, Promtail
-├── k8s/           # Zdk IngressRoute stub; Flux bootstrap later
+├── k8s/           # Flux tree (infra HelmReleases + Zdk stub)
 ├── secrets/       # examples + .sops.yaml; live yaml not committed
 └── scripts/       # validate.sh, generate-viewer.py
 ```

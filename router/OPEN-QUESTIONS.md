@@ -10,9 +10,9 @@ unanswered leftovers only.
 
 ## Deferred
 
-1. [ ] **MAC addresses** for dnsmasq static reservations. Fill from leases at
-   deploy (`docs/inventory.md`). Empty `reservations` in `router/modules/dhcp.nix`
-   is expected until then. Do not block Stage 2.
+1. [ ] **MAC addresses** for remaining dnsmasq reservations. TrueNAS
+   (`cc:28:aa:42:c2:9d` → `10.10.30.20`) is in `router/modules/dhcp.nix`.
+   Fill the rest from leases (`docs/inventory.md`). Do not block Stage 2.
 
 ## Operational (not design — already on Stage 1–2 checklists)
 

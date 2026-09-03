@@ -5,7 +5,7 @@ let
 
   # MAC → IP reservations filled at deploy (see docs/inventory.md).
   reservations = [
-    # { ethernet = "00:00:00:00:00:00"; name = "truenas"; ipAddress = C.hosts.truenas; }
+    { ethernet = "cc:28:aa:42:c2:9d"; name = "truenas"; ipAddress = C.hosts.truenas; }
   ];
 
   gw = cidr: lib.head (lib.splitString "/" cidr);

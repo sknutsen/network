@@ -73,6 +73,7 @@ in
 
       define TRUENAS = ${C.hosts.truenas}
       define BLOCKY = ${C.hosts.blocky}
+      define CRS310 = ${C.hosts.crs310}
       ${
         if iotDns6 then
           "define BLOCKY6 = ${cfg.blockyIpv6}"
@@ -193,6 +194,7 @@ in
           # App HTTP on TrueNAS is Caddy-only (this host OUTPUT, not forward).
           ip daddr $TRUENAS tcp dport { 3000, 8123, 9091 } drop
           iifname $TRUSTED oifname $SERVERS accept
+          iifname $TRUSTED ip daddr $CRS310 accept
           iifname $TRUSTED oifname $WAN accept
           # Cast targets (optional) — enable specific daddrs in Stage 4–5
           # iifname $TRUSTED ip daddr { ${C.hosts.samsungTv}, ${C.hosts.chromecast}, ${C.hosts.odyssey} } accept

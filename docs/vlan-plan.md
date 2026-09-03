@@ -82,27 +82,39 @@ Leave Caddy on `.30.1` so mgmt DNS stays infrastructure-only.
 | 7–8  | disabled | — | unused                 |
 | 9–10 | disabled | — | SFP+ unused            |
 
-Config: [switch/crs310.rsc](../switch/crs310.rsc). CRS310 mgmt: `10.10.10.2` (`crs310.lab.zdk.no`). UniFi devices (AP + Flex Minis) use native VLAN 10 so Inform is `10.10.10.1` (not Caddy at `10.10.30.1`).
+Config: [switch/crs310.rsc](../switch/crs310.rsc). CRS310 mgmt: `10.10.10.2` (`crs310.lab.zdk.no`). Trusted (`10.10.20.0/24`) may reach that address (SSH/Winbox); other mgmt hosts stay VLAN-10-only. UniFi devices (AP + Flex Minis) use native VLAN 10 so Inform is `10.10.10.1` (not Caddy at `10.10.30.1`).
+
+**USW Flex Mini VLAN limit:** these switches cannot use custom port profiles
+(native + a tagged allow-list). That is a hardware limit, not a UI bug. Each
+port is only **All** (native = UniFi **Default** network, every other network
+tagged) or **one network untagged** (tagged blocked). Assign networks from
+**Devices → switch → Ports**, not from Profiles.
+
+UniFi **Default** must be VLAN 10 (mgmt) so **All** matches CRS310 ether6
+(native 10). Do not keep a second network with VLAN ID 10. SSIDs stay on their
+own networks (20/40/50). CRS310 still filters the uplink to tagged 20/40 only;
+extra UniFi networks tagged by **All** simply have no path past ether6.
 
 ### USW-NC (network closet) — UniFi Flex Mini `10.10.10.3`
 
-| Port | Mode | VLAN | Device |
-| ---- | ---- | ---- | ------ |
-| 2    | native 10 + tagged 40 | mgmt + iot | USW-LR port 1 |
-| 4    | native 10 + tagged 20,40 | uplink | CRS310 ether6 |
-| 5    | access | 20 | SW-O (unmanaged) |
-| 1, 3 | unused | — | — |
+| Port | UniFi assignment | Meaning | Device |
+| ---- | ---------------- | ------- | ------ |
+| 4    | **All** | native 10 + tagged rest | CRS310 ether6 |
+| 2    | **All** | native 10 + tagged rest | USW-LR port 1 |
+| 5    | network **trusted** (20) | access; tagged blocked | SW-O |
+| 1, 3 | Disabled | unused | — |
 
-Set the device management network to VLAN 10 and a static address `10.10.10.3/24` (gateway `10.10.10.1`).
+Static `10.10.10.3/24`, gateway/DNS `10.10.10.1`. Management follows **All**
+(Default / VLAN 10). Do not set a custom management VLAN that differs from Default.
 
 ### USW-LR (living room) — UniFi Flex Mini `10.10.10.4`
 
-| Port | Mode | VLAN | Device |
-| ---- | ---- | ---- | ------ |
-| 1    | native 10 + tagged 40 | uplink | USW-NC port 2 |
-| 2–5  | access | 40 | Philips Hue, IKEA Trådfri, spare |
+| Port | UniFi assignment | Meaning | Device |
+| ---- | ---------------- | ------- | ------ |
+| 1    | **All** | native 10 + tagged rest | USW-NC port 2 |
+| 2–5  | network **iot** (40) | access; tagged blocked | Hue, Trådfri, spare |
 
-Management network VLAN 10, static `10.10.10.4/24`.
+Static `10.10.10.4/24`, gateway/DNS `10.10.10.1`.
 
 ### SW-O (office) — unmanaged
 

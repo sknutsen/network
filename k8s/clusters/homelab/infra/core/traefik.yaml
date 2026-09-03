@@ -1,0 +1,50 @@
+# HTTP only. Caddy terminates TLS. LB IP is in the MetalLB pool.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: traefik
+spec:
+  interval: 30m
+  timeout: 10m
+  dependsOn:
+    - name: metallb
+      namespace: metallb-system
+  chart:
+    spec:
+      chart: traefik
+      version: "41.4.0"
+      sourceRef:
+        kind: HelmRepository
+        name: traefik
+        namespace: flux-system
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  values:
+    deployment:
+      replicas: 2
+    ports:
+      web:
+        expose:
+          default: true
+      websecure:
+        expose:
+          default: false
+    service:
+      spec:
+        loadBalancerIP: 10.10.30.100
+    ingressClass:
+      enabled: true
+      isDefaultClass: true
+    providers:
+      kubernetesCRD:
+        enabled: true
+        allowCrossNamespace: true
+      kubernetesIngress:
+        enabled: true

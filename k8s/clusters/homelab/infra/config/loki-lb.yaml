@@ -1,0 +1,17 @@
+# Promtail (TrueNAS) → http://10.10.30.101:3100/loki/api/v1/push
+# No Authelia. Selector must match the Loki 7.x single-binary pod.
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki-vlan
+  namespace: monitoring
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 10.10.30.101
+  ports:
+    - name: http
+      port: 3100
+      targetPort: http-metrics
+  selector:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/component: single-binary

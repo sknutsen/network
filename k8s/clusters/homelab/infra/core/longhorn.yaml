@@ -1,0 +1,45 @@
+# Host path /var/lib/longhorn is prepared on the RK1s (nodes flake).
+# Tolerates the CP taint so all four NVMe disks are in the pool; app
+# Deployments still stay off nordri.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: longhorn
+  namespace: longhorn-system
+spec:
+  interval: 30m
+  timeout: 15m
+  chart:
+    spec:
+      chart: longhorn
+      version: "1.12.1"
+      sourceRef:
+        kind: HelmRepository
+        name: longhorn
+        namespace: flux-system
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  values:
+    defaultSettings:
+      defaultReplicaCount: "3"
+      defaultDataPath: /var/lib/longhorn
+    persistence:
+      defaultClass: true
+      defaultClassReplicaCount: 3
+      reclaimPolicy: Retain
+    longhornManager:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+    longhornDriver:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
