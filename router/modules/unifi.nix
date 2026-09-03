@@ -137,6 +137,7 @@ in {
         // {
           ExecStart = "${uosStartScript}";
           RuntimeDirectoryPreserve = "yes";
+          PermissionsStartOnly = true;
         };
     };
 
