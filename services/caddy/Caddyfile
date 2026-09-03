@@ -21,7 +21,6 @@ auth.lab.zdk.no {
 }
 
 ha.lab.zdk.no {
-	import authelia
 	reverse_proxy 10.10.30.20:8123
 	encode gzip
 }
@@ -42,15 +41,14 @@ code.lab.zdk.no {
 # UniFi UI is :11443 on janus. unifi.lab.zdk.no → Caddy (.30.1) in Unbound.
 # Until this vhost exists, browse https://10.10.10.1:11443 (trusted/mgmt).
 # Inform stays http://10.10.10.1:8080 — do not proxy Inform.
-# unifi.lab.zdk.no {
-# 	import authelia
-# 	reverse_proxy https://127.0.0.1:11443 {
-# 		transport http {
-# 			tls_insecure_skip_verify
-# 		}
-# 	}
-# 	encode gzip
-# }
+unifi.lab.zdk.no {
+	reverse_proxy https://127.0.0.1:11443 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+	encode gzip
+}
 
 # k8s UIs — 502 until Traefik is up (Stage 5 k8s)
 grafana.lab.zdk.no {
