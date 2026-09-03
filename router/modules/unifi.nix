@@ -6,6 +6,8 @@
 }: let
   cfg = config.homelab.router;
   C = import ../lib/constants.nix;
+  mgmtVlan = "vlan${toString C.vlans.mgmt.id}";
+  mgmtIp = lib.head (lib.splitString "/" C.vlans.mgmt.ipv4);
   podmanPackage = config.virtualisation.podman.package;
   # Podman's nix wrapper prepends deps then inherits PATH, which includes the
   # non-capability newuidmap from /run/current-system/sw/bin. Call the unwrapped
@@ -35,12 +37,15 @@
     pkgs.coreutils
     config.systemd.package
   ]}";
+  uosUid = config.users.users.uosserver.uid;
+  uosRuntimeDir = "/run/user/${toString uosUid}";
   uosStartScript = pkgs.writeShellScript "uosserver-start" ''
     export HOME=/home/uosserver
     export XDG_CONFIG_HOME=/home/uosserver/.config
     export XDG_DATA_HOME=/home/uosserver/.local/share
-    export XDG_RUNTIME_DIR=/run/uosserver-runtime
+    export XDG_RUNTIME_DIR=${uosRuntimeDir}
     export CONTAINERS_STORAGE_CONF=/etc/uosserver/storage.conf
+    export UOS_SYSTEM_IP=${mgmtIp}
     export PATH="${uosPath}"
     exec /var/lib/uosserver/bin/uosserver-service
   '';
@@ -48,8 +53,9 @@
     "HOME=/home/uosserver"
     "XDG_CONFIG_HOME=/home/uosserver/.config"
     "XDG_DATA_HOME=/home/uosserver/.local/share"
-    "XDG_RUNTIME_DIR=/run/uosserver-runtime"
+    "XDG_RUNTIME_DIR=${uosRuntimeDir}"
     "CONTAINERS_STORAGE_CONF=/etc/uosserver/storage.conf"
+    "UOS_SYSTEM_IP=${mgmtIp}"
     "PATH=${uosPath}"
   ];
   uosServiceConfig = {
@@ -122,15 +128,38 @@ in {
       "L+ /usr/libexec/podman/aardvark-dns - - - - ${pkgs.aardvark-dns}/bin/aardvark-dns"
     ];
 
+    # Discovery client joins UDP multicast with INADDR_ANY; without a link-scoped
+    # route the kernel picks wan0 and setsockopt(IP_ADD_MEMBERSHIP) fails (ENODEV).
+    systemd.network.networks."40-vlan${toString C.vlans.mgmt.id}" = {
+      routes = [
+        {
+          Destination = "224.0.0.0/4";
+          Scope = "link";
+        }
+      ];
+    };
+
     systemd.services.uosserver = {
       description = "UniFi OS Server";
       wantedBy = ["multi-user.target"];
-      after = ["network-online.target"];
-      wants = ["network-online.target"];
+      after = [
+        "network-online.target"
+        "systemd-networkd-wait-online.service"
+        "dbus.service"
+        "systemd-logind.service"
+        "user@${toString uosUid}.service"
+      ];
+      wants = [
+        "network-online.target"
+        "systemd-networkd-wait-online.service"
+        "user@${toString uosUid}.service"
+      ];
       preStart = ''
         ln -sfn /usr/bin/podman /var/lib/uosserver/bin/podman
         ln -sfn /run/wrappers/bin/newuidmap /var/lib/uosserver/bin/newuidmap
         ln -sfn /run/wrappers/bin/newgidmap /var/lib/uosserver/bin/newgidmap
+        ip route show dev ${mgmtVlan} | grep -q '^224\.' \
+          || ip route add 224.0.0.0/4 dev ${mgmtVlan} scope link
       '';
       serviceConfig =
         uosServiceConfig
@@ -154,7 +183,7 @@ in {
             export HOME=/home/uosserver
             export XDG_CONFIG_HOME=/home/uosserver/.config
             export XDG_DATA_HOME=/home/uosserver/.local/share
-            export XDG_RUNTIME_DIR=/run/uosserver-runtime
+            export XDG_RUNTIME_DIR=${uosRuntimeDir}
             export CONTAINERS_STORAGE_CONF=/etc/uosserver/storage.conf
             export PATH="${uosPath}"
             exec /var/lib/uosserver/bin/updater-service
