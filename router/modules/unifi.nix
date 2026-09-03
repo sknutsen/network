@@ -213,7 +213,7 @@ in {
         "user@${toString uosUid}.service"
       ];
       preStart = "${uosPreStartScript}";
-      stopPost = "${uosCleanupScript}";
+      postStop = "${uosCleanupScript}";
       serviceConfig =
         uosServiceConfig
         // {
