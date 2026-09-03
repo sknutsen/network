@@ -18,12 +18,13 @@
     pkgs.slirp4netns
     pkgs.passt
     pkgs.coreutils
+    config.systemd.package
   ];
   podmanForUos = pkgs.writeShellScript "podman-for-uosserver" ''
-    export PATH="/run/wrappers/bin:/run/wrappers:${podmanHelperPath}"
+    export PATH="/var/lib/uosserver/bin:/run/wrappers/bin:/run/wrappers:${podmanHelperPath}"
     exec ${podmanPackage}/bin/.podman-wrapped "$@"
   '';
-  uosPath = "/run/wrappers/bin:/run/wrappers:${lib.makeBinPath [
+  uosPath = "/var/lib/uosserver/bin:/run/wrappers/bin:/run/wrappers:${lib.makeBinPath [
     podmanForUos
     pkgs.netavark
     pkgs.aardvark-dns
@@ -32,7 +33,17 @@
     pkgs.slirp4netns
     pkgs.passt
     pkgs.coreutils
+    config.systemd.package
   ]}";
+  uosStartScript = pkgs.writeShellScript "uosserver-start" ''
+    export HOME=/home/uosserver
+    export XDG_CONFIG_HOME=/home/uosserver/.config
+    export XDG_DATA_HOME=/home/uosserver/.local/share
+    export XDG_RUNTIME_DIR=/run/uosserver-runtime
+    export CONTAINERS_STORAGE_CONF=/etc/uosserver/storage.conf
+    export PATH="${uosPath}"
+    exec /var/lib/uosserver/bin/uosserver-service
+  '';
   uosEnv = [
     "HOME=/home/uosserver"
     "XDG_CONFIG_HOME=/home/uosserver/.config"
@@ -101,6 +112,8 @@ in {
       "d /var/lib/unifi-os-server 0750 root root -"
       "L+ /usr/bin/podman - - - - ${podmanForUos}"
       "L+ /var/lib/uosserver/bin/podman - - - - ${podmanForUos}"
+      "L+ /var/lib/uosserver/bin/newuidmap - - - - /run/wrappers/bin/newuidmap"
+      "L+ /var/lib/uosserver/bin/newgidmap - - - - /run/wrappers/bin/newgidmap"
       "L+ /var/lib/uosserver/bin/netavark - - - - ${lib.getExe' pkgs.netavark "netavark"}"
       "L+ /var/lib/uosserver/bin/aardvark-dns - - - - ${pkgs.aardvark-dns}/bin/aardvark-dns"
       "L+ /var/lib/uosserver/bin/crun - - - - ${lib.getExe pkgs.crun}"
@@ -114,14 +127,10 @@ in {
       wantedBy = ["multi-user.target"];
       after = ["network-online.target"];
       wants = ["network-online.target"];
-      preStart = ''
-        ln -sfn /run/wrappers/bin/newuidmap /var/lib/uosserver/bin/newuidmap
-        ln -sfn /run/wrappers/bin/newgidmap /var/lib/uosserver/bin/newgidmap
-      '';
       serviceConfig =
         uosServiceConfig
         // {
-          ExecStart = "/var/lib/uosserver/bin/uosserver-service";
+          ExecStart = "${uosStartScript}";
           RuntimeDirectoryPreserve = "yes";
         };
     };
@@ -132,14 +141,18 @@ in {
       enable = false;
       description = "UniFi OS Server updater";
       after = ["uosserver.service"];
-      preStart = ''
-        ln -sfn /run/wrappers/bin/newuidmap /var/lib/uosserver/bin/newuidmap
-        ln -sfn /run/wrappers/bin/newgidmap /var/lib/uosserver/bin/newgidmap
-      '';
       serviceConfig =
         uosServiceConfig
         // {
-          ExecStart = "/var/lib/uosserver/bin/updater-service";
+          ExecStart = "${pkgs.writeShellScript "uosserver-updater-start" ''
+            export HOME=/home/uosserver
+            export XDG_CONFIG_HOME=/home/uosserver/.config
+            export XDG_DATA_HOME=/home/uosserver/.local/share
+            export XDG_RUNTIME_DIR=/run/uosserver-runtime
+            export CONTAINERS_STORAGE_CONF=/etc/uosserver/storage.conf
+            export PATH="${uosPath}"
+            exec /var/lib/uosserver/bin/updater-service
+          ''}";
         };
     };
 
