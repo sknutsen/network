@@ -127,6 +127,11 @@ in {
       wantedBy = ["multi-user.target"];
       after = ["network-online.target"];
       wants = ["network-online.target"];
+      preStart = ''
+        ln -sfn /usr/bin/podman /var/lib/uosserver/bin/podman
+        ln -sfn /run/wrappers/bin/newuidmap /var/lib/uosserver/bin/newuidmap
+        ln -sfn /run/wrappers/bin/newgidmap /var/lib/uosserver/bin/newgidmap
+      '';
       serviceConfig =
         uosServiceConfig
         // {
