@@ -27,11 +27,12 @@ in {
         plugins = ["github.com/caddy-dns/domainnameshop@v0.2.3"];
         hash = "sha256-PhUY+12QUI/BJ++mEWPce60rM6ySNG2o4o13ZdXqgWo=";
       };
+      # acme_dns lives in the Caddyfile (dns01 snippet) so resolvers can be
+      # public DNS. Janus Unbound is split-horizon and has no NS for zdk.no;
+      # certmagic on 127.0.0.53 then fails "could not determine authoritative
+      # nameservers" and Caddy has no cert (tlsv1 alert internal error).
       globalConfig = lib.concatStringsSep "\n" (
         lib.optional (cfg.caddyEmail != null) "email ${cfg.caddyEmail}"
-        ++ [
-          "acme_dns domainnameshop {env.DOMAINNAMESHOP_API_TOKEN} {env.DOMAINNAMESHOP_API_SECRET}"
-        ]
       );
       extraConfig = builtins.readFile caddyfile;
     };
