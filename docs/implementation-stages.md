@@ -65,7 +65,7 @@ confirms `.21` answers.
 
 **TrueNAS (internal only — no WAN exposure yet):**
 
-- [ ] Static IP `10.10.30.20`
+- [x] Static IP `10.10.30.20` (dnsmasq reservation `cc:28:aa:42:c2:9d`)
 - [ ] Deploy `services/truenas/docker-compose.yml`: **Home Assistant**,
       **Immich** (`immich.lab.zdk.no`), **Forgejo** (internal `code.lab.zdk.no`,
       no Authelia), **Authelia**, **Blocky** (`10.10.30.21` alias on TrueNAS)
@@ -75,11 +75,15 @@ confirms `.21` answers.
 - [ ] Validate IoT DNS: DHCP DNS is `.21`; `dig @8.8.8.8 example.com` from IoT
       still resolves (intercept); IoT cannot use Unbound on `10.10.40.1` as a
       bypass. IoT lease is **1 h**.
-- [ ] Caddy on janus: Authelia on lab UIs except `auth` / `code.lab` /
-      `ha.lab` / `immich.lab` / (later) `headscale.lab`.
-- [ ] DNS-01: Domeneshop plugin on Caddy + sops
-      `caddy.domeneshopToken`/`Secret`; set `caddyEmail`; first lab certs issue
-      (no public A records)
+- [x] Caddy on janus: Authelia on lab UIs except `auth` / `code.lab` /
+      `ha.lab` / `immich.lab` / `truenas.lab` / `unifi.lab` / (later)
+      `headscale.lab`. UI is `https://truenas.lab.zdk.no` (not the raw IP —
+      TrueNAS host firewall is same-subnet only).
+- [x] DNS-01: Domeneshop plugin on Caddy (`withPlugins`) + sops
+      `caddy.domeneshopToken`/`Secret`; `caddyEmail`; lab certs issue. Caddyfile
+      `dns01` snippet uses public resolvers (`1.1.1.1` / `9.9.9.9`) and
+      `propagation_delay 60s` — janus Unbound has no NS for `zdk.no`, so
+      certmagic must not use `127.0.0.53`. No public A records for lab names.
 - [ ] Forgejo: internal HTTPS via `code.lab.zdk.no` or direct; **LAN SSH
       enabled** (trusted + VPN)
 - [ ] Promtail stub in compose (`--profile logging`) → Loki; enable after Loki
@@ -97,9 +101,11 @@ confirms `.21` answers.
 - [ ] Capacitor at `capacitor.lab.zdk.no` via Caddy + Authelia
 - [ ] Zdk ingress stub only — no app deploy until Zdk repo ships
 
-**TLS (v1):** Internal `*.lab.zdk.no` — Caddy ACME **DNS-01 (Domeneshop)**.
+**TLS (v1):** Caddy ACME **DNS-01 (Domeneshop)** for lab **and** public names.
 Custom Caddy with `github.com/caddy-dns/domainnameshop` + sops API credentials.
-Unbound still points lab names at `10.10.30.1` for browsing. step-ca not in v1.
+`dns01` snippet: public resolvers + 60s propagation delay. Unbound still points
+lab names at `10.10.30.1` for browsing. `enableWanCaddy` is only for *serving*
+WAN 80/443, not issuance. step-ca not in v1.
 
 ## Stage 6 — VPN and Headscale (depends: Stage 4; parallel with Stage 5)
 
@@ -117,8 +123,9 @@ exposure** happens here.
 **Immich (`img.zdk.no`) and Home Assistant (`ha.zdk.no`):**
 
 - [ ] Domeneshop: `A`/`AAAA` for `img` and `ha` (same WAN IP as other public names)
-- [ ] `enableWanCaddy = true`; Caddy HTTP-01 issues certs (lab names stay
-      `tls internal` + `lab_only`)
+- [ ] `enableWanCaddy = true` so WAN 80/443 hit Caddy. Certs already use
+      DNS-01 (same as lab); `lab_only` still aborts WAN clients on lab Host
+      headers. No public A/AAAA for `*.lab.zdk.no`.
 - [ ] HA `configuration.yaml`: `external_url` / `internal_url` / `trusted_proxies`
 - [ ] Immich admin: external domain `https://img.zdk.no`
 - [ ] External validation: `curl -I https://img.zdk.no` and `https://ha.zdk.no`
@@ -159,7 +166,9 @@ exposure** happens here.
 - [x] Scaffold `router/` NixOS flake (+ OPEN-QUESTIONS.md)
 - [x] Scaffold `nodes/` RK1 NixOS flake (k3s off until Stage 5)
 - [x] Scaffold `k8s/` Flux tree (bootstrap + infra HelmReleases)
-- [ ] Encrypted `secrets/*.yaml` and `docs/runbooks/`
+- [x] Encrypted `secrets/router.yaml` + `secrets/.sops.yaml` (janus / pingu /
+      remorse age recipients). Caddy Domeneshop env via sops-nix template.
+- [ ] Encrypted `secrets/cluster.yaml` and `docs/runbooks/`
 
 ## Parallel workstreams
 

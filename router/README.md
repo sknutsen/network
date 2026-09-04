@@ -84,7 +84,7 @@ router/
     └── ssh.nix
 ```
 
-**Stage flags** in `hosts/optiplex/configuration.nix`: `enableBlocky` stays **false** until Blocky answers at `10.10.30.21`. `enableWanCaddy` is **true** (WAN 80/443 for `img.zdk.no` and `ha.zdk.no`). Lab TLS is `tls internal` until the Domeneshop DNS-01 plugin is packaged — see `caddy.nix`. Caddyfile: `services/caddy/Caddyfile`.
+**Stage flags** in `hosts/optiplex/configuration.nix`: `enableBlocky` stays **false** until Blocky answers at `10.10.30.21`. `enableWanCaddy` stays **false** until Stage 7 (WAN 80/443 for `img.zdk.no` and `ha.zdk.no`). Lab and public TLS is ACME **DNS-01** (Domeneshop plugin + sops; `dns01` snippet in the Caddyfile). Caddyfile: `services/caddy/Caddyfile`.
 
 ## Build / deploy (once hardware knobs are set)
 
@@ -106,9 +106,8 @@ nixos-rebuild switch --flake '.#optiplex' --target-host root@10.10.20.1
 nixpkgs service — the installer cannot write `/etc/systemd/system` (Nix store
 symlink). `enableUnifi` is on. `nix-ld` is required for the vendor ELF.
 
-**Access:** UI `:11443` from trusted / servers / mgmt (+ wg0). Inform `:8080`.
-Until the Caddy vhost is uncommented, browse `https://10.10.10.1:11443`.
-`unifi.lab.zdk.no` already points at Caddy (`.30.1`). Headscale (Stage 6)
+**Access:** UI `:11443` from trusted / servers / mgmt (+ wg0), or
+`https://unifi.lab.zdk.no` (Caddy). Inform `:8080`. Headscale (Stage 6)
 listens on **`127.0.0.1:8081`** so it does not collide with Inform.
 
 **Inform Host Override:** **`10.10.10.1`**. The AP and Flex Minis use native

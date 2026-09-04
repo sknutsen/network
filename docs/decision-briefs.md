@@ -118,7 +118,8 @@ for *browsing*; ACME does not use that path.
 | Secrets | Domeneshop API token + secret in sops (same API user as DNSUpdater is fine) |
 | Caddy build | `pkgs.caddy.withPlugins` + `github.com/caddy-dns/domainnameshop` (hash filled on first Linux build) |
 | Port 80 | Not required for ACME; still served for HTTP→HTTPS once Caddy is up |
-| Public names | Same DNS-01 issuer at Stage 7; `enableWanCaddy` is for *serving*, not issuance |
+| Public names | Same DNS-01 issuer; `enableWanCaddy` is for *serving*, not issuance |
+| ACME resolvers | `1.1.1.1` / `9.9.9.9` via Caddyfile `dns01` snippet | Janus Unbound has no NS for `zdk.no`; certmagic on `127.0.0.53` fails |
 
 ### Options considered
 
@@ -556,8 +557,8 @@ guess a lab Host header.
 | `img.zdk.no` | `immich.lab.zdk.no` | Immich `:30041` on TrueNAS | Immich-native |
 | `ha.zdk.no` | `ha.lab.zdk.no` | Home Assistant `:30103` | HA-native |
 
-Public certs are **HTTP-01** until the Domeneshop DNS-01 plugin is packaged.
-Lab names stay `tls internal`.
+Public and lab certs are **DNS-01** via Domeneshop (`dns01` snippet: public
+resolvers + 60s delay). `enableWanCaddy` is only for serving WAN 80/443.
 
 ### Recommendation
 

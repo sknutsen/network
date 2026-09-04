@@ -170,7 +170,7 @@ flowchart TB
 | `*.lab.zdk.no` | Host records, else Caddy on janus | **No public records**                |
 | `lab.zdk.no`   | `10.10.30.1`                  | **No public record** (not WAN-reachable) |
 
-Unbound `lab.zdk.no` is a **static** zone (no recursion to the internet). Exact `local-data` wins (`nordri`, `pingu`, `truenas`, `janus`, `headscale`, `immich`, …). One-label names not listed (`grafana.lab.zdk.no`, `capacitor.lab.zdk.no`) hit a wildcard → Caddy on janus (`10.10.30.1`) for HTTPS. Lab TLS is `tls internal` until DNS-01 (Domeneshop) is packaged. Public names (`img.zdk.no`, `ha.zdk.no`) use HTTP-01. `domain-insecure` covers `lab.zdk.no` **and** `zdk.no` so local A records do not SERVFAIL if Domeneshop signs the public zone.
+Unbound `lab.zdk.no` is a **static** zone (no recursion to the internet). Exact `local-data` wins (`nordri`, `pingu`, `janus`, `headscale`, `immich`, …). `truenas.lab.zdk.no` and `unifi.lab.zdk.no` are Caddy (`10.10.30.1`), not the backend IPs — TrueNAS’s host firewall is same-subnet only. One-label names not listed (`grafana.lab.zdk.no`, `capacitor.lab.zdk.no`) hit a wildcard → Caddy on janus for HTTPS. Lab and public names use Caddy ACME **DNS-01** (Domeneshop); the `dns01` snippet queries `1.1.1.1`/`9.9.9.9` so certmagic does not ask this Unbound for NS of `zdk.no`. `domain-insecure` covers `lab.zdk.no` **and** `zdk.no` so local A records do not SERVFAIL if Domeneshop signs the public zone.
 
 Authelia is **not** on `auth.lab.zdk.no` (portal), `code.lab.zdk.no` (Forgejo-native), `headscale.lab.zdk.no` (Tailscale login-server), `ha.lab.zdk.no` (HA-native), or `immich.lab.zdk.no` (Immich-native).
 

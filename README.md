@@ -35,6 +35,6 @@ net/
 ├── switch/        # CRS310 RouterOS (L2 VLANs)
 ├── services/      # truenas compose, Caddy, Authelia, Immich, DNS, Promtail
 ├── k8s/           # Flux tree (infra HelmReleases + Zdk stub)
-├── secrets/       # examples + .sops.yaml; live yaml not committed
+├── secrets/       # .sops.yaml + encrypted router.yaml; cluster example until k8s
 └── scripts/       # validate.sh, generate-viewer.py
 ```

@@ -130,7 +130,7 @@ net/
 ├── switch/                      # exists
 ├── services/                    # exists (truenas, caddy, authelia, dns, promtail, HA/Immich/Forgejo READMEs)
 ├── k8s/clusters/homelab/        # Flux infra + Zdk stub
-├── secrets/                     # examples + .sops.yaml; live yaml not committed
+├── secrets/                     # .sops.yaml + encrypted router.yaml; cluster example until Stage 5 k8s
 └── scripts/                     # validate.sh, generate-viewer.py
 ```
 

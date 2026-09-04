@@ -116,7 +116,7 @@ sequenceDiagram
 
 | Tier | Role | Host |
 |------|------|------|
-| **Caddy** (edge) | WAN TLS, ACME (HTTP-01 public; DNS-01 later), Authelia, static backends | janus (NixOS) |
+| **Caddy** (edge) | WAN TLS, ACME DNS-01 (Domeneshop; public resolvers for propagation), Authelia, static backends | janus (NixOS) |
 | **Traefik** (in-cluster) | Dynamic pod routing, IngressRoute | k8s MetalLB `10.10.30.100` |
 
 ```mermaid
@@ -151,7 +151,7 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 | `ha.lab.zdk.no` | HA `:30103` | HA-native |
 | `immich.lab.zdk.no` | Immich `:30041` | Immich-native |
 | `headscale.lab.zdk.no` | `127.0.0.1:8081` | Headscale-native (Stage 6) |
-| `unifi.lab.zdk.no` | UniFi `:11443` | Authelia once vhost exists; until then `:11443` direct |
+| `unifi.lab.zdk.no` | UniFi `:11443` | UniFi-native (Caddy proxy) |
 | `capacitor.lab.zdk.no` | Capacitor Service | Authelia |
 | `grafana.lab.zdk.no` | Grafana (k8s) | Authelia |
 

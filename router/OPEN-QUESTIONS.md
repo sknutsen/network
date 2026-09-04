@@ -18,4 +18,3 @@ unanswered leftovers only.
 
 - Confirm i350 port 1 ↔ `lan0` after first boot (`ethtool -p lan0`).
 - Bridge the OBOS Nett modem at router cutover.
-- Generate sops age key at `/var/lib/sops-nix/key.txt` after first boot.

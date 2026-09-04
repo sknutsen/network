@@ -76,7 +76,7 @@ All use **servers → IoT ALLOW** from `10.10.30.20`:
 | Hostname | IP | VLAN |
 |----------|-----|------|
 | `janus.lab.zdk.no` | `10.10.30.1` | 30 (servers GW; Unbound) |
-| `truenas.lab.zdk.no` | `10.10.30.20` | 30 |
+| `truenas.lab.zdk.no` | `10.10.30.1` | 30 (Caddy → NAS `:443`; host is `.20`) |
 | `blocky.lab.zdk.no` | `10.10.30.21` | 30 |
 | `headscale.lab.zdk.no` | `10.10.30.1` | 30 (Caddy → `127.0.0.1:8081`) |
 | `crs310.lab.zdk.no` | `10.10.10.2` | 10 |

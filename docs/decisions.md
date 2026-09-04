@@ -80,7 +80,7 @@ are canonical.
 | `auth.lab.zdk.no`        | **No**        | No       | Authelia portal (would loop) |
 | `code.lab.zdk.no`        | **No**        | No       | Forgejo-native auth (internal Git) |
 | `headscale.lab.zdk.no`   | **No**        | No       | Tailscale login-server; Stage 6 |
-| `unifi.lab.zdk.no`       | **No**        | Later    | Until Caddy vhost: `https://10.10.10.1:11443` |
+| `unifi.lab.zdk.no`       | **No**        | No       | Caddy proxy to `:11443`; UniFi-native login |
 | `truenas.lab.zdk.no`     | **No**        | No       | TrueNAS-native auth; Caddy proxy (not direct IP) |
 | `ha.lab.zdk.no`          | **No**        | No       | HA-native; companion app |
 | `immich.lab.zdk.no`      | **No**        | No       | Immich-native; mobile app |
@@ -91,8 +91,8 @@ are canonical.
 
 | Layer                                | Approach |
 | ------------------------------------ | -------- |
-| Public WAN (`img.zdk.no`, `ha.zdk.no`) | Caddy ACME **HTTP-01** until the Domeneshop DNS-01 plugin is in the Caddy package. Public `A` records required. `enableWanCaddy` opens 80/443 |
-| Internal (`*.lab.zdk.no`)            | `tls internal` until DNS-01 (Domeneshop) is packaged. Unbound → `10.10.30.1`; no public A/AAAA for `lab` names. Caddy `lab_only` aborts non-RFC1918 clients |
+| Public WAN (`img.zdk.no`, `ha.zdk.no`) | Caddy ACME **DNS-01** (Domeneshop). Public `A`/`AAAA` still required to *reach* the names. `enableWanCaddy` opens 80/443 for serving (not issuance) |
+| Internal (`*.lab.zdk.no`)            | Same DNS-01 issuer. Unbound → `10.10.30.1`; no public A/AAAA. Caddy `lab_only` aborts non-`10.10.0.0/16` clients. ACME checks use `1.1.1.1`/`9.9.9.9` (not janus Unbound) |
 | Caddy → Traefik (east-west)          | HTTP on VLAN 30 — mTLS is a non-goal for v1 |
 | step-ca                              | **Not in v1** — Caddy ACME covers edge; revisit for mTLS/device certs if needed |
 

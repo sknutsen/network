@@ -75,14 +75,13 @@ in
           ''"odyssey.iot.${C.domain}. A ${C.hosts.odyssey}"''
           ''"chromecast.iot.${C.domain}. A ${C.hosts.chromecast}"''
           # UniFi UI is on this host :11443; lab name → Caddy (no extra views).
-          # Browse https://10.10.10.1:11443 until a Caddy vhost exists.
           ''"unifi.${C.domain}. A ${gw C.vlans.servers.ipv4}"''
           ''"headscale.${C.domain}. A ${C.hosts.caddy}"''
           ''"ha.${C.domain}. A ${C.hosts.caddy}"''
           ''"immich.${C.domain}. A ${C.hosts.caddy}"''
           ''"auth.${C.domain}. A ${C.hosts.caddy}"''
           # Catch-all for HTTPS vhosts (grafana, capacitor, …). Exact
-          # names above win. Apex has no wildcard match. Lab TLS is internal;
+          # names above win. Apex has no wildcard match. ACME is DNS-01.
           ''"${C.domain}. A ${C.hosts.caddy}"''
           ''"*.${C.domain}. A ${C.hosts.caddy}"''
         ];
