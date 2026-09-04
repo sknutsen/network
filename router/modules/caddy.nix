@@ -3,8 +3,7 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   cfg = config.homelab.router;
   caddyfile = ../../services/caddy/Caddyfile;
   # v1 ACME is DNS-01 (Domeneshop / Domainname.shop). Unstable Caddy has
@@ -19,18 +18,20 @@ let
   #     plugins = [ "github.com/caddy-dns/domainnameshop@v0.2.3" ];
   #     hash = "...";
   #   };
-in
-{
+in {
   # Edge TLS on janus. Caddyfile stays in services/caddy/ (shared with docs).
   config = lib.mkIf cfg.enableCaddy {
     services.caddy = {
       enable = true;
-      package = pkgs.caddy; # withPlugins once hash is known; see comment above
+      package = pkgs.caddy.withPlugins {
+        plugins = ["github.com/caddy-dns/domainnameshop@v0.2.3"];
+        hash = "...";
+      };
       globalConfig = lib.concatStringsSep "\n" (
         lib.optional (cfg.caddyEmail != null) "email ${cfg.caddyEmail}"
-        # ++ [
-        #   "acme_dns domainnameshop {env.DOMAINNAMESHOP_API_TOKEN} {env.DOMAINNAMESHOP_API_SECRET}"
-        # ]
+        ++ [
+          "acme_dns domainnameshop {env.DOMAINNAMESHOP_API_TOKEN} {env.DOMAINNAMESHOP_API_SECRET}"
+        ]
       );
       extraConfig = builtins.readFile caddyfile;
     };
