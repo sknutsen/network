@@ -30,7 +30,7 @@ Resolved** here, and remove the row from `plan.md` § Remaining decisions.
 | 15 | [CrowdSec](#15-crowdsec) | Resolved | — |
 | 16 | [mDNS / Avahi reflector](#16-mdns--avahi-reflector) | Resolved — static IPs first | Stage 4–5 if discovery fails |
 | 17 | [Trusted → IoT cast rules](#17-trusted--iot-cast-rules) | Resolved — wait for HA | Stage 4–5 |
-| 18 | [Future public apps](#18-future-public-apps) | Per-app | Each new WAN service |
+| 18 | [Future public apps](#18-future-public-apps) | Per-app — Immich + HA documented | Each new WAN service |
 | 19 | [Guest DNS via Blocky](#19-guest-dns-via-blocky) | Resolved — public resolvers | Post Stage 4 if wanted |
 
 ---
@@ -530,29 +530,40 @@ Odyssey) before any Avahi reflector. Document each target in firewall-matrix.
 
 ## 18. Future public apps
 
-**Status:** Per-app — no fixed template yet.
+**Status:** Per-app — Immich and Home Assistant documented below.
 
 ### Context
 
-`zdk.no` and `code.zdk.no` are public **without** Authelia ([decisions.md](decisions.md)).
-Future WAN services may need different exposure and auth.
+Public apps terminate TLS on Caddy and use **native** login (no Authelia).
+`*.lab.zdk.no` is never in public DNS. Caddy `lab_only` aborts WAN clients that
+guess a lab Host header.
 
 ### Decision checklist (per app)
 
 | Question | Guidance |
 |----------|----------|
 | WAN required? | Default **no** — VPN + `*.lab.zdk.no` first |
-| Hostname | Subdomain of `zdk.no` or new apex |
+| Hostname | Subdomain of `zdk.no` (lab name stays `*.lab.zdk.no`) |
 | Auth | Public app → no Authelia; admin UI → internal only |
 | Backend | TrueNAS Docker vs k8s IngressRoute |
 | DNS | Domeneshop + DNSUpdater; no `lab` public records |
 | Firewall | nftables WAN → Caddy only on 443/80 |
 
+### Documented apps
+
+| Public name | Lab name | Backend | Auth |
+|-------------|----------|---------|------|
+| `img.zdk.no` | `immich.lab.zdk.no` | Immich `:30041` on TrueNAS | Immich-native |
+| `ha.zdk.no` | `ha.lab.zdk.no` | Home Assistant `:30103` | HA-native |
+
+Public certs are **HTTP-01** until the Domeneshop DNS-01 plugin is packaged.
+Lab names stay `tls internal`.
+
 ### Recommendation
 
 **Copy the two-tier pattern:** Caddy on janus for TLS/WAN; backend on k8s or
 compose. Document each app as a row in decisions.md exposure matrix before
-Stage 7-style cutover.
+WAN cutover.
 
 ---
 

@@ -1,5 +1,5 @@
 # Authelia — internal SSO for lab UIs.
-# Caddy forward_auth except auth.lab (portal), code.lab (Forgejo), headscale.lab.
+# Caddy forward_auth except auth.lab, code.lab, headscale.lab, ha.lab, immich.lab.
 
 server:
   address: tcp://0.0.0.0:9091
@@ -24,6 +24,10 @@ access_control:
     - domain: code.lab.zdk.no
       policy: bypass
     - domain: headscale.lab.zdk.no
+      policy: bypass
+    - domain: ha.lab.zdk.no
+      policy: bypass
+    - domain: immich.lab.zdk.no
       policy: bypass
     - domain: "*.lab.zdk.no"
       policy: one_factor

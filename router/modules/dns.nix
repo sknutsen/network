@@ -48,6 +48,8 @@ in
         local-data = [
           ''"zdk.no. A ${C.hosts.caddy}"''
           ''"code.zdk.no. A ${C.hosts.caddy}"''
+          ''"img.zdk.no. A ${C.hosts.caddy}"''
+          ''"ha.zdk.no. A ${C.hosts.caddy}"''
           # TrueNAS UI via Caddy — host firewall allows same-subnet only.
           ''"truenas.${C.domain}. A ${C.hosts.caddy}"''
           ''"blocky.${C.domain}. A ${C.hosts.blocky}"''
@@ -77,9 +79,10 @@ in
           ''"unifi.${C.domain}. A ${gw C.vlans.servers.ipv4}"''
           ''"headscale.${C.domain}. A ${C.hosts.caddy}"''
           ''"ha.${C.domain}. A ${C.hosts.caddy}"''
+          ''"immich.${C.domain}. A ${C.hosts.caddy}"''
           ''"auth.${C.domain}. A ${C.hosts.caddy}"''
           # Catch-all for HTTPS vhosts (grafana, capacitor, …). Exact
-          # names above win. Apex has no wildcard match. ACME is DNS-01.
+          # names above win. Apex has no wildcard match. Lab TLS is internal;
           ''"${C.domain}. A ${C.hosts.caddy}"''
           ''"*.${C.domain}. A ${C.hosts.caddy}"''
         ];

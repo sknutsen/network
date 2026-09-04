@@ -18,7 +18,7 @@ Declarative home network configuration and documentation.
 | [router/OPEN-QUESTIONS.md](router/OPEN-QUESTIONS.md) | Unanswered first-boot leftovers |
 | [docs/reference/](docs/reference/) | Alternatives not chosen |
 
-**Public services (Stage 7):** `zdk.no` ([Zdk](https://github.com/sknutsen/Zdk) on k8s) and `code.zdk.no` (Forgejo on TrueNAS). HTTPS-only Git over WAN; LAN SSH on trusted VLAN + VPN.
+**Public services:** `img.zdk.no` (Immich) and `ha.zdk.no` (Home Assistant) on TrueNAS via Caddy. `zdk.no` ([Zdk](https://github.com/sknutsen/Zdk) on k8s) and `code.zdk.no` (Forgejo) stay internal until those WAN vhosts are uncommented.
 
 **Browser viewer:** from the repo root, `python3 scripts/generate-viewer.py --open`. That parses **all** markdown in the plan (docs, READMEs, remaining questions) and writes `docs/generated/index.html`. Markdown stays the source of truth.
 
@@ -33,7 +33,7 @@ net/
 ├── router/        # janus NixOS modules
 ├── nodes/         # RK1 NixOS flake (nordri–vestri; k3s off)
 ├── switch/        # CRS310 RouterOS (L2 VLANs)
-├── services/      # truenas compose, Caddy, Authelia, DNS, Promtail
+├── services/      # truenas compose, Caddy, Authelia, Immich, DNS, Promtail
 ├── k8s/           # Flux tree (infra HelmReleases + Zdk stub)
 ├── secrets/       # examples + .sops.yaml; live yaml not committed
 └── scripts/       # validate.sh, generate-viewer.py

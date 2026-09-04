@@ -67,17 +67,16 @@ confirms `.21` answers.
 
 - [ ] Static IP `10.10.30.20`
 - [ ] Deploy `services/truenas/docker-compose.yml`: **Home Assistant**,
-      **Forgejo** (internal `code.lab.zdk.no`, no Authelia), **Authelia**,
-      **Blocky** (`10.10.30.21` alias on TrueNAS)
+      **Immich** (`immich.lab.zdk.no`), **Forgejo** (internal `code.lab.zdk.no`,
+      no Authelia), **Authelia**, **Blocky** (`10.10.30.21` alias on TrueNAS)
 - [ ] Confirm Blocky answers on `.21`; then set
       `homelab.router.enableBlocky = true` and rebuild (DHCP, DNAT, no IoT
       domain-search). If IPv6 is on, set `blockyIpv6` too.
 - [ ] Validate IoT DNS: DHCP DNS is `.21`; `dig @8.8.8.8 example.com` from IoT
       still resolves (intercept); IoT cannot use Unbound on `10.10.40.1` as a
       bypass. IoT lease is **1 h**.
-- [ ] Caddy on janus: Authelia on lab UIs except `auth` / `code.lab` / (later)
-      `headscale.lab`. Public `zdk.no` / `code.zdk.no` stay commented;
-      `enableWanCaddy` stays false until Stage 7.
+- [ ] Caddy on janus: Authelia on lab UIs except `auth` / `code.lab` /
+      `ha.lab` / `immich.lab` / (later) `headscale.lab`.
 - [ ] DNS-01: Domeneshop plugin on Caddy + sops
       `caddy.domeneshopToken`/`Secret`; set `caddyEmail`; first lab certs issue
       (no public A records)
@@ -112,15 +111,25 @@ Unbound still points lab names at `10.10.30.1` for browsing. step-ca not in v1.
 
 ## Stage 7 — External access (public services)
 
-VPN-first during Stages 0–6. Internal HA/Forgejo run in Stage 5; **WAN
+VPN-first during Stages 0–6. Internal HA/Immich/Forgejo run in Stage 5; **WAN
 exposure** happens here.
+
+**Immich (`img.zdk.no`) and Home Assistant (`ha.zdk.no`):**
+
+- [ ] Domeneshop: `A`/`AAAA` for `img` and `ha` (same WAN IP as other public names)
+- [ ] `enableWanCaddy = true`; Caddy HTTP-01 issues certs (lab names stay
+      `tls internal` + `lab_only`)
+- [ ] HA `configuration.yaml`: `external_url` / `internal_url` / `trusted_proxies`
+- [ ] Immich admin: external domain `https://img.zdk.no`
+- [ ] External validation: `curl -I https://img.zdk.no` and `https://ha.zdk.no`
+- [ ] Confirm `immich.lab.zdk.no` / `ha.lab.zdk.no` fail from WAN (no public DNS;
+      Caddy `lab_only`)
 
 **Forgejo (`code.zdk.no`) — can enable independently:**
 
-- [ ] Domeneshop: `A`/`AAAA` for `code` only; DNSUpdater timer
+- [ ] Domeneshop: `A`/`AAAA` for `code`; DNSUpdater timer
 - [ ] Caddyfile: uncomment `code.zdk.no`; set Forgejo `ROOT_URL` to
-      `https://code.zdk.no`; set `enableWanCaddy = true` + `caddyEmail`; DNS-01
-      ACME succeeds (WAN 80 not required for issuance)
+      `https://code.zdk.no`
 - [ ] Confirm no WAN `:22`; LAN SSH still works on trusted/VPN
 - [ ] External validation: `curl -I https://code.zdk.no`
 
@@ -132,8 +141,8 @@ exposure** happens here.
 
 **Always at Stage 7:**
 
-- [ ] Confirm `*.lab.zdk.no` **not** WAN-reachable (no public DNS, no WAN INPUT
-      except Caddy 80/443 for public names)
+- [ ] Confirm `*.lab.zdk.no` **not** WAN-reachable (no public DNS; Caddy
+      `lab_only`; WAN INPUT is Caddy 80/443 only)
 - [ ] nftables rate-limit on WAN 443 (CrowdSec deferred — add only if logs
       warrant)
 - [ ] SSL Labs scan on public hostnames

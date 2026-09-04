@@ -84,7 +84,7 @@ router/
     └── ssh.nix
 ```
 
-**Stage flags** in `hosts/optiplex/configuration.nix`: `enableBlocky` stays **false** until Blocky answers at `10.10.30.21`. `enableWanCaddy` stays **false** until Stage 7. Lab TLS is DNS-01 (Domeneshop plugin + sops) — see `caddy.nix`. Caddyfile: `services/caddy/Caddyfile`.
+**Stage flags** in `hosts/optiplex/configuration.nix`: `enableBlocky` stays **false** until Blocky answers at `10.10.30.21`. `enableWanCaddy` is **true** (WAN 80/443 for `img.zdk.no` and `ha.zdk.no`). Lab TLS is `tls internal` until the Domeneshop DNS-01 plugin is packaged — see `caddy.nix`. Caddyfile: `services/caddy/Caddyfile`.
 
 ## Build / deploy (once hardware knobs are set)
 

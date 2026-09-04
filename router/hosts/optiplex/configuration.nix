@@ -27,7 +27,7 @@ in {
     enableDnsUpdater = false;
     enableUnifi = true;
     enableCaddy = true;
-    enableWanCaddy = false; # Stage 7 — WAN 80/443 to local Caddy
+    enableWanCaddy = true; # WAN 80/443 for img.zdk.no and ha.zdk.no
     caddyEmail = null;
     enableBlocky = false; # Stage 4 — flip after Blocky answers on 10.10.30.21
   };
@@ -87,8 +87,8 @@ in {
   # sops-nix — enable once secrets/router.yaml + age key exist.
   # Key path is canonical: generate on janus, backup offline, add pubkey
   # (and a workstation identity) to secrets/.sops.yaml.
-  # sops.defaultSopsFile = ../../../secrets/router.yaml;
-  # sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+  sops.defaultSopsFile = ../../../secrets/router.yaml;
+  sops.age.keyFile = "/var/lib/sops-nix/key.txt";
 
   system.stateVersion = "24.11";
 }

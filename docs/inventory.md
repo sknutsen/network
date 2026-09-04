@@ -6,7 +6,7 @@ VLAN assignments, static IPs, switch ports, and dnsmasq reservations. Network de
 
 | Name | Hardware | OS | Static IP | Connection | Role |
 |------|----------|-----|-----------|------------|------|
-| **TrueNAS** | NAS | TrueNAS SCALE | `10.10.30.20` (+ `.21` alias for Blocky); MAC `cc:28:aa:42:c2:9d` | Wired (port 4) | HA, Forgejo, Authelia, Blocky; **UI:** `https://truenas.lab.zdk.no` (Caddy), not direct IP from trusted/mgmt |
+| **TrueNAS** | NAS | TrueNAS SCALE | `10.10.30.20` (+ `.21` alias for Blocky); MAC `cc:28:aa:42:c2:9d` | Wired (port 4) | HA, Immich, Forgejo, Authelia, Blocky; **UI:** `https://truenas.lab.zdk.no` (Caddy), not direct IP from trusted/mgmt |
 | **nordri** | RK1 (Turing Pi) | NixOS + k3s | `10.10.30.11` | Wired (port 3) | k3s control plane |
 | **sudri** | RK1 (Turing Pi) | NixOS + k3s | `10.10.30.12` | Wired (port 3) | k3s worker |
 | **austri** | RK1 (Turing Pi) | NixOS + k3s | `10.10.30.13` | Wired (port 3) | k3s worker |

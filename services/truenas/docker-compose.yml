@@ -1,13 +1,14 @@
 # Deploy on TrueNAS (10.10.30.20). Datasets under tank/services/.
 # Caddy runs on janus (NixOS), not here. Publish backend ports on this
-# host IP only — nftables drops forwarded 3000/8123/9091 so clients
-# cannot skip Authelia. Janus Caddy uses OUTPUT (not forward).
+# host IP only — nftables drops forwarded 3000/9091/30041/30103 so clients
+# cannot skip Caddy. Janus Caddy uses OUTPUT (not forward).
 #
 # Blocky binds 10.10.30.21 — add a /32 alias on the TrueNAS VLAN 30 NIC
 # (gateway 10.10.30.1) before starting this stack.
 #
 # Authelia: copy services/authelia/.env.example → .env and
 # users_database.yml.example → users_database.yml, then generate hashes.
+# Immich: copy services/immich/.env.example → .env (DB_PASSWORD).
 
 services:
   authelia:
@@ -29,8 +30,10 @@ services:
     restart: unless-stopped
     environment:
       TZ: Europe/Oslo
+    # Live HA is a TrueNAS App on 10.10.30.20:30103 (Caddy). Do not also
+    # publish this port from compose. Container listen port is still 8123.
     ports:
-      - "10.10.30.20:8123:8123"
+      - "10.10.30.20:30103:8123"
     volumes:
       - /mnt/tank/services/homeassistant/config:/config
     networks:
@@ -53,6 +56,75 @@ services:
     ports:
       - "10.10.30.20:3000:3000"
       - "10.10.30.20:2222:22"
+
+  # Immich — keep in sync with
+  # https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml
+  # Live Immich is a TrueNAS App on 10.10.30.20:30041. Keep a single
+  # listener; do not start a second stack on that port.
+  # Copy services/immich/.env.example → services/immich/.env first.
+  immich-server:
+    container_name: immich_server
+    image: ghcr.io/immich-app/immich-server:v3
+    restart: unless-stopped
+    env_file:
+      - ../immich/.env
+    environment:
+      TZ: Europe/Oslo
+      DB_HOSTNAME: database
+      REDIS_HOSTNAME: redis
+    # TrueNAS App host port (Caddy → 30041). Container still listens on 2283.
+    ports:
+      - "10.10.30.20:30041:2283"
+    volumes:
+      - /mnt/tank/services/immich/upload:/data
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - redis
+      - database
+    networks:
+      - edge
+    healthcheck:
+      disable: false
+
+  immich-machine-learning:
+    container_name: immich_machine_learning
+    image: ghcr.io/immich-app/immich-machine-learning:v3
+    restart: unless-stopped
+    env_file:
+      - ../immich/.env
+    volumes:
+      - immich-model-cache:/cache
+    networks:
+      - edge
+    healthcheck:
+      disable: false
+
+  redis:
+    container_name: immich_redis
+    image: docker.io/valkey/valkey:9@sha256:70739f85ad2ee01a726a965584a0f94895f01b0c60b3cc8b0aeef11eaa6888cf
+    restart: unless-stopped
+    healthcheck:
+      test: redis-cli ping | grep -q PONG || exit 1
+    networks:
+      - edge
+
+  database:
+    container_name: immich_postgres
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+    restart: unless-stopped
+    env_file:
+      - ../immich/.env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: immich
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    volumes:
+      - /mnt/tank/services/immich/postgres:/var/lib/postgresql/data
+    shm_size: 128mb
+    networks:
+      - edge
+    healthcheck:
+      disable: false
 
   blocky:
     image: ghcr.io/0xerr0r/blocky:v0.26
@@ -81,6 +153,9 @@ services:
       - -config.file=/etc/promtail/config.yml
     networks:
       - edge
+
+volumes:
+  immich-model-cache:
 
 networks:
   edge:

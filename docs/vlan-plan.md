@@ -163,21 +163,25 @@ flowchart TB
 
 | Name           | Internal answer       | WAN                                      |
 | -------------- | --------------------- | ---------------------------------------- |
-| `zdk.no`       | `10.10.30.1` (Caddy on janus) | Public `A`/`AAAA` via DDNS               |
-| `code.zdk.no`  | `10.10.30.1`                  | Public `A`/`AAAA` via DDNS               |
+| `zdk.no`       | `10.10.30.1` (Caddy on janus) | Public `A`/`AAAA` via DDNS (vhost later) |
+| `code.zdk.no`  | `10.10.30.1`                  | Public `A`/`AAAA` via DDNS (vhost later) |
+| `img.zdk.no`   | `10.10.30.1`                  | Public `A`/`AAAA` via DDNS               |
+| `ha.zdk.no`    | `10.10.30.1`                  | Public `A`/`AAAA` via DDNS               |
 | `*.lab.zdk.no` | Host records, else Caddy on janus | **No public records**                |
 | `lab.zdk.no`   | `10.10.30.1`                  | **No public record** (not WAN-reachable) |
 
-Unbound `lab.zdk.no` is a **static** zone (no recursion to the internet). Exact `local-data` wins (`nordri`, `pingu`, `truenas`, `janus`, `headscale`, …). One-label names not listed (`grafana.lab.zdk.no`, `capacitor.lab.zdk.no`) hit a wildcard → Caddy on janus (`10.10.30.1`) for HTTPS. ACME is **DNS-01** (Domeneshop), not HTTP-01. `domain-insecure` covers `lab.zdk.no` **and** `zdk.no` so local A records do not SERVFAIL if Domeneshop signs the public zone.
+Unbound `lab.zdk.no` is a **static** zone (no recursion to the internet). Exact `local-data` wins (`nordri`, `pingu`, `truenas`, `janus`, `headscale`, `immich`, …). One-label names not listed (`grafana.lab.zdk.no`, `capacitor.lab.zdk.no`) hit a wildcard → Caddy on janus (`10.10.30.1`) for HTTPS. Lab TLS is `tls internal` until DNS-01 (Domeneshop) is packaged. Public names (`img.zdk.no`, `ha.zdk.no`) use HTTP-01. `domain-insecure` covers `lab.zdk.no` **and** `zdk.no` so local A records do not SERVFAIL if Domeneshop signs the public zone.
 
-Authelia is **not** on `auth.lab.zdk.no` (portal), `code.lab.zdk.no` (Forgejo-native), or `headscale.lab.zdk.no` (Tailscale login-server).
+Authelia is **not** on `auth.lab.zdk.no` (portal), `code.lab.zdk.no` (Forgejo-native), `headscale.lab.zdk.no` (Tailscale login-server), `ha.lab.zdk.no` (HA-native), or `immich.lab.zdk.no` (Immich-native).
 
 ### Public DNS (Domeneshop + DNSUpdater)
 
 | Record         | Type         | Updated by DDNS                      |
 | -------------- | ------------ | ------------------------------------ |
-| `@` (`zdk.no`) | `A` / `AAAA` | Yes                                  |
-| `code`         | `A` / `AAAA` | Yes                                  |
+| `@` (`zdk.no`) | `A` / `AAAA` | Yes (when Zdk ships)                 |
+| `code`         | `A` / `AAAA` | Yes (when Forgejo WAN is enabled)    |
+| `img`          | `A` / `AAAA` | Yes                                  |
+| `ha`           | `A` / `AAAA` | Yes                                  |
 | `lab`          | —            | **No** — internal split-horizon only |
 
 ## IPv6 (prefix delegation)

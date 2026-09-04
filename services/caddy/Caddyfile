@@ -1,15 +1,23 @@
 # Edge proxy on janus (NixOS). Caddyfile is the source of truth;
 # router/modules/caddy.nix loads it. Backends are on TrueNAS / Traefik.
 #
-# Stage 5: *.lab.zdk.no only. Uncomment public sites at Stage 7
-# (enableWanCaddy). ACME is DNS-01 via Domeneshop (decision-briefs #3):
-# no public A records for lab names; HTTP-01 is not the v1 path.
-# Live `acme_dns` stays in caddy.nix until the Caddy binary includes
-# github.com/caddy-dns/domainnameshop (`withPlugins` on nixos-unstable).
-# Until then, lab vhosts use Caddy's internal CA (`tls internal`).
+# Lab names (*.lab.zdk.no): never public DNS. tls internal until the
+# Domeneshop DNS-01 plugin is in the Caddy package (caddy.nix). lab_only
+# refuses WAN clients even if they guess the Host header.
+#
+# Public names (img.zdk.no, ha.zdk.no): HTTP-01 ACME (public A records
+# exist). zdk.no / code.zdk.no stay commented until those apps are ready.
+# enableWanCaddy opens WAN 80/443.
 
 (lab_tls) {
 	tls internal
+}
+
+# Trusted, servers, VPN (10.10.255.0/24 ⊂ 10.10.0.0/16). Guest/IoT never
+# reach Caddy INPUT; this is for WAN clients hitting a lab Host header.
+(lab_only) {
+	@not_lan not remote_ip 10.10.0.0/16 127.0.0.1
+	abort @not_lan
 }
 
 (authelia) {
@@ -19,22 +27,58 @@
 	}
 }
 
+(ha_proxy) {
+	reverse_proxy 10.10.30.20:30103
+	encode gzip
+}
+
+# Immich: large uploads, long-lived photo/video transfers, websockets.
+# No Authelia — mobile app and API would break. Native Immich login.
+(immich_proxy) {
+	reverse_proxy 10.10.30.20:30041 {
+		header_up X-Real-IP {remote_host}
+		flush_interval -1
+		transport http {
+			read_timeout 600s
+			write_timeout 600s
+		}
+	}
+}
+
 # Authelia portal — no forward_auth (would loop)
 auth.lab.zdk.no {
 	import lab_tls
+	import lab_only
 	reverse_proxy 10.10.30.20:9091
 	encode gzip
 }
 
 ha.lab.zdk.no {
 	import lab_tls
-	reverse_proxy 10.10.30.20:8123
-	encode gzip
+	import lab_only
+	import ha_proxy
+}
+
+# Public HA — same backend, HA-native auth (companion app).
+ha.zdk.no {
+	import ha_proxy
+}
+
+immich.lab.zdk.no {
+	import lab_tls
+	import lab_only
+	import immich_proxy
+}
+
+# Public Immich — same backend. LAN uses split-horizon → Caddy.
+img.zdk.no {
+	import immich_proxy
 }
 
 # Forgejo internal until Stage 7 — Forgejo-native auth, no Authelia
 code.lab.zdk.no {
 	import lab_tls
+	import lab_only
 	reverse_proxy 10.10.30.20:3000
 	encode gzip
 }
@@ -42,6 +86,8 @@ code.lab.zdk.no {
 # Stage 6 — Headscale on 127.0.0.1:8081 (UniFi Inform owns :8080).
 # No Authelia — Tailscale clients use this as login-server.
 # headscale.lab.zdk.no {
+# 	import lab_tls
+# 	import lab_only
 # 	reverse_proxy 127.0.0.1:8081
 # 	encode gzip
 # }
@@ -50,6 +96,7 @@ code.lab.zdk.no {
 # (OUTPUT); trusted/mgmt browse via truenas.lab.zdk.no, not the raw IP.
 truenas.lab.zdk.no {
 	import lab_tls
+	import lab_only
 	reverse_proxy https://10.10.30.20:443 {
 		transport http {
 			tls_insecure_skip_verify
@@ -65,6 +112,7 @@ truenas.lab.zdk.no {
 # Inform stays http://10.10.10.1:8080 — do not proxy Inform.
 unifi.lab.zdk.no {
 	import lab_tls
+	import lab_only
 	reverse_proxy https://127.0.0.1:11443 {
 		transport http {
 			tls_insecure_skip_verify
@@ -76,6 +124,7 @@ unifi.lab.zdk.no {
 # k8s UIs — 502 until Traefik is up (Stage 5 k8s)
 grafana.lab.zdk.no {
 	import lab_tls
+	import lab_only
 	import authelia
 	reverse_proxy 10.10.30.100:80
 	encode gzip
@@ -83,12 +132,13 @@ grafana.lab.zdk.no {
 
 capacitor.lab.zdk.no {
 	import lab_tls
+	import lab_only
 	import authelia
 	reverse_proxy 10.10.30.100:80
 	encode gzip
 }
 
-# --- Stage 7: uncomment and set enableWanCaddy = true ---
+# --- Stage 7 leftovers: uncomment when those apps are ready ---
 # zdk.no {
 # 	reverse_proxy 10.10.30.100:80
 # 	encode gzip

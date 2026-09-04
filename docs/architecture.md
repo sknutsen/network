@@ -27,6 +27,7 @@ flowchart TB
 
   subgraph truenas [TrueNAS 10.10.30.20]
     HA[Home Assistant]
+    Immich[Immich]
     Forgejo[Forgejo]
     Authelia[Authelia]
     Blocky[Blocky 10.10.30.21]
@@ -48,13 +49,14 @@ flowchart TB
   Caddy --> Forgejo
   Caddy --> Authelia
   Caddy --> HA
+  Caddy --> Immich
   Blocky --> Router
   Traefik --> Zdk
   HA --> IOT
-  InternetUsers[Internet] -->|zdk.no code.zdk.no| Caddy
+  InternetUsers[Internet] -->|img.zdk.no ha.zdk.no| Caddy
 ```
 
-**Principle:** The router is the **policy enforcement point** and the **always-on edge box**: nftables plus Unbound, dnsmasq, Caddy, UniFi OS Server, Headscale, and DNSUpdater. Blocky, HA, Forgejo, Authelia, and k8s stay on VLAN hosts.
+**Principle:** The router is the **policy enforcement point** and the **always-on edge box**: nftables plus Unbound, dnsmasq, Caddy, UniFi OS Server, Headscale, and DNSUpdater. Blocky, HA, Immich, Forgejo, Authelia, and k8s stay on VLAN hosts.
 
 ## Physical L2
 
@@ -82,7 +84,7 @@ USW-NC (closet) uplinks on its port 4. USW-LR (living room) uplinks on port 1. S
 |---------|------|--------|
 | Firewall, DHCP, Unbound, Caddy, WireGuard, Headscale (`127.0.0.1:8081`), DNSUpdater | NixOS router (janus) | `router/` flake + `services/caddy/Caddyfile` |
 | UniFi OS Server | NixOS router (janus) | **Functional** — vendor binaries + `unifi.nix` (rootless Podman, systemd `uosserver`); data `/var/lib/unifi-os-server` |
-| HA, Forgejo, Authelia, Blocky, Promtail | TrueNAS `10.10.30.20` | `services/truenas/docker-compose.yml` |
+| HA, Immich, Forgejo, Authelia, Blocky, Promtail | TrueNAS `10.10.30.20` | `services/truenas/docker-compose.yml` |
 | k3s, Traefik, Flux, Capacitor, monitoring | RK1 cluster | `nodes/` flake + `k8s/` Flux tree |
 | Zdk app | k8s (when ready) | Flux `GitRepository` + `Kustomization` → [Zdk repo](https://github.com/sknutsen/Zdk); `net/` stub at `k8s/clusters/homelab/apps/zdk/ingressroute.yaml` |
 
@@ -102,7 +104,7 @@ sequenceDiagram
   WG->>Svc: RFC1918 direct
 
   Note over Admin,Svc: Path B — public apps (Stage 7)
-  Admin->>Caddy: HTTPS zdk.no / code.zdk.no
+  Admin->>Caddy: HTTPS img.zdk.no / ha.zdk.no
   Caddy->>Svc: No Authelia for current public apps
 
   Note over Admin,Svc: Path C — admin UIs (*.lab.zdk.no)
@@ -114,7 +116,7 @@ sequenceDiagram
 
 | Tier | Role | Host |
 |------|------|------|
-| **Caddy** (edge) | WAN TLS, ACME DNS-01 (Domeneshop), Authelia, static backends | janus (NixOS) |
+| **Caddy** (edge) | WAN TLS, ACME (HTTP-01 public; DNS-01 later), Authelia, static backends | janus (NixOS) |
 | **Traefik** (in-cluster) | Dynamic pod routing, IngressRoute | k8s MetalLB `10.10.30.100` |
 
 ```mermaid
@@ -122,6 +124,8 @@ flowchart LR
   Internet -->|443 TLS| Caddy
   Caddy -->|HTTP| TraefikLB[Traefik 10.10.30.100]
   Caddy --> Forgejo
+  Caddy --> HA
+  Caddy --> Immich
   Caddy -->|forward_auth| Authelia
   Authelia --> Caddy
   TraefikLB --> Pods[k8s pods]
@@ -129,7 +133,7 @@ flowchart LR
 
 - Caddy terminates public TLS; Traefik serves HTTP internally (mTLS non-goal for v1).
 - All WAN traffic enters via Caddy only — no direct WAN → Traefik or k8s nodes.
-- Future public apps **may** use Authelia; `zdk.no` and `code.zdk.no` do not today.
+- Future public apps **may** use Authelia; `img.zdk.no`, `ha.zdk.no`, `zdk.no`, and `code.zdk.no` do not (native app login).
 
 ## Public services
 
@@ -137,12 +141,15 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 
 | Hostname | Backend | Auth |
 |----------|---------|------|
-| `zdk.no` | Traefik `10.10.30.100:80` | None |
-| `code.zdk.no` | Forgejo `:3000` | Forgejo-native |
+| `zdk.no` | Traefik `10.10.30.100:80` | None (vhost commented) |
+| `code.zdk.no` | Forgejo `:3000` | Forgejo-native (vhost commented) |
+| `img.zdk.no` | Immich `:30041` | Immich-native |
+| `ha.zdk.no` | HA `:30103` | HA-native |
 | `auth.lab.zdk.no` | Authelia `:9091` | None (portal) |
 | `truenas.lab.zdk.no` | TrueNAS `:443` | TrueNAS-native |
 | `code.lab.zdk.no` | Forgejo `:3000` | Forgejo-native |
-| `ha.lab.zdk.no` | HA `:8123` | Authelia |
+| `ha.lab.zdk.no` | HA `:30103` | HA-native |
+| `immich.lab.zdk.no` | Immich `:30041` | Immich-native |
 | `headscale.lab.zdk.no` | `127.0.0.1:8081` | Headscale-native (Stage 6) |
 | `unifi.lab.zdk.no` | UniFi `:11443` | Authelia once vhost exists; until then `:11443` direct |
 | `capacitor.lab.zdk.no` | Capacitor Service | Authelia |
@@ -166,7 +173,7 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 
 ## DDNS
 
-[DNSUpdater](https://github.com/sknutsen/DNSUpdater) on router via systemd timer → Domeneshop. Updates `@` and `code` records only. Packaging lives in the DNSUpdater repo; this flake stays a placeholder until that ships. Run before Stage 7 WAN enable.
+[DNSUpdater](https://github.com/sknutsen/DNSUpdater) on router via systemd timer → Domeneshop. Updates `@`, `code`, `img`, and `ha`. Packaging lives in the DNSUpdater repo; this flake stays a placeholder until that ships. Run before Stage 7 WAN enable.
 
 ## Target repo layout
 

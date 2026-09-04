@@ -21,7 +21,7 @@ are canonical.
 - **Router as policy point** — nftables on NixOS. The same host also runs
   **edge services that must stay up with the gateway:** Unbound, dnsmasq,
   Caddy, UniFi OS Server, Headscale, DNSUpdater. Apps and filters that do not
-  need the edge (HA, Forgejo, Authelia, Blocky, k8s) stay on VLAN hosts.
+  need the edge (HA, Immich, Forgejo, Authelia, Blocky, k8s) stay on VLAN hosts.
 
 ## Decision table
 
@@ -48,10 +48,10 @@ are canonical.
 | Secrets           | **sops-nix + age**; key `/var/lib/sops-nix/key.txt` on janus   | One SOPS workflow; workstation age identity in `.sops.yaml`     |
 | VPN               | **WireGuard** (`51820`) + **Headscale** on janus               | Headscale **`127.0.0.1:8081`** behind Caddy (`headscale.lab.zdk.no`); **not** `:8080` (UniFi Inform) |
 | WAN IDS           | **Not in v1** (CrowdSec deferred)                              | nftables rate-limit on 443 first; add CrowdSec if logs warrant  |
-| DDNS              | **DNSUpdater** → **Domeneshop** (package in DNSUpdater repo)   | Dynamic `A`/`AAAA` for `@` and `code` only; this flake waits    |
+| DDNS              | **DNSUpdater** → **Domeneshop** (package in DNSUpdater repo)   | Dynamic `A`/`AAAA` for `@`, `code`, `img`, `ha`; this flake waits |
 | Monitoring        | **kube-prometheus-stack** in k8s                               | Prometheus, Grafana, Alertmanager, Loki in one Helm release     |
 | Logging (edge)    | **Promtail** on TrueNAS → Loki; Caddy logs on janus            | HA/Forgejo/Authelia Docker logs to Loki; Caddy via journald     |
-| Public services   | **`zdk.no`** + **`code.zdk.no`**                               | Zdk on k8s; Forgejo on TrueNAS; Stage 7 WAN                     |
+| Public services   | **`img.zdk.no`**, **`ha.zdk.no`**; later `zdk.no` + `code.zdk.no` | Immich + HA on TrueNAS; Zdk/Forgejo WAN when those apps are ready |
 | `zdk.no` app      | **[github.com/sknutsen/Zdk](https://github.com/sknutsen/Zdk)** | App code external                                               |
 | Zdk GitOps        | **Flux `GitRepository` + `Kustomization` → Zdk repo**          | Zdk repo owns Deployment/Service/image; `net/` `ingressroute.yaml` stub + Flux CR |
 | Forgejo Git (WAN) | **HTTPS only**                                                 | No WAN `:22`; LAN SSH enabled on trusted VLAN + VPN             |
@@ -66,29 +66,33 @@ are canonical.
 | IoT lab DNS       | **Deny** `*.lab.zdk.no` after Blocky (Stage 5)                 | Whitelist only if a device needs a name                         |
 | Caddy LAN INPUT   | **trusted + servers + vpn** (`:80/:443`)                       | Not mgmt (infrastructure-only); not IoT/guest. WAN INPUT Stage 7 |
 | Home Assistant    | **Docker on TrueNAS**, VLAN 30                                 | HA initiates to IoT; stays off IoT VLAN                         |
-| TrueNAS compose   | **Single** `services/truenas/docker-compose.yml`               | HA, Forgejo, Authelia, Blocky (Caddy is on janus)               |
+| TrueNAS compose   | **Single** `services/truenas/docker-compose.yml`               | HA, Immich, Forgejo, Authelia, Blocky (Caddy is on janus)       |
 | Location          | **Norway**, ~60 m² flat                                        | 1 AP; EU/NO retailers where possible                            |
 
 ## Exposure matrix
 
 | Hostname                 | WAN           | Authelia | Notes |
 | ------------------------ | ------------- | -------- | ----- |
-| `zdk.no`                 | Yes (Stage 7) | No       | Public app |
-| `code.zdk.no`            | Yes (Stage 7) | No       | Forgejo; HTTPS git on WAN |
+| `zdk.no`                 | Later         | No       | Public app; vhost still commented |
+| `code.zdk.no`            | Later         | No       | Forgejo; HTTPS git on WAN; vhost still commented |
+| `img.zdk.no`             | Yes           | No       | Immich; native login; same backend as `immich.lab` |
+| `ha.zdk.no`              | Yes           | No       | Home Assistant; native login; same backend as `ha.lab` |
 | `auth.lab.zdk.no`        | **No**        | No       | Authelia portal (would loop) |
 | `code.lab.zdk.no`        | **No**        | No       | Forgejo-native auth (internal Git) |
 | `headscale.lab.zdk.no`   | **No**        | No       | Tailscale login-server; Stage 6 |
 | `unifi.lab.zdk.no`       | **No**        | Later    | Until Caddy vhost: `https://10.10.10.1:11443` |
 | `truenas.lab.zdk.no`     | **No**        | No       | TrueNAS-native auth; Caddy proxy (not direct IP) |
-| Other `*.lab.zdk.no`     | **No**        | Yes      | ha, grafana, capacitor, … |
+| `ha.lab.zdk.no`          | **No**        | No       | HA-native; companion app |
+| `immich.lab.zdk.no`      | **No**        | No       | Immich-native; mobile app |
+| Other `*.lab.zdk.no`     | **No**        | Yes      | grafana, capacitor, … |
 | Future public apps       | Per-app       | Optional | Document a row here before WAN cutover |
 
 ## TLS (v1)
 
 | Layer                                | Approach |
 | ------------------------------------ | -------- |
-| Public WAN (`zdk.no`, `code.zdk.no`) | Caddy ACME **DNS-01** (Domeneshop); `enableWanCaddy` still required to *serve* 80/443 |
-| Internal (`*.lab.zdk.no`)            | Caddy ACME **DNS-01** (Domeneshop). Unbound → `10.10.30.1` for browsing; no public A/AAAA for `lab` names |
+| Public WAN (`img.zdk.no`, `ha.zdk.no`) | Caddy ACME **HTTP-01** until the Domeneshop DNS-01 plugin is in the Caddy package. Public `A` records required. `enableWanCaddy` opens 80/443 |
+| Internal (`*.lab.zdk.no`)            | `tls internal` until DNS-01 (Domeneshop) is packaged. Unbound → `10.10.30.1`; no public A/AAAA for `lab` names. Caddy `lab_only` aborts non-RFC1918 clients |
 | Caddy → Traefik (east-west)          | HTTP on VLAN 30 — mTLS is a non-goal for v1 |
 | step-ca                              | **Not in v1** — Caddy ACME covers edge; revisit for mTLS/device certs if needed |
 

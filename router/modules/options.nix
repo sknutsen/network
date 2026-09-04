@@ -50,7 +50,7 @@
     enableDnsUpdater = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "After the DNSUpdater repo ships a package — Domeneshop for zdk.no / code.";
+      description = "After the DNSUpdater repo ships a package — Domeneshop for zdk.no / code / img / ha.";
     };
 
     enableUnifi = lib.mkOption {

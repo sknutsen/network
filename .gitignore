@@ -5,3 +5,5 @@
 /services/authelia/.env
 /services/authelia/users_database.yml
 
+# Immich DB password (example stays in git)
+/services/immich/.env
