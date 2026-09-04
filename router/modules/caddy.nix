@@ -25,7 +25,7 @@ in {
       enable = true;
       package = pkgs.caddy.withPlugins {
         plugins = ["github.com/caddy-dns/domainnameshop@v0.2.3"];
-        hash = "...";
+        hash = "sha256-PhUY+12QUI/BJ++mEWPce60rM6ySNG2o4o13ZdXqgWo=";
       };
       globalConfig = lib.concatStringsSep "\n" (
         lib.optional (cfg.caddyEmail != null) "email ${cfg.caddyEmail}"
