@@ -10,6 +10,10 @@ Runs in `services/truenas/docker-compose.yml`.
 No Authelia — the companion app, webhooks, and APIs would break. Point the
 app at **`https://ha.zdk.no`**; Unbound answers that name with Caddy on LAN.
 
+The TrueNAS App listens with **HTTPS** on `10.10.30.20:30103`. Caddy must
+`reverse_proxy https://…` with `tls_insecure_skip_verify` (HTTP to that port
+is an immediate EOF / 502).
+
 After first-run onboarding, add this to `/mnt/tank/services/homeassistant/config/configuration.yaml` so Caddy on janus (`10.10.30.1`) works:
 
 ```yaml
