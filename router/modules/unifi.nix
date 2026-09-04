@@ -56,12 +56,24 @@
     PKILL=${pkgs.procps}/bin/pkill
     SED=${pkgs.gnused}/bin/sed
     SLEEP=${pkgs.coreutils}/bin/sleep
+    RUNUSER=${pkgs.util-linux}/bin/runuser
 
     # Host discovery client binds 127.0.0.1:11002; the binary shows as "discovery".
     $PKILL -u ${toString uosUid} -x discovery 2>/dev/null
     for pid in $($SS -H -ltnp 'sport = :11002' | $SED -n 's/.*pid=\([0-9]*\).*/\1/p'); do
       [ -n "$pid" ] && $KILL "$pid" 2>/dev/null
     done
+
+    # Abrupt stops leave the named container in an unstartable "improper" state.
+    $RUNUSER -u uosserver -- env \
+      HOME=/home/uosserver \
+      XDG_CONFIG_HOME=/home/uosserver/.config \
+      XDG_DATA_HOME=/home/uosserver/.local/share \
+      XDG_RUNTIME_DIR=${uosRuntimeDir} \
+      CONTAINERS_STORAGE_CONF=/etc/uosserver/storage.conf \
+      PATH="${uosPath}" \
+      /var/lib/uosserver/bin/podman rm -f uosserver 2>/dev/null
+
     $SLEEP 0.5
   '';
   uosPreStartScript = pkgs.writeShellScript "uosserver-pre-start" ''
