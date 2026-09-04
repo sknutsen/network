@@ -36,8 +36,24 @@ in {
       extraConfig = builtins.readFile caddyfile;
     };
 
-    systemd.services.caddy.serviceConfig.EnvironmentFile = [
-      "-/run/secrets/caddy-domeneshop.env"
-    ];
+    sops.secrets = {
+      "caddy/domeneshopToken" = {};
+      "caddy/domeneshopSecret" = {};
+    };
+
+    sops.templates."caddy-domeneshop.env" = {
+      restartUnits = ["caddy.service"];
+      content = ''
+        DOMAINNAMESHOP_API_TOKEN=${config.sops.placeholder."caddy/domeneshopToken"}
+        DOMAINNAMESHOP_API_SECRET=${config.sops.placeholder."caddy/domeneshopSecret"}
+      '';
+    };
+
+    systemd.services.caddy = {
+      after = ["sops-install-secrets.service"];
+      serviceConfig.EnvironmentFile = [
+        config.sops.templates."caddy-domeneshop.env".path
+      ];
+    };
   };
 }

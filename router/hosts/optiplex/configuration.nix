@@ -84,11 +84,10 @@ in {
     usbutils
   ];
 
-  # sops-nix — enable once secrets/router.yaml + age key exist.
-  # Key path is canonical: generate on janus, backup offline, add pubkey
-  # (and a workstation identity) to secrets/.sops.yaml.
-  # sops.defaultSopsFile = ../../../secrets/router.yaml;
-  # sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+  # Janus decrypts with /var/lib/sops-nix/key.txt. Recipients: secrets/.sops.yaml.
+  # Caddy Domeneshop env is rendered in caddy.nix.
+  sops.defaultSopsFile = ../../../secrets/router.yaml;
+  sops.age.keyFile = "/var/lib/sops-nix/key.txt";
 
   system.stateVersion = "24.11";
 }
