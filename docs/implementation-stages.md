@@ -29,9 +29,9 @@ Stages marked **(parallel)** can run concurrently. Architecture:
 - [x] Unbound split-horizon; Caddy (`enableCaddy`; WAN closed until Stage 7)
 - [x] IoT DHCP DNS = Unbound (`enableBlocky = false`); do not point IoT at
       Blocky yet
-- [ ] IPv6: set `enableIpv6 = true`; native /64 per VLAN; document OBOS Nett
-      prefix **and Blocky GUA** in vlan-plan; leave `blockyIpv6` null until GUA
-      known
+- [x] IPv6: OBOS Nett offers **no IPv6** (Stage 2 live + [OBOS](https://www.obos.no/boligselskap/nett/beboer/internett/fast-ip)).
+      `enableIpv6` stays false; PD + `/64` per VLAN is in `networking.nix` for
+      later. `blockyIpv6` remains null. Documented in [vlan-plan.md](vlan-plan.md)
 - [x] **UniFi OS Server** on OptiPlex (functional): vendor binaries +
       `unifi.nix` systemd/rootless Podman; data `/var/lib/unifi-os-server`; UI
       `:11443`; inform `:8080` (Headscale must not use `:8080`)

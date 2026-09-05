@@ -110,7 +110,6 @@ choices on this list. Do not invent a parallel numbering scheme.
 
 | Brief # | Topic | Status |
 |---------|-------|--------|
-| 1 | IPv6 prefix size | Install-time — document OBOS Nett PD in [vlan-plan.md](vlan-plan.md) at Stage 2 |
 | 11 | Hardware capability check | Stage 1 physical verify ([brief](decision-briefs.md#11-hardware-capability-check)) |
 | 12 | RK1 BSP / NPU fork | Deferred — [plans/rk1-bsp-fork.md](plans/rk1-bsp-fork.md) |
 | 13 | Nintendo Switch local play | Deferred until local play is tested |

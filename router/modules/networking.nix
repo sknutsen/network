@@ -58,11 +58,17 @@ in
         linkConfig.RequiredForOnline = "routable";
       }
       // lib.optionalAttrs cfg.enableIpv6 {
-        # DHCPv6-PD: hint /56 (OBOS typical). WithoutRA so PD starts even if
-        # the ISP RA omits M/O. Document the real prefix in docs/vlan-plan.md.
+        # DHCPv6-PD when the ISP offers it. OBOS Nett does not (2026-09).
+        # WithoutRA + DHCPv6Client=always: start PD without waiting for RA.
+        # UseAddress=no: IA_PD only — many ISPs ignore Solicit+IA_NA.
         dhcpV6Config = {
           WithoutRA = "solicit";
           PrefixDelegationHint = "::/56";
+          UseAddress = false;
+        };
+        ipv6AcceptRAConfig = {
+          DHCPv6Client = "always";
+          UseDNS = false;
         };
       };
 

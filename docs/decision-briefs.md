@@ -13,7 +13,7 @@ Resolved** here, and remove the row from `plan.md` § Remaining decisions.
 
 | # | Brief | Status | Decide by |
 |---|-------|--------|-----------|
-| 1 | [IPv6 prefix size](#1-ipv6-prefix-size) | Install-time — ISP **OBOS Nett**; prefix TBD | Stage 2 |
+| 1 | [IPv6 prefix size](#1-ipv6-prefix-size) | Resolved — OBOS Nett offers none | — |
 | 2 | [NPTv6 vs native /64 per VLAN](#2-nptv6-vs-native-64-per-vlan) | Resolved | — |
 | 3 | [`*.lab.zdk.no` TLS](#3-labzdkno-tls) | Resolved | — |
 | 4 | [step-ca internal CA](#4-step-ca-internal-ca) | Resolved | — |
@@ -37,31 +37,25 @@ Resolved** here, and remove the row from `plan.md` § Remaining decisions.
 
 ## 1. IPv6 prefix size
 
-**Status:** Install-time — document in [vlan-plan.md](vlan-plan.md) at Stage 2.
+**Status:** **Resolved** — OBOS Nett offers no IPv6 (Stage 2, 2026-09-05).
 
 ### Context
 
 Norwegian ISPs typically delegate a `/56` or `/48` via DHCPv6-PD on the WAN
 link. Prefix size determines how many `/64` subnets you can carve for VLANs,
-WireGuard, and future growth. This is observational — layout is already
-**native /64 per VLAN** (#2). If the prefix is `/60` or smaller, revisit NPTv6.
+WireGuard, and future growth. Layout is **native /64 per VLAN** (#2). If a
+future prefix is `/60` or smaller, revisit NPTv6.
 
-### What to record
+### Decision
 
-| Field | Example |
-|-------|---------|
-| Delegated prefix | `2a0x:yyyy::/56` |
-| ISP | **OBOS Nett** (recorded); prefix size still blank |
-### How to capture
+| Field | Value |
+|-------|-------|
+| Delegated prefix | **None** — ISP does not offer IPv6 |
+| ISP | **OBOS Nett** |
+| Evidence | janus `wan0` IPv4-only after DHCPv6-PD enable; [OBOS](https://www.obos.no/boligselskap/nett/beboer/internett/fast-ip) |
+| Flag | `enableIpv6 = false` until they offer PD; `blockyIpv6` null |
 
-1. Enable PD on WAN in Stage 2 router config.
-2. Read `dhcpcd` / `networkd` logs or `ip -6 addr show dev wan`.
-3. Fill the table in [vlan-plan.md § IPv6](vlan-plan.md).
-
-### Recommendation
-
-No decision required — **document what the ISP gives you**. If the prefix is
-smaller than `/60`, prefer NPTv6 (#2) to conserve addresses.
+Recorded in [vlan-plan.md § IPv6](vlan-plan.md).
 
 ---
 

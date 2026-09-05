@@ -21,7 +21,7 @@ in {
     hostname = "janus";
     wanInterface = "wan0"; # I217LM 34:17:eb:96:84:20
     lanTrunkInterface = "lan0"; # i350-T2 port 1 a0:36:9f:33:ae:96
-    enableIpv6 = true; # Stage 2: WAN DHCPv6-PD + /64 per VLAN. Leave blockyIpv6 null until GUA known.
+    enableIpv6 = false; # OBOS Nett has no IPv6 (Stage 2). Flip when they offer PD; leave blockyIpv6 null until GUA known.
     blockyIpv6 = null; # set after PD, e.g. "<servers-/64>::21"
     enableWireGuard = false;
     enableDnsUpdater = false;
@@ -39,15 +39,24 @@ in {
   # Persistent names from burned-in MACs (port order: lower MAC = i350 port 1).
   systemd.network.links = {
     "10-wan" = {
-      matchConfig.MACAddress = "34:17:eb:96:84:20";
+      matchConfig = {
+        MACAddress = "34:17:eb:96:84:20";
+        Type = "ether";
+      };
       linkConfig.Name = "wan0";
     };
     "20-lan" = {
-      matchConfig.MACAddress = "a0:36:9f:33:ae:96";
+      matchConfig = {
+        MACAddress = "a0:36:9f:33:ae:96";
+        Type = "ether";
+      };
       linkConfig.Name = "lan0";
     };
     "30-spare" = {
-      matchConfig.MACAddress = "a0:36:9f:33:ae:97";
+      matchConfig = {
+        MACAddress = "a0:36:9f:33:ae:97";
+        Type = "ether";
+      };
       linkConfig.Name = "spare0";
     };
   };

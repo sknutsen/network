@@ -57,8 +57,8 @@ are canonical.
 | Forgejo Git (WAN) | **HTTPS only**                                                 | No WAN `:22`; LAN SSH enabled on trusted VLAN + VPN             |
 | Internal admin    | **`*.lab.zdk.no`**                                             | Split-horizon only; VPN/trusted VLAN; Authelia; never WAN       |
 | WAN IPv4          | **Dynamic public IP** (CGNAT not active)                       | **WAN INPUT to Caddy** 443/80 on janus (Stage 7) + WireGuard UDP |
-| WAN IPv6          | **Prefix delegation at Stage 2**; **native /64 per VLAN**      | Enable `enableIpv6` with WAN; inbound v6 default deny; NPTv6 only if ISP delegates `/60` or smaller |
-| ISP               | **OBOS Nett**                                                  | Dynamic public IPv4; DHCPv6-PD size TBD at Stage 2              |
+| WAN IPv6          | **PD ready; ISP offers none** (2026-09-05)                     | `enableIpv6` off; native /64 per VLAN when OBOS Nett adds IPv6; inbound v6 default deny |
+| ISP               | **OBOS Nett**                                                  | Dynamic public IPv4 `84.48.97.100/21`; no IPv6                 |
 | ISP modem         | **Bridge mode** — configure at router cutover                  | OptiPlex is sole router                                         |
 | Hairpin NAT       | **Off**                                                        | Unbound already answers `zdk.no` / `code.zdk.no` → `10.10.30.1`; revisit only if clients bypass internal DNS |
 | mDNS              | **Static IPs first**                                           | Avahi reflector servers↔IoT only if discovery fails             |

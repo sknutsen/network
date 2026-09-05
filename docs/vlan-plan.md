@@ -187,20 +187,24 @@ Authelia is **not** on `auth.lab.zdk.no` (portal), `code.lab.zdk.no` (Forgejo-na
 
 ## IPv6 (prefix delegation)
 
-Enable on WAN at Stage 2. Document delegated prefix size from ISP logs here:
+Stage 2 capture (2026-09-05): **OBOS Nett does not offer IPv6**. janus `wan0`
+has public IPv4 `84.48.97.100/21` only; no RA, no DHCPv6-PD, no GUA (link-local
+only). [OBOS: no IPv6 today](https://www.obos.no/boligselskap/nett/beboer/internett/fast-ip).
+Keep `enableIpv6 = false`. PD + `/64` per VLAN is already in `networking.nix`
+for when they do. Leave `blockyIpv6` null.
 
-| Field                            | Value                           |
-| -------------------------------- | ------------------------------- |
-| Delegated prefix                 | `________________` (e.g. `/56`) |
-| ISP                              | **OBOS Nett**                   |
-| CGNAT                            | **Not active** (public IPv4)    |
-| Router WAN IP matches whatismyip | Yes                             |
-| Blocky GUA (`blockyIpv6`)        | `________________` (e.g. `<servers-/64>::21`) |
+| Field                            | Value                                                      |
+| -------------------------------- | ---------------------------------------------------------- |
+| Delegated prefix                 | **None** — ISP does not offer IPv6                         |
+| ISP                              | **OBOS Nett**                                              |
+| CGNAT                            | **Not active** (public IPv4 `84.48.97.100/21`)             |
+| Router WAN IP matches whatismyip | Yes                                                        |
+| Blocky GUA (`blockyIpv6`)        | n/a until ISP IPv6 (then `<servers-/64>::21`)              |
 
-### Per-VLAN v6 (example from /56)
+### Per-VLAN v6 (when ISP delegates)
 
 Carving uses the VLAN id as the subnet nibble. Replace `2a0x:yyyy` with the
-real OBOS Nett prefix at Stage 2.
+real prefix when OBOS Nett offers PD.
 
 | VLAN / iface | IPv6 subnet (example) |
 | ------------ | --------------------- |
@@ -218,8 +222,8 @@ GUA until you have a reason to manage it over v6.
 **Security:** WAN inbound v6 default deny. IoT/guest: internet egress only; no
 cross-VLAN v6.
 
-**Layout:** Native /64 per VLAN from delegated prefix (resolved). Document actual
-prefix at Stage 2 — see [decision briefs](decision-briefs.md#1-ipv6-prefix-size).
+**Layout:** Native /64 per VLAN from delegated prefix (resolved). ISP currently
+gives no prefix — see [decision briefs](decision-briefs.md#1-ipv6-prefix-size).
 
 ## mDNS policy
 
