@@ -26,7 +26,7 @@ IP addressing, DHCP pools, IPv6 layout, and DNS policy. Firewall rules:
 | `10.10.30.13`      | austri       | k3s worker                                                          |
 | `10.10.30.14`      | vestri       | k3s worker                                                          |
 | `10.10.30.15`      | zpi          | Audio casting (RPi 5); eth `d8:3a:dd:cf:e1:75`; Wi-Fi `d8:3a:dd:cf:e1:78` (no reservation) |
-| `10.10.30.20`      | truenas      | HA, Immich, Authelia (TrueNAS Apps); Forgejo, Blocky                |
+| `10.10.30.20`      | truenas      | HA, Immich, Authelia, Forgejo (TrueNAS Apps); Blocky                |
 | `10.10.30.21`      | blocky       | IoT DNS filter (TrueNAS Docker)                                     |
 | `10.10.30.100`     | traefik-lb   | Traefik LoadBalancer (MetalLB)                                      |
 | `10.10.30.101`     | loki         | Loki push API (MetalLB) — Promtail stub; **no Authelia**            |

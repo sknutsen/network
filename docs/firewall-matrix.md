@@ -32,8 +32,8 @@ Router-enforced nftables policy on NixOS. VLAN design: [vlan-plan.md](vlan-plan.
 | 8 | guest (50) | internet | tcp/udp | **ALLOW** | Public DNS (1.1.1.1 / 9.9.9.9) |
 | 9 | trusted (20) | servers (30) | tcp/udp | **ALLOW** | Admin UIs; HA/Authelia/Forgejo HTTP on TrueNAS **dropped** (11a) |
 | 10 | trusted (20) | iot cast + hub targets | see below | **ALLOW** | TV / Chromecast / Odyssey / Hue / Dirigera (`firewall.nix`). Not the rest of VLAN 40 |
-| 11 | trusted (20) | `10.10.30.20` | 2222/tcp | **ALLOW** | Forgejo SSH (LAN); not `:22` (TrueNAS SSH) |
-| 11a | any forward | `10.10.30.20` | 3000, 9091, 30041, 30103/tcp | **DENY** | Caddy on janus (OUTPUT) is the only client |
+| 11 | trusted (20) | `10.10.30.20` | 30143/tcp | **ALLOW** | Forgejo SSH (LAN); not `:22` (TrueNAS SSH) |
+| 11a | any forward | `10.10.30.20` | 30142, 9091, 30041, 30103/tcp | **DENY** | Caddy on janus (OUTPUT) is the only client |
 | 12 | vpn (`10.10.255.0/24`) | trusted + servers + mgmt | tcp/udp | **ALLOW** | WireGuard peers |
 | 13 | servers (30) | internet | tcp/udp | **ALLOW** | |
 | 14 | mgmt (10) | servers (30) | as needed | **ALLOW** | BMC → nodes for provisioning |
@@ -87,7 +87,7 @@ trusted, servers (jump/k8s), or VPN — not from VLAN 10.
 |--------|-------------|-------|--------|-------|
 | janus (Caddy) | `10.10.30.100` (Traefik LB) | 80/tcp | **ALLOW** | Caddy → k8s (OUTPUT) |
 | janus (Caddy) | `10.10.30.20` | 443/tcp | **ALLOW** | TrueNAS UI proxy (OUTPUT) |
-| janus (Caddy) | `10.10.30.20` | 3000, 9091, 30041, 30103/tcp | **ALLOW** | OUTPUT, not forward |
+| janus (Caddy) | `10.10.30.20` | 30142, 9091, 30041, 30103/tcp | **ALLOW** | OUTPUT, not forward |
 | iot, guest | `10.10.30.20` | all | **DENY** | |
 | iot, guest | k8s nodes / API | all | **DENY** | |
 | trusted + vpn | k8s API `10.10.30.11:6443` | 6443/tcp | **ALLOW** | kubectl from trusted |

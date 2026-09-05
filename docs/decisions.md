@@ -54,7 +54,7 @@ are canonical.
 | Public services   | **`img.zdk.no`**, **`ha.zdk.no`**; later `zdk.no` + `code.zdk.no` | Immich + HA on TrueNAS; Zdk/Forgejo WAN when those apps are ready |
 | `zdk.no` app      | **[github.com/sknutsen/Zdk](https://github.com/sknutsen/Zdk)** | App code external                                               |
 | Zdk GitOps        | **Flux `GitRepository` + `Kustomization` → Zdk repo**          | Zdk repo owns Deployment/Service/image; `net/` `ingressroute.yaml` stub + Flux CR |
-| Forgejo Git (WAN) | **HTTPS only**                                                 | No WAN `:22`; LAN SSH enabled on trusted VLAN + VPN             |
+| Forgejo Git (WAN) | **HTTPS only**                                                 | No WAN `:22`; LAN SSH `:30143` on trusted VLAN + VPN            |
 | Internal admin    | **`*.lab.zdk.no`**                                             | Split-horizon only; VPN/trusted VLAN; Authelia; never WAN       |
 | WAN IPv4          | **Dynamic public IP** (CGNAT not active)                       | **WAN INPUT to Caddy** 443/80 on janus (Stage 7) + WireGuard UDP |
 | WAN IPv6          | **PD ready; ISP offers none** (2026-09-05)                     | `enableIpv6` off; native /64 per VLAN when OBOS Nett adds IPv6; inbound v6 default deny |
@@ -66,8 +66,8 @@ are canonical.
 | IoT lab DNS       | **Deny** `*.lab.zdk.no` after Blocky (Stage 5)                 | Whitelist only if a device needs a name                         |
 | Caddy LAN INPUT   | **trusted + servers + vpn** (`:80/:443`)                       | Not mgmt (infrastructure-only); not IoT/guest. WAN INPUT Stage 7 |
 | Home Assistant    | **TrueNAS App**, VLAN 30                                       | HA initiates to IoT; stays off IoT VLAN                         |
-| TrueNAS apps      | **HA, Immich, Authelia** as catalog Apps                       | Live listeners `:30103` / `:30041` / `:9091`; do not also start those compose services |
-| TrueNAS compose   | **Forgejo, Blocky, Promtail** in `services/truenas/docker-compose.yml` | Caddy is on janus; App-backed services stay out of compose |
+| TrueNAS apps      | **HA, Immich, Authelia, Forgejo** as catalog Apps              | Live listeners `:30103` / `:30041` / `:9091` / `:30142`+`:30143`; do not also start those compose services |
+| TrueNAS compose   | **Blocky, Promtail** in `services/truenas/docker-compose.yml`  | Caddy is on janus; App-backed services stay out of compose |
 | Location          | **Norway**, ~60 m² flat                                        | 1 AP; EU/NO retailers where possible                            |
 
 ## Exposure matrix

@@ -128,6 +128,11 @@
     listenPort = 51820;
   };
 
+  forgejo = {
+    uiPort = 30142;
+    sshPort = 30143;
+  };
+
   unifi = {
     # UniFi OS Server on this host (Podman / vendor installer)
     uiPort = 11443;

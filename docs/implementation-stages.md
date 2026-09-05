@@ -71,7 +71,9 @@ confirms `.21` answers.
 - [x] **Authelia** — TrueNAS App on `10.10.30.20:9091`; portal
       `https://auth.lab.zdk.no` ([README](../services/authelia/README.md)). Do
       not also start compose Authelia on `:9091`.
-- [ ] **Forgejo** (compose) — internal `code.lab.zdk.no`, no Authelia
+- [ ] **Forgejo** — TrueNAS App on `10.10.30.20:30142` (UI) / `:30143`
+      (SSH); `code.lab.zdk.no`, no Authelia. Do not also start compose
+      Forgejo on those ports.
 - [ ] **Blocky** (`10.10.30.21` alias on TrueNAS) via
       `services/truenas/docker-compose.yml`
 - [ ] Confirm Blocky answers on `.21`; then set
@@ -89,8 +91,8 @@ confirms `.21` answers.
       `dns01` snippet uses public resolvers (`1.1.1.1` / `9.9.9.9`) and
       `propagation_delay 60s` — janus Unbound has no NS for `zdk.no`, so
       certmagic must not use `127.0.0.53`. No public A records for lab names.
-- [ ] Forgejo: internal HTTPS via `code.lab.zdk.no` or direct; **LAN SSH
-      enabled** (trusted + VPN)
+- [ ] Forgejo: internal HTTPS via `code.lab.zdk.no`; **LAN SSH on `:30143`**
+      (trusted + VPN)
 - [ ] Promtail stub in compose (`--profile logging`) → Loki; enable after Loki
       is up; push URL must not go through Authelia
 
@@ -185,7 +187,7 @@ exposure** happens here.
 | B — Router core   | 2      | Blocks VLAN testing                                                                     |
 | C — L2 wireless   | 3      | After router trunks                                                                     |
 | D — Policy        | 4      | Firewall except IoT DNS cutover                                                         |
-| E — Homelab       | 5      | TrueNAS Apps (HA/Immich/Authelia) + compose (Forgejo/Blocky) + k8s; then `enableBlocky` |
+| E — Homelab       | 5      | TrueNAS Apps (HA/Immich/Authelia/Forgejo) + compose (Blocky) + k8s; then `enableBlocky` |
 | F — Remote access | 6, 7   | WireGuard/Headscale then WAN INPUT to Caddy                                             |
 | G — GitOps        | 0→8    | Repo scaffolding                                                                        |
 

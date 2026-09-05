@@ -197,7 +197,7 @@ in
 
           # --- Trusted ---
           # App HTTP on TrueNAS is Caddy-only (this host OUTPUT, not forward).
-          ip daddr $TRUENAS tcp dport { 3000, 9091, 30041, 30103 } drop
+          ip daddr $TRUENAS tcp dport { ${toString C.forgejo.uiPort}, 9091, 30041, 30103 } drop
           iifname $TRUSTED oifname $SERVERS accept
           iifname $TRUSTED ip daddr $CRS310 accept
           iifname $TRUSTED oifname $WAN accept

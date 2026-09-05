@@ -84,8 +84,8 @@ USW-NC (closet) uplinks on its port 4. USW-LR (living room) uplinks on port 1. S
 |---------|------|--------|
 | Firewall, DHCP, Unbound, Caddy, WireGuard, Headscale (`127.0.0.1:8081`), DNSUpdater | NixOS router (janus) | `router/` flake + `services/caddy/Caddyfile` |
 | UniFi OS Server | NixOS router (janus) | **Functional** — vendor binaries + `unifi.nix` (rootless Podman, systemd `uosserver`); data `/var/lib/unifi-os-server` |
-| HA, Immich, Authelia | TrueNAS `10.10.30.20` | TrueNAS Apps (`:30103`, `:30041`, `:9091`) |
-| Forgejo, Blocky, Promtail | TrueNAS `10.10.30.20` | `services/truenas/docker-compose.yml` |
+| HA, Immich, Authelia, Forgejo | TrueNAS `10.10.30.20` | TrueNAS Apps (`:30103`, `:30041`, `:9091`, `:30142` / SSH `:30143`) |
+| Blocky, Promtail | TrueNAS `10.10.30.20` | `services/truenas/docker-compose.yml` |
 | k3s, Traefik, Flux, Capacitor, monitoring | RK1 cluster | `nodes/` flake + `k8s/` Flux tree |
 | Zdk app | k8s (when ready) | Flux `GitRepository` + `Kustomization` → [Zdk repo](https://github.com/sknutsen/Zdk); `net/` stub at `k8s/clusters/homelab/apps/zdk/ingressroute.yaml` |
 
@@ -143,12 +143,12 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 | Hostname | Backend | Auth |
 |----------|---------|------|
 | `zdk.no` | Traefik `10.10.30.100:80` | None (vhost commented) |
-| `code.zdk.no` | Forgejo `:3000` | Forgejo-native (vhost commented) |
+| `code.zdk.no` | Forgejo `:30142` | Forgejo-native (vhost commented) |
 | `img.zdk.no` | Immich `:30041` | Immich-native |
 | `ha.zdk.no` | HA `:30103` | HA-native |
 | `auth.lab.zdk.no` | Authelia TrueNAS App `:9091` | None (portal) |
 | `truenas.lab.zdk.no` | TrueNAS `:443` | TrueNAS-native |
-| `code.lab.zdk.no` | Forgejo `:3000` | Forgejo-native |
+| `code.lab.zdk.no` | Forgejo `:30142` | Forgejo-native |
 | `ha.lab.zdk.no` | HA `:30103` | HA-native |
 | `immich.lab.zdk.no` | Immich `:30041` | Immich-native |
 | `headscale.lab.zdk.no` | `127.0.0.1:8081` | Headscale-native (Stage 6) |

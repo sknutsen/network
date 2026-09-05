@@ -1,6 +1,6 @@
 # Deploy on TrueNAS (10.10.30.20). Datasets under tank/services/.
 # Caddy runs on janus (NixOS), not here. Publish backend ports on this
-# host IP only — nftables drops forwarded 3000/9091/30041/30103 so clients
+# host IP only — nftables drops forwarded 30142/9091/30041/30103 so clients
 # cannot skip Caddy. Janus Caddy uses OUTPUT (not forward).
 #
 # Blocky binds 10.10.30.21 — add a /32 alias on the TrueNAS VLAN 30 NIC
@@ -49,15 +49,17 @@ services:
       # Stage 5 internal. At Stage 7 switch ROOT_URL/SSH_DOMAIN to https://code.zdk.no
       - FORGEJO__server__ROOT_URL=https://code.lab.zdk.no
       - FORGEJO__server__SSH_DOMAIN=code.lab.zdk.no
-      - FORGEJO__server__SSH_PORT=2222
+      - FORGEJO__server__SSH_PORT=30143
     volumes:
       - /mnt/tank/services/forgejo/data:/data
       - /mnt/tank/services/forgejo/config:/etc/gitea
     networks:
       - edge
+    # Live Forgejo is a TrueNAS App on 10.10.30.20:30142 (UI) and :30143
+    # (SSH). Do not also publish those ports from compose.
     ports:
-      - "10.10.30.20:3000:3000"
-      - "10.10.30.20:2222:22"
+      - "10.10.30.20:30142:3000"
+      - "10.10.30.20:30143:22"
 
   # Immich — keep in sync with
   # https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml
