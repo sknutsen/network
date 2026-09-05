@@ -89,17 +89,11 @@ img.zdk.no {
 	import immich_proxy
 }
 
-# Forgejo internal until Stage 7 — Forgejo-native auth, no Authelia
+# Forgejo internal until Stage 7 — HTTP on :30142 (not TLS). No Authelia.
 code.lab.zdk.no {
 	import lab_only
 	import dns01
-	reverse_proxy https://10.10.30.20:30142 {
-		transport http {
-			tls_insecure_skip_verify
-		}
-		header_up Host 10.10.30.20
-		header_down Location https://10.10.30.20 https://truenas.lab.zdk.no
-	}
+	reverse_proxy 10.10.30.20:30142
 	encode gzip
 }
 

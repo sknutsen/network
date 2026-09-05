@@ -81,8 +81,9 @@ in
           ''"ha.${C.domain}. A ${C.hosts.caddy}"''
           ''"immich.${C.domain}. A ${C.hosts.caddy}"''
           ''"auth.${C.domain}. A ${C.hosts.caddy}"''
-          # Catch-all for HTTPS vhosts (grafana, capacitor, …). Exact
-          # names above win. Apex has no wildcard match. ACME is DNS-01.
+          ''"code.${C.domain}. A ${C.hosts.caddy}"''
+          # Exact names only: local-zone type static does not synthesize
+          # answers from *.lab.zdk.no (foo.lab / grafana.lab NXDOMAIN).
           ''"${C.domain}. A ${C.hosts.caddy}"''
           ''"*.${C.domain}. A ${C.hosts.caddy}"''
         ];
