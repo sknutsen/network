@@ -1,6 +1,7 @@
 # Auth: Authelia vs Authentik (reference)
 
-**Chosen:** Authelia on TrueNAS Docker. See [decisions.md](../decisions.md).
+**Chosen:** Authelia as a TrueNAS App on `10.10.30.20:9091`. See
+[decisions.md](../decisions.md) and [the Authelia README](../../services/authelia/README.md).
 
 | Aspect | Authelia | Authentik |
 |--------|----------|-----------|
@@ -21,4 +22,6 @@ services/authelia/
 └── users_database.yml.example  # copy → users_database.yml (not committed)
 ```
 
-Deployed via `services/truenas/docker-compose.yml`.
+Live deploy is the TrueNAS catalog App. Compose Authelia in
+`services/truenas/docker-compose.yml` is reference only — do not start it
+alongside the App.

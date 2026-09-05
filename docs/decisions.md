@@ -44,13 +44,13 @@ are canonical.
 | K8s control plane | **`nordri` sole CP** at `10.10.30.11:6443`; **CP taint kept**; `.10` reserved | Workloads on `sudri`–`vestri`; no kube-vip until second CP |
 | RK1 node OS       | **NixOS** (GiyoMoon mainline)                                  | Unified ops with router; escape hatches documented only         |
 | Storage (K8s)     | **Longhorn** — default StorageClass, **replica 3**, NVMe at `/var/lib/longhorn` per RK1 | 4 nodes × 256 GB+; ~256 GB usable replicated capacity; Velero/ZFS backup off-cluster |
-| Auth / SSO        | **Authelia** on TrueNAS Docker                                 | Caddy `forward_auth` for lab UIs; exceptions below              |
+| Auth / SSO        | **Authelia** TrueNAS App (`10.10.30.20:9091`)                  | Caddy `forward_auth` for lab UIs; portal `auth.lab.zdk.no`; exceptions below |
 | Secrets           | **sops-nix + age**; key `/var/lib/sops-nix/key.txt` on janus   | One SOPS workflow; workstation age identity in `.sops.yaml`     |
 | VPN               | **WireGuard** (`51820`) + **Headscale** on janus               | Headscale **`127.0.0.1:8081`** behind Caddy (`headscale.lab.zdk.no`); **not** `:8080` (UniFi Inform) |
 | WAN IDS           | **Not in v1** (CrowdSec deferred)                              | nftables rate-limit on 443 first; add CrowdSec if logs warrant  |
 | DDNS              | **DNSUpdater** → **Domeneshop** (package in DNSUpdater repo)   | Dynamic `A`/`AAAA` for `@`, `code`, `img`, `ha`; this flake waits |
 | Monitoring        | **kube-prometheus-stack** in k8s                               | Prometheus, Grafana, Alertmanager, Loki in one Helm release     |
-| Logging (edge)    | **Promtail** on TrueNAS → Loki; Caddy logs on janus            | HA/Forgejo/Authelia Docker logs to Loki; Caddy via journald     |
+| Logging (edge)    | **Promtail** on TrueNAS → Loki; Caddy logs on janus            | HA/Immich/Authelia + Forgejo Docker logs to Loki; Caddy via journald |
 | Public services   | **`img.zdk.no`**, **`ha.zdk.no`**; later `zdk.no` + `code.zdk.no` | Immich + HA on TrueNAS; Zdk/Forgejo WAN when those apps are ready |
 | `zdk.no` app      | **[github.com/sknutsen/Zdk](https://github.com/sknutsen/Zdk)** | App code external                                               |
 | Zdk GitOps        | **Flux `GitRepository` + `Kustomization` → Zdk repo**          | Zdk repo owns Deployment/Service/image; `net/` `ingressroute.yaml` stub + Flux CR |
@@ -65,8 +65,9 @@ are canonical.
 | Guest DNS         | **1.1.1.1 / 9.9.9.9**                                          | No Blocky on guest for v1                                       |
 | IoT lab DNS       | **Deny** `*.lab.zdk.no` after Blocky (Stage 5)                 | Whitelist only if a device needs a name                         |
 | Caddy LAN INPUT   | **trusted + servers + vpn** (`:80/:443`)                       | Not mgmt (infrastructure-only); not IoT/guest. WAN INPUT Stage 7 |
-| Home Assistant    | **Docker on TrueNAS**, VLAN 30                                 | HA initiates to IoT; stays off IoT VLAN                         |
-| TrueNAS compose   | **Single** `services/truenas/docker-compose.yml`               | HA, Immich, Forgejo, Authelia, Blocky (Caddy is on janus)       |
+| Home Assistant    | **TrueNAS App**, VLAN 30                                       | HA initiates to IoT; stays off IoT VLAN                         |
+| TrueNAS apps      | **HA, Immich, Authelia** as catalog Apps                       | Live listeners `:30103` / `:30041` / `:9091`; do not also start those compose services |
+| TrueNAS compose   | **Forgejo, Blocky, Promtail** in `services/truenas/docker-compose.yml` | Caddy is on janus; App-backed services stay out of compose |
 | Location          | **Norway**, ~60 m² flat                                        | 1 AP; EU/NO retailers where possible                            |
 
 ## Exposure matrix

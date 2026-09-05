@@ -49,6 +49,7 @@ DOCS: list[tuple[str, Path, str, str]] = [
     ("readme", ROOT / "README.md", "README", "Repo"),
     ("forgejo", ROOT / "services/forgejo/README.md", "Forgejo", "Services"),
     ("homeassistant", ROOT / "services/homeassistant/README.md", "Home Assistant", "Services"),
+    ("authelia", ROOT / "services/authelia/README.md", "Authelia", "Services"),
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)$")

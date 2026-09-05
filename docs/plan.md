@@ -22,7 +22,9 @@ Declarative homelab: NixOS router, VLAN segmentation, TrueNAS edge, k3s on Turin
 - Self-hosted first — no Cloudflare, Tailscale SaaS, or tunnel vendors unless unavoidable.
 - Router is the policy point **and** always-on edge (Caddy, Unbound, UniFi, Headscale); config lives in Git.
 - VPN-first admin (WireGuard + Headscale); publish `img.zdk.no` and `ha.zdk.no` on WAN. `zdk.no` / `code.zdk.no` when those apps are ready. `*.lab.zdk.no` stays internal.
-- `*.lab.zdk.no` is internal-only. Authelia on lab UIs except `auth` / `code.lab` / `headscale.lab` / `ha.lab` / `immich.lab`.
+- `*.lab.zdk.no` is internal-only. Authelia on lab UIs except `auth` /
+  `code.lab` / `headscale.lab` / `ha.lab` / `immich.lab` / `truenas.lab` /
+  `unifi.lab`.
 
 ## Decisions (summary)
 
@@ -32,7 +34,7 @@ Full table: **[decisions.md](decisions.md)**.
 |-------|--------|
 | Router | NixOS on Dell OptiPlex 9020 MT + i350-T2 (acquired); UniFi OS Server (functional) |
 | Switch / WiFi | CRS310 + 2× USW Flex Mini + U7 Lite + PoE injector (all acquired); UPS deferred |
-| Edge | Caddy on janus; Authelia + HA + Immich + Forgejo on TrueNAS Docker |
+| Edge | Caddy on janus; HA, Immich, Authelia as TrueNAS Apps; Forgejo on TrueNAS |
 | K8s | 4× RK1, NixOS, k3s, Flux, Traefik, Capacitor |
 | Monitoring | kube-prometheus-stack in k8s (incl. Loki) |
 | Public | `img.zdk.no` (Immich), `ha.zdk.no` (HA) — no Authelia; `zdk.no` / `code.zdk.no` later |
@@ -69,7 +71,7 @@ IPs, DHCP, DNS, mDNS: [vlan-plan.md](vlan-plan.md). Firewall: [firewall-matrix.m
 | Where | Services |
 |-------|----------|
 | **Router** (janus) | nftables, dnsmasq, Unbound, Caddy, WireGuard, Headscale, DNSUpdater, UniFi OS Server, node_exporter |
-| **TrueNAS** `10.10.30.20` | Home Assistant, Immich, Forgejo, Authelia, Blocky, Promtail |
+| **TrueNAS** `10.10.30.20` | HA, Immich, Authelia (Apps); Forgejo, Blocky, Promtail |
 | **k8s** | k3s, Traefik, Flux, Capacitor, kube-prometheus-stack, Zdk (when ready) |
 | **Zpi** `10.10.30.15` | Audio casting to speakers |
 
@@ -93,7 +95,8 @@ Full matrix: [decisions.md § Exposure matrix](decisions.md#exposure-matrix).
 
 Stages 0–8 with checklists: **[implementation-stages.md](implementation-stages.md)**.
 
-- **Stage 5:** Internal HA, Forgejo (LAN SSH), Authelia, Blocky, k8s stack — no WAN.
+- **Stage 5:** Internal HA / Immich / Authelia (TrueNAS Apps), Forgejo (LAN
+  SSH), Blocky, k8s stack — no WAN.
 - **Stage 7:** WAN is on for `img.zdk.no` and `ha.zdk.no`. Enable `code.zdk.no` / `zdk.no` when those apps are ready.
 
 ## Remaining decisions

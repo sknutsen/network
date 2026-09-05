@@ -16,6 +16,8 @@ services:
     restart: unless-stopped
     env_file:
       - ../authelia/.env
+    # Live Authelia is a TrueNAS App on 10.10.30.20:9091 (Caddy). Do not
+    # also publish this port from compose.
     ports:
       - "10.10.30.20:9091:9091"
     volumes:

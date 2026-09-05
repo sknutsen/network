@@ -40,6 +40,9 @@ session:
       expiration: 1h
       inactivity: 5m
 
+# Compose mounts /data writable and /config read-only (yml only).
+# TrueNAS App typically has writable /config and no /data — use
+# /config/db.sqlite3 and /config/notification.txt there, or mount /data.
 storage:
   local:
     path: /data/db.sqlite3

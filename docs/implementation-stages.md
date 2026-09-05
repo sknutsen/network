@@ -66,9 +66,15 @@ confirms `.21` answers.
 **TrueNAS (internal only — no WAN exposure yet):**
 
 - [x] Static IP `10.10.30.20` (dnsmasq reservation `cc:28:aa:42:c2:9d`)
-- [ ] Deploy `services/truenas/docker-compose.yml`: **Home Assistant**,
-      **Immich** (`immich.lab.zdk.no`), **Forgejo** (internal `code.lab.zdk.no`,
-      no Authelia), **Authelia**, **Blocky** (`10.10.30.21` alias on TrueNAS)
+- [x] **Home Assistant** — TrueNAS App on `10.10.30.20:30103`
+      (`ha.lab.zdk.no`)
+- [x] **Immich** — TrueNAS App on `10.10.30.20:30041` (`immich.lab.zdk.no`)
+- [x] **Authelia** — TrueNAS App on `10.10.30.20:9091`; portal
+      `https://auth.lab.zdk.no` ([README](../services/authelia/README.md)).
+      Do not also start compose Authelia on `:9091`.
+- [ ] **Forgejo** (compose) — internal `code.lab.zdk.no`, no Authelia
+- [ ] **Blocky** (`10.10.30.21` alias on TrueNAS) via
+      `services/truenas/docker-compose.yml`
 - [ ] Confirm Blocky answers on `.21`; then set
       `homelab.router.enableBlocky = true` and rebuild (DHCP, DNAT, no IoT
       domain-search). If IPv6 is on, set `blockyIpv6` too.
@@ -178,7 +184,7 @@ exposure** happens here.
 | B — Router core   | 2      | Blocks VLAN testing                                       |
 | C — L2 wireless   | 3      | After router trunks                                       |
 | D — Policy        | 4      | Firewall except IoT DNS cutover                           |
-| E — Homelab       | 5      | TrueNAS compose (incl. Blocky) + k8s; then `enableBlocky` |
+| E — Homelab       | 5      | TrueNAS Apps (HA/Immich/Authelia) + compose (Forgejo/Blocky) + k8s; then `enableBlocky` |
 | F — Remote access | 6, 7   | WireGuard/Headscale then WAN INPUT to Caddy               |
 | G — GitOps        | 0→8    | Repo scaffolding                                          |
 
@@ -190,7 +196,7 @@ Stage 7 needs Caddy on janus (Stage 2) plus TrueNAS backends from E.
 
 Already in tree: vlan/firewall/inventory docs, router flake, `nodes/` RK1
 flake, `k8s/` Flux tree, CRS310 `.rsc`, TrueNAS compose, Caddyfile,
-Authelia/Blocky/Promtail stubs, Zdk IngressRoute stub.
+Authelia config (live App), Blocky/Promtail stubs, Zdk IngressRoute stub.
 
 Still to add:
 

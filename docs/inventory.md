@@ -6,7 +6,7 @@ VLAN assignments, static IPs, switch ports, and dnsmasq reservations. Network de
 
 | Name | Hardware | OS | Static IP | Connection | Role |
 |------|----------|-----|-----------|------------|------|
-| **TrueNAS** | NAS | TrueNAS SCALE | `10.10.30.20` (+ `.21` alias for Blocky); MAC `cc:28:aa:42:c2:9d` | Wired (port 4) | HA, Immich, Forgejo, Authelia, Blocky; **UI:** `https://truenas.lab.zdk.no` (Caddy), not direct IP from trusted/mgmt |
+| **TrueNAS** | NAS | TrueNAS SCALE | `10.10.30.20` (+ `.21` alias for Blocky); MAC `cc:28:aa:42:c2:9d` | Wired (port 4) | HA, Immich, Authelia (TrueNAS Apps); Forgejo, Blocky; **UI:** `https://truenas.lab.zdk.no` (Caddy), not direct IP from trusted/mgmt |
 | **nordri** | RK1 (Turing Pi) | NixOS + k3s | `10.10.30.11` | Wired (port 3) | k3s control plane |
 | **sudri** | RK1 (Turing Pi) | NixOS + k3s | `10.10.30.12` | Wired (port 3) | k3s worker |
 | **austri** | RK1 (Turing Pi) | NixOS + k3s | `10.10.30.13` | Wired (port 3) | k3s worker |
@@ -79,6 +79,7 @@ DHCP `dhcp-host` rows live in `router/modules/dhcp.nix` (MACs in `router/lib/con
 |----------|-----|------|----------------|
 | `janus.lab.zdk.no` | `10.10.30.1` | 30 (servers GW; Unbound) | — (router) |
 | `truenas.lab.zdk.no` | `10.10.30.1` | 30 (Caddy → NAS `:443`; host is `.20`) | `cc:28:aa:42:c2:9d` → `.20` |
+| `auth.lab.zdk.no` | `10.10.30.1` | 30 (Caddy → Authelia App `:9091`) | — |
 | `blocky.lab.zdk.no` | `10.10.30.21` | 30 | — (alias on TrueNAS) |
 | `headscale.lab.zdk.no` | `10.10.30.1` | 30 (Caddy → `127.0.0.1:8081`) | — |
 | `crs310.lab.zdk.no` | `10.10.10.2` | 10 | — (static on switch) |
