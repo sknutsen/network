@@ -3,9 +3,24 @@ let
   cfg = config.homelab.router;
   C = import ../lib/constants.nix;
 
-  # MAC → IP reservations filled at deploy (see docs/inventory.md).
+  # MAC → IP (see docs/inventory.md). Multiple ethernet addrs share one IP.
   reservations = [
-    { ethernet = "cc:28:aa:42:c2:9d"; name = "truenas"; ipAddress = C.hosts.truenas; }
+    { ethernet = C.macs.uswNc; name = "usw-nc"; ipAddress = C.hosts.uswNc; }
+    { ethernet = C.macs.uswLr; name = "usw-lr"; ipAddress = C.hosts.uswLr; }
+    { ethernet = C.macs.zpi; name = "zpi"; ipAddress = C.hosts.zpi; }
+    { ethernet = C.macs.truenas; name = "truenas"; ipAddress = C.hosts.truenas; }
+    { ethernet = C.macs.pingu; name = "pingu"; ipAddress = C.hosts.pingu; }
+    { ethernet = C.macs.remorse; name = "remorse"; ipAddress = C.hosts.remorse; }
+    {
+      ethernet = [
+        C.macs.pixel7Wifi1
+        C.macs.pixel7Wifi2
+      ];
+      name = "pixel7";
+      ipAddress = C.hosts.pixel7;
+    }
+    { ethernet = C.macs.hue; name = "hue"; ipAddress = C.hosts.hue; }
+    { ethernet = C.macs.tradfri; name = "tradfri"; ipAddress = C.hosts.tradfri; }
   ];
 
   gw = cidr: lib.head (lib.splitString "/" cidr);
@@ -40,7 +55,11 @@ let
   );
 
   reservationLines = lib.concatMapStrings (
-    r: "dhcp-host=${r.ethernet},${r.name},${r.ipAddress},infinite\n"
+    r:
+    let
+      macs = if builtins.isList r.ethernet then lib.concatStringsSep "," r.ethernet else r.ethernet;
+    in
+    "dhcp-host=${macs},${r.name},${r.ipAddress},infinite\n"
   ) reservations;
 in
 {

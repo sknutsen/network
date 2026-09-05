@@ -83,6 +83,22 @@
     chromecast = "10.10.40.16";
   };
 
+  # Burned-in / observed MACs. dnsmasq reservations in modules/dhcp.nix.
+  # u7Lite has no reserved IP yet (DHCP pool on VLAN 10).
+  macs = {
+    truenas = "cc:28:aa:42:c2:9d";
+    uswNc = "f4:e2:c6:55:40:ab";
+    uswLr = "d0:21:f9:b2:bf:5d";
+    u7Lite = "a8:9c:6c:b8:f6:27";
+    zpi = "d8:3a:dd:cf:e1:75";
+    pingu = "f0:2f:74:dd:e6:48";
+    remorse = "96:5b:ef:ae:02:04";
+    pixel7Wifi1 = "ee:15:ec:33:4e:84";
+    pixel7Wifi2 = "76:37:82:bf:88:3d";
+    hue = "ec:b5:fa:12:d3:7c";
+    tradfri = "68:ec:8a:02:69:43";
+  };
+
   vpn = {
     network = "10.10.255.0/24";
     listenPort = 51820;

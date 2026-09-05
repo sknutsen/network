@@ -10,9 +10,10 @@ unanswered leftovers only.
 
 ## Deferred
 
-1. [ ] **MAC addresses** for remaining dnsmasq reservations. TrueNAS
-   (`cc:28:aa:42:c2:9d` → `10.10.30.20`) is in `router/modules/dhcp.nix`.
-   Fill the rest from leases (`docs/inventory.md`). Do not block Stage 2.
+1. [ ] **MAC addresses** for remaining dnsmasq reservations. Known hosts
+   are in `router/lib/constants.nix` (`macs`) and `router/modules/dhcp.nix`.
+   Still unknown: Turing Pi BMC, RK1s (nordri–vestri), Socrates, Peon,
+   Samsung TV, Rusken, Switch, Odyssey, Chromecast. Do not block Stage 2.
 
 ## Operational (not design — already on Stage 1–2 checklists)
 

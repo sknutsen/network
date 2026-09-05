@@ -25,7 +25,7 @@ IP addressing, DHCP pools, IPv6 layout, and DNS policy. Firewall rules:
 | `10.10.30.12`      | sudri        | k3s worker                                                          |
 | `10.10.30.13`      | austri       | k3s worker                                                          |
 | `10.10.30.14`      | vestri       | k3s worker                                                          |
-| `10.10.30.15`      | zpi          | Audio casting (RPi 5)                                               |
+| `10.10.30.15`      | zpi          | Audio casting (RPi 5); MAC `d8:3a:dd:cf:e1:75`                      |
 | `10.10.30.20`      | truenas      | HA, Forgejo, Authelia, Blocky                                       |
 | `10.10.30.21`      | blocky       | IoT DNS filter (TrueNAS Docker)                                     |
 | `10.10.30.100`     | traefik-lb   | Traefik LoadBalancer (MetalLB)                                      |
@@ -38,8 +38,9 @@ IP addressing, DHCP pools, IPv6 layout, and DNS policy. Firewall rules:
 | ------------- | ------ | ---------------------------- |
 | `10.10.10.1`  | janus  | Mgmt gateway                 |
 | `10.10.10.2`  | crs310 | CRS310 CPU (RouterOS), **IPv4 only** |
-| `10.10.10.3`  | usw-nc | UniFi Flex Mini (network closet) |
-| `10.10.10.4`  | usw-lr | UniFi Flex Mini (living room) |
+| `10.10.10.3`  | usw-nc | UniFi Flex Mini (network closet); MAC `f4:e2:c6:55:40:ab` |
+| `10.10.10.4`  | usw-lr | UniFi Flex Mini (living room); MAC `d0:21:f9:b2:bf:5d` |
+| DHCP `.100–.200` | U7 Lite | AP mgmt; MAC `a8:9c:6c:b8:f6:27` — no reservation |
 | DHCP `.100–.200` | Turing Pi BMC | Mgmt NIC — no reservation until MAC known |
 
 ## DHCP pools (dnsmasq on router)
@@ -74,7 +75,7 @@ Leave Caddy on `.30.1` so mgmt DNS stays infrastructure-only.
 | Port | Mode   | VLAN | Device                 |
 | ---- | ------ | ---- | ---------------------- |
 | 1    | tagged trunk | 10,20,30,40,50 | OptiPlex i350 (janus) |
-| 2    | native 10 + tagged 20,40,50 | mgmt + SSIDs | Ubiquiti U7 Lite |
+| 2    | native 10 + tagged 20,40,50 | mgmt + SSIDs | Ubiquiti U7 Lite (`a8:9c:6c:b8:f6:27`) |
 | 3    | access | 30   | Turing Pi 2.5          |
 | 4    | access | 30   | TrueNAS                |
 | 5    | access | 30   | Zpi (RPi 5)            |
@@ -95,7 +96,7 @@ UniFi **Default** must be VLAN 10 (mgmt) so **All** matches CRS310 ether6
 own networks (20/40/50). CRS310 still filters the uplink to tagged 20/40 only;
 extra UniFi networks tagged by **All** simply have no path past ether6.
 
-### USW-NC (network closet) — UniFi Flex Mini `10.10.10.3`
+### USW-NC (network closet) — UniFi Flex Mini `10.10.10.3` (`f4:e2:c6:55:40:ab`)
 
 | Port | UniFi assignment | Meaning | Device |
 | ---- | ---------------- | ------- | ------ |
@@ -107,18 +108,18 @@ extra UniFi networks tagged by **All** simply have no path past ether6.
 Static `10.10.10.3/24`, gateway/DNS `10.10.10.1`. Management follows **All**
 (Default / VLAN 10). Do not set a custom management VLAN that differs from Default.
 
-### USW-LR (living room) — UniFi Flex Mini `10.10.10.4`
+### USW-LR (living room) — UniFi Flex Mini `10.10.10.4` (`d0:21:f9:b2:bf:5d`)
 
 | Port | UniFi assignment | Meaning | Device |
 | ---- | ---------------- | ------- | ------ |
 | 1    | **All** | native 10 + tagged rest | USW-NC port 2 |
-| 2–5  | network **iot** (40) | access; tagged blocked | Hue, Trådfri, spare |
+| 2–5  | network **iot** (40) | access; tagged blocked | Hue (`ec:b5:fa:12:d3:7c`), Trådfri (`68:ec:8a:02:69:43`), spare |
 
 Static `10.10.10.4/24`, gateway/DNS `10.10.10.1`.
 
 ### SW-O (office) — unmanaged
 
-No 802.1Q. Every port is VLAN 20 because USW-NC port 5 is access 20. **pingu** and **Peon** (work machine) live here. Do not hang IoT or mgmt devices off SW-O.
+No 802.1Q. Every port is VLAN 20 because USW-NC port 5 is access 20. **pingu** (`f0:2f:74:dd:e6:48`) and **Peon** (work machine) live here. Do not hang IoT or mgmt devices off SW-O.
 
 ## Router cabling
 
