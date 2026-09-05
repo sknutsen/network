@@ -70,6 +70,7 @@ in
       define NET_GUEST = ${C.vlans.guest.network}
       define NET_VPN = ${C.vpn.network}
       define NET_LAB = 10.10.0.0/16
+      define NET_LAB6 = ${C.ula.lab}
 
       define TRUENAS = ${C.hosts.truenas}
       define BLOCKY = ${C.hosts.blocky}
@@ -148,6 +149,9 @@ in
           iifname { $IOT, $GUEST } udp dport 67 accept
           ${iotDnsInput}
 
+          # Avahi on this host (reflector vlan30 ↔ vlan40 only)
+          iifname { $SERVERS, $IOT } udp dport 5353 accept
+
           # UniFi OS Server (on-router). UI: admins on trusted/servers/mgmt (+ wg0).
           # Inform/STUN/discovery: AP on mgmt; trusted/servers for set-inform debug.
           iifname { $TRUSTED, $MGMT, $SERVERS } tcp dport ${toString C.unifi.uiPort} accept
@@ -182,6 +186,7 @@ in
 
           # --- IoT isolation ---
           iifname $IOT ip daddr $RFC1918 jump iot_to_rfc1918
+          iifname $IOT ip6 daddr $NET_LAB6 drop
           ${iotBlocky6Forward}
           ${iotWanDnsDrop}
           iifname $IOT oifname $WAN accept
@@ -201,8 +206,9 @@ in
 
           # --- Servers ---
           iifname $SERVERS oifname $WAN accept
-          # HA → IoT
+          # HA → IoT (v4 TrueNAS only; v6 any VLAN 30 — Matter needs ULA)
           iifname $SERVERS ip saddr $TRUENAS oifname $IOT accept
+          iifname $SERVERS oifname $IOT meta nfproto ipv6 accept
 
           # --- Mgmt ---
           iifname $MGMT oifname { $SERVERS, $WAN } accept

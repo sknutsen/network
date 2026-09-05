@@ -190,8 +190,8 @@ Authelia is **not** on `auth.lab.zdk.no` (portal), `code.lab.zdk.no` (Forgejo-na
 Stage 2 capture (2026-09-05): **OBOS Nett does not offer IPv6**. janus `wan0`
 has public IPv4 `84.48.97.100/21` only; no RA, no DHCPv6-PD, no GUA (link-local
 only). [OBOS: no IPv6 today](https://www.obos.no/boligselskap/nett/beboer/internett/fast-ip).
-Keep `enableIpv6 = false`. PD + `/64` per VLAN is already in `networking.nix`
-for when they do. Leave `blockyIpv6` null.
+Keep `enableIpv6 = false` for WAN. Lab **ULA** `fd10:10:10::/48` is on every
+VLAN so Matter / HA can route IPv6 without ISP PD. Leave `blockyIpv6` null.
 
 | Field                            | Value                                                      |
 | -------------------------------- | ---------------------------------------------------------- |
@@ -200,8 +200,19 @@ for when they do. Leave `blockyIpv6` null.
 | CGNAT                            | **Not active** (public IPv4 `84.48.97.100/21`)             |
 | Router WAN IP matches whatismyip | Yes                                                        |
 | Blocky GUA (`blockyIpv6`)        | n/a until ISP IPv6 (then `<servers-/64>::21`)              |
+| Lab ULA                          | **`fd10:10:10::/48`** (janus RA; independent of OBOS)      |
 
-### Per-VLAN v6 (when ISP delegates)
+### Per-VLAN ULA (live)
+
+| VLAN / iface | ULA |
+| ------------ | --- |
+| 10 mgmt      | `fd10:10:10:10::/64` (gw `…:10::1`) |
+| 20 trusted   | `fd10:10:10:20::/64` |
+| 30 servers   | `fd10:10:10:30::/64` |
+| 40 iot       | `fd10:10:10:40::/64` |
+| 50 guest     | `fd10:10:10:50::/64` |
+
+### Per-VLAN GUA (when ISP delegates)
 
 Carving uses the VLAN id as the subnet nibble. Replace `2a0x:yyyy` with the
 real prefix when OBOS Nett offers PD.
@@ -219,8 +230,8 @@ real prefix when OBOS Nett offers PD.
 switch is L2: tagged IPv6 for clients still passes. Do not give the switch a
 GUA until you have a reason to manage it over v6.
 
-**Security:** WAN inbound v6 default deny. IoT/guest: internet egress only; no
-cross-VLAN v6.
+**Security:** WAN inbound v6 default deny. IoT/guest: no new sessions to lab
+ULA. Servers → IoT v6 allowed (Matter). No ULA reflection to trusted/guest.
 
 **Layout:** Native /64 per VLAN from delegated prefix (resolved). ISP currently
 gives no prefix — see [decision briefs](decision-briefs.md#1-ipv6-prefix-size).
@@ -229,9 +240,8 @@ gives no prefix — see [decision briefs](decision-briefs.md#1-ipv6-prefix-size)
 
 1. **Prefer static IPs** in Home Assistant and casting rules — see
    [inventory.md](inventory.md).
-2. **Cross-VLAN reflector (if needed):** Avahi on router, scoped **servers
-   (VLAN 30) ↔ IoT (VLAN 40) only** — for HA discovery and casting. Never
-   reflect to guest or trusted broadly.
+2. **Cross-VLAN reflector:** Avahi on janus, **servers (VLAN 30) ↔ IoT
+   (VLAN 40) only** — Matter / HA. Never reflect to guest or trusted.
 3. **Trusted → IoT:** firewall allows to specific IPs (TV, Chromecast, Odyssey,
    Hue, Dirigera) over wide mDNS reflection to trusted VLAN.
 4. **Do not** move Home Assistant to IoT VLAN for discovery.

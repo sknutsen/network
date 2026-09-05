@@ -78,6 +78,7 @@ trusted, servers (jump/k8s), or VPN — not from VLAN 10.
 | trusted + servers + mgmt (+ wg0) | janus | 11443/tcp | **ALLOW** | UniFi UI. Mgmt included so you can use the AP’s native VLAN |
 | mgmt (AP + Flex Minis) + trusted + servers | `10.10.10.1` | 8080/tcp, 3478/udp, 10001/udp | **ALLOW** | UniFi Inform / STUN / discovery. **Do not put Headscale on :8080** |
 | wg0 | janus | 53/udp+tcp | **ALLOW** Stage 6 | Split-horizon Unbound for VPN clients |
+| servers + iot | janus | 5353/udp | **ALLOW** | Avahi reflector (30↔40 only) |
 | localhost | Headscale | 8081/tcp | — | Caddy reverse_proxy only; no extra INPUT |
 
 ## East-west (VLAN 30)
@@ -97,6 +98,7 @@ trusted, servers (jump/k8s), or VPN — not from VLAN 10.
 | Rule | Action |
 |------|--------|
 | HA (`10.10.30.20`) → IoT device IPs | **ALLOW** tcp/udp |
+| servers VLAN → IoT IPv6 ULA | **ALLOW** — Matter / Dirigera (`fd10:10:10::/48`) |
 | IoT → HA UI `:30103` | **DENY** |
 | Trusted + VPN → HA `:30103` | **DENY** — use `https://ha.lab.zdk.no` or `https://ha.zdk.no` (Caddy, HA-native auth) |
 | Trusted + VPN → janus `:443` | **ALLOW** |

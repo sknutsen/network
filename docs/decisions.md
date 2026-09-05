@@ -61,7 +61,7 @@ are canonical.
 | ISP               | **OBOS Nett**                                                  | Dynamic public IPv4 `84.48.97.100/21`; no IPv6                 |
 | ISP modem         | **Bridge mode** — configure at router cutover                  | OptiPlex is sole router                                         |
 | Hairpin NAT       | **Off**                                                        | Unbound already answers `zdk.no` / `code.zdk.no` → `10.10.30.1`; revisit only if clients bypass internal DNS |
-| mDNS              | **Static IPs first**                                           | Avahi reflector servers↔IoT only if discovery fails             |
+| mDNS              | **Static IPs + Avahi 30↔40**                                   | Matter / Dirigera; ULA `fd10:10:10::/48`; never trusted/guest   |
 | Guest DNS         | **1.1.1.1 / 9.9.9.9**                                          | No Blocky on guest for v1                                       |
 | IoT lab DNS       | **Deny** `*.lab.zdk.no` after Blocky (Stage 5)                 | Whitelist only if a device needs a name                         |
 | Caddy LAN INPUT   | **trusted + servers + vpn** (`:80/:443`)                       | Not mgmt (infrastructure-only); not IoT/guest. WAN INPUT Stage 7 |

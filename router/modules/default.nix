@@ -2,6 +2,7 @@
   imports = [
     ./options.nix
     ./networking.nix
+    ./mdns.nix
     ./dhcp.nix
     ./dns.nix
     ./firewall.nix

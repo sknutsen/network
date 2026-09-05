@@ -28,7 +28,7 @@ Resolved** here, and remove the row from `plan.md` § Remaining decisions.
 | 13 | [Nintendo Switch local play](#13-nintendo-switch-local-play) | Deferred | If local play fails |
 | 14 | [Hairpin NAT](#14-hairpin-nat) | Resolved — off | — |
 | 15 | [CrowdSec](#15-crowdsec) | Resolved | — |
-| 16 | [mDNS / Avahi reflector](#16-mdns--avahi-reflector) | Resolved — static IPs first | Stage 4–5 if discovery fails |
+| 16 | [mDNS / Avahi reflector](#16-mdns--avahi-reflector) | Resolved — servers↔IoT Avahi | — |
 | 17 | [Trusted → IoT cast rules](#17-trusted--iot-cast-rules) | Resolved — per-device allows | — |
 | 18 | [Future public apps](#18-future-public-apps) | Per-app — Immich + HA documented | Each new WAN service |
 | 19 | [Guest DNS via Blocky](#19-guest-dns-via-blocky) | Resolved — public resolvers | Post Stage 4 if wanted |
@@ -475,7 +475,7 @@ show sustained 403/401 brute force after the first month of WAN exposure.
 
 ## 16. mDNS / Avahi reflector
 
-**Status:** **Resolved** — static IPs first (accepted default).
+**Status:** **Resolved** — Avahi reflector VLAN 30 ↔ 40 (Matter / HA).
 
 ### Context
 
@@ -493,9 +493,10 @@ Home Assistant on servers VLAN initiates to IoT; HA is **not** moved to IoT
 
 ### Decision
 
-**Static IPs in HA** per [inventory.md](inventory.md). Enable **scoped Avahi
-reflector** (VLAN 30 ↔ 40 only) only if discovery fails for casting or HA
-auto-detection. Never reflect to guest or trusted broadly.
+**Static IPs in HA** for Hue / HTTP integrations. **Avahi reflector VLAN 30 ↔
+40** for Matter (Dirigera) — IPv4 static host is not enough. Lab ULA
+`fd10:10:10::/48` on each VLAN so advertisements are routable (not `fe80`).
+Never reflect to guest or trusted.
 
 ---
 

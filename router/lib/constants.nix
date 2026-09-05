@@ -3,11 +3,18 @@
 {
   domain = "lab.zdk.no";
 
+  # Lab-local ULA (not ISP). Matter / HA need routed IPv6; OBOS has none.
+  ula = {
+    lab = "fd10:10:10::/48";
+  };
+
   vlans = {
     mgmt = {
       id = 10;
       ipv4 = "10.10.10.1/24";
+      ipv6 = "fd10:10:10:10::1/64";
       network = "10.10.10.0/24";
+      network6 = "fd10:10:10:10::/64";
       dhcpRange = {
         start = "10.10.10.100";
         end = "10.10.10.200";
@@ -17,7 +24,9 @@
     trusted = {
       id = 20;
       ipv4 = "10.10.20.1/24";
+      ipv6 = "fd10:10:10:20::1/64";
       network = "10.10.20.0/24";
+      network6 = "fd10:10:10:20::/64";
       dhcpRange = {
         start = "10.10.20.100";
         end = "10.10.20.250";
@@ -27,7 +36,9 @@
     servers = {
       id = 30;
       ipv4 = "10.10.30.1/24";
+      ipv6 = "fd10:10:10:30::1/64";
       network = "10.10.30.0/24";
+      network6 = "fd10:10:10:30::/64";
       dhcpRange = {
         start = "10.10.30.22";
         end = "10.10.30.50";
@@ -37,7 +48,9 @@
     iot = {
       id = 40;
       ipv4 = "10.10.40.1/24";
+      ipv6 = "fd10:10:10:40::1/64";
       network = "10.10.40.0/24";
+      network6 = "fd10:10:10:40::/64";
       dhcpRange = {
         start = "10.10.40.100";
         end = "10.10.40.250";
@@ -47,7 +60,9 @@
     guest = {
       id = 50;
       ipv4 = "10.10.50.1/24";
+      ipv6 = "fd10:10:10:50::1/64";
       network = "10.10.50.0/24";
+      network6 = "fd10:10:10:50::/64";
       dhcpRange = {
         start = "10.10.50.100";
         end = "10.10.50.250";

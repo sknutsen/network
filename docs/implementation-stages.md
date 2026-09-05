@@ -57,7 +57,7 @@ confirms `.21` answers.
 
 - [x] Apply [firewall-matrix.md](firewall-matrix.md) except IoT DNS cutover
       (`enableBlocky` stays false)
-- [x] mDNS: static IPs first; Avahi reflector servers↔IoT only if needed
+- [x] mDNS: static IPs first; Avahi reflector servers↔IoT (Matter / Dirigera)
 - [x] Trusted→IoT cast allows (TV/Chromecast/Odyssey) here or with HA — not at
       Stage 3. Uncomment the nftables cast rule when enabling.
 

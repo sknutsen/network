@@ -13,7 +13,8 @@ in
 
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;
-    "net.ipv6.conf.all.forwarding" = lib.mkIf cfg.enableIpv6 1;
+    # ULA between VLANs (Matter). WAN PD is still gated on enableIpv6.
+    "net.ipv6.conf.all.forwarding" = 1;
   };
 
   networking = {
@@ -91,15 +92,24 @@ in
           name = "40-vlan${toString vlan.id}";
           value = {
             matchConfig.Name = "vlan${toString vlan.id}";
-            address = [ vlan.ipv4 ];
+            address = [
+              vlan.ipv4
+              vlan.ipv6
+            ];
             networkConfig = {
               ConfigureWithoutCarrier = true;
               IPv6AcceptRA = false;
+              IPv6SendRA = true;
             }
             // lib.optionalAttrs cfg.enableIpv6 {
               DHCPPrefixDelegation = true;
-              IPv6SendRA = true;
             };
+            ipv6Prefixes = [
+              {
+                Prefix = vlan.network6;
+                Assign = false;
+              }
+            ];
           }
           // lib.optionalAttrs cfg.enableIpv6 {
             # SubnetId 0x10/0x20/… matches vlan-plan nibble carving.
