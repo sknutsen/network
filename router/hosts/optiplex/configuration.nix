@@ -29,7 +29,7 @@ in {
     enableCaddy = true;
     enableWanCaddy = false; # WAN 80/443 for img.zdk.no and ha.zdk.no
     caddyEmail = "admin@zdk.no";
-    enableBlocky = false; # Stage 5 — flip after Blocky answers on 10.10.30.21
+    enableBlocky = true; # Blocky answers on 10.10.30.21; IoT DHCP + DNAT cutover
   };
 
   # Confirm on the installer: lsblk -d -o NAME,SIZE,MODEL && ls -l /dev/disk/by-id/

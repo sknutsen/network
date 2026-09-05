@@ -74,11 +74,9 @@ confirms `.21` answers.
 - [ ] **Forgejo** — TrueNAS App on `10.10.30.20:30142` (UI) / `:30143`
       (SSH); `code.lab.zdk.no`, no Authelia. Do not also start compose
       Forgejo on those ports.
-- [ ] **Blocky** (`10.10.30.21` alias on TrueNAS) via
-      `services/truenas/docker-compose.yml`
-- [ ] Confirm Blocky answers on `.21`; then set
-      `homelab.router.enableBlocky = true` and rebuild (DHCP, DNAT, no IoT
-      domain-search). If IPv6 is on, set `blockyIpv6` too.
+- [x] **Blocky** — TrueNAS Custom App on `10.10.30.21:53` (alias on `eno1`)
+- [x] Confirm Blocky answers on `.21`; `enableBlocky = true` (DHCP, DNAT, no
+      IoT domain-search). `blockyIpv6` stays null until ISP IPv6.
 - [ ] Validate IoT DNS: DHCP DNS is `.21`; `dig @8.8.8.8 example.com` from IoT
       still resolves (intercept); IoT cannot use Unbound on `10.10.40.1` as a
       bypass. IoT lease is **1 h**.
