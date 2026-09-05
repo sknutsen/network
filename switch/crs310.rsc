@@ -30,8 +30,8 @@ set [find where default-name=sfp-sfpplus2] disabled=yes
 :do { add bridge=bridge interface=ether4 pvid=30 frame-types=admit-only-untagged-and-priority-tagged comment="TrueNAS" } on-error={
   set [find where interface=ether4] bridge=bridge pvid=30 frame-types=admit-only-untagged-and-priority-tagged comment="TrueNAS"
 }
-:do { add bridge=bridge interface=ether5 pvid=30 frame-types=admit-only-untagged-and-priority-tagged comment="Zpi" } on-error={
-  set [find where interface=ether5] bridge=bridge pvid=30 frame-types=admit-only-untagged-and-priority-tagged comment="Zpi"
+:do { add bridge=bridge interface=ether5 pvid=10 frame-types=admit-only-untagged-and-priority-tagged comment="Turing Pi BMC" } on-error={
+  set [find where interface=ether5] bridge=bridge pvid=10 frame-types=admit-only-untagged-and-priority-tagged comment="Turing Pi BMC"
 }
 :do { add bridge=bridge interface=ether6 pvid=10 frame-types=admit-all comment="USW-NC native mgmt 10" } on-error={
   set [find where interface=ether6] bridge=bridge pvid=10 frame-types=admit-all comment="USW-NC native mgmt 10"
@@ -42,9 +42,9 @@ set [find where default-name=sfp-sfpplus2] disabled=yes
 # before it can be untagged on VLAN 10 — wipe-and-add avoids that conflict.
 /interface bridge vlan
 :foreach v in=[find] do={ :do { remove $v } on-error={} }
-add bridge=bridge vlan-ids=10 tagged=bridge,ether1 untagged=ether2,ether6 comment="mgmt"
+add bridge=bridge vlan-ids=10 tagged=bridge,ether1 untagged=ether2,ether5,ether6 comment="mgmt"
 add bridge=bridge vlan-ids=20 tagged=ether1,ether2,ether6 comment="trusted"
-add bridge=bridge vlan-ids=30 tagged=ether1 untagged=ether3,ether4,ether5 comment="servers"
+add bridge=bridge vlan-ids=30 tagged=ether1 untagged=ether3,ether4 comment="servers"
 add bridge=bridge vlan-ids=40 tagged=ether1,ether2,ether6 comment="iot"
 add bridge=bridge vlan-ids=50 tagged=ether1,ether2 comment="guest"
 

@@ -21,7 +21,7 @@ in {
     hostname = "janus";
     wanInterface = "wan0"; # I217LM 34:17:eb:96:84:20
     lanTrunkInterface = "lan0"; # i350-T2 port 1 a0:36:9f:33:ae:96
-    enableIpv6 = false; # Stage 2: true once WAN is up (PD). Leave blockyIpv6 null until GUA known.
+    enableIpv6 = true; # Stage 2: WAN DHCPv6-PD + /64 per VLAN. Leave blockyIpv6 null until GUA known.
     blockyIpv6 = null; # set after PD, e.g. "<servers-/64>::21"
     enableWireGuard = false;
     enableDnsUpdater = false;

@@ -350,7 +350,8 @@ this brief is “prove them on the metal.”
 
 1. **Label** CRS310 ports 1–8 per [inventory.md](inventory.md) / vlan-plan.
 2. **Cable the LAN side first** (no ISP cutover yet): i350 port 1 → CRS310 ether1
-   trunk; AP + PoE injector → ether2; TrueNAS → ether4; Turing Pi → ether3.
+   trunk; AP + PoE injector → ether2; TrueNAS → ether4; Turing Pi → ether3;
+   Turing Pi BMC → ether5.
 3. **After NixOS first boot**, confirm names match MACs:
    `ip link` shows `wan0` / `lan0` / `spare0`; `ethtool -p lan0` blinks i350
    **port 1** (or unplug test). Spare stays down.
@@ -370,7 +371,7 @@ this brief is “prove them on the metal.”
 | OptiPlex 9020 MT | I217LM = WAN; i350-T2 port 1 = 802.1Q trunk | `ip link`, `ethtool -p lan0` |
 | CRS310 | 802.1Q VLAN, trunk + access ports per vlan-plan | Import `.rsc`; ping `10.10.10.2` |
 | U7 Lite | SSIDs mapped to VLANs 20/40/50 | UniFi OS Server; DHCP subnet check |
-| Turing Pi 2.5 | Single NIC on VLAN 30 access | Link on port 3 |
+| Turing Pi 2.5 | Node NIC on VLAN 30 access; BMC on VLAN 10 access | Link on port 3 / port 5 |
 | TrueNAS | NIC on VLAN 30 access | Static `10.10.30.20` |
 
 ---

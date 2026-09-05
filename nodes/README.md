@@ -43,8 +43,8 @@ U-Boot must stay on eMMC. The OS lives on NVMe. Follow
 5. Set the static IP from inventory (or rebuild this flake — it assigns
    `.11`–`.14`). SSH keys for `zdk` and `root` match the router.
 
-BMC Ethernet is VLAN 10 (mgmt) only. Node NICs are VLAN 30 access (CRS310
-port 3).
+BMC Ethernet is VLAN 10 (mgmt) only — CRS310 port 5. Node NICs are VLAN 30
+access (CRS310 port 3).
 
 ## Adopt this flake
 
@@ -102,7 +102,7 @@ Do not mix mainline and BSP nodes in one cluster.
 |------|--------|
 | NIC name | Confirm `enP2p33s0` vs `end0` |
 | NVMe by-id | Fill `diskDevice` before any disko reimage |
-| MACs | Inventory / dnsmasq — same deferred list as the router |
+| MACs | Board 2.5GbE `d0:ea:11:6d:36:a7` is documented; per-RK1 NICs still open |
 | k3s token | After nordri `enableK3s` |
 | IPv6 | `enableIpv6` after Stage 2 PD |
 

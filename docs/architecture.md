@@ -66,7 +66,7 @@ flowchart TB
   crs -->|ether2 native 10 + tagged 20/40/50| ap[U7 Lite]
   crs -->|ether3 access 30| tpi[Turing Pi]
   crs -->|ether4 access 30| nas[TrueNAS]
-  crs -->|ether5 access 30| zpi[Zpi]
+  crs -->|ether5 access 10| bmc[Turing Pi BMC]
   crs -->|ether6 native 10 + tagged 20/40| nc[USW-NC]
   nc -->|port 2 native 10 + tagged 40| lr[USW-LR]
   nc -->|port 5 access 20| swo[SW-O]
@@ -76,7 +76,7 @@ flowchart TB
   swo --- peon[Peon]
 ```
 
-USW-NC (closet) uplinks on its port 4. USW-LR (living room) uplinks on port 1. SW-O is unmanaged, so every office drop is VLAN 20. Mgmt IPs: CRS310 `10.10.10.2`, USW-NC `10.10.10.3`, USW-LR `10.10.10.4`. Port tables: [vlan-plan.md](vlan-plan.md).
+USW-NC (closet) uplinks on its port 4. USW-LR (living room) uplinks on port 1. SW-O is unmanaged, so every office drop is VLAN 20. Mgmt IPs: CRS310 `10.10.10.2`, USW-NC `10.10.10.3`, USW-LR `10.10.10.4`, Turing Pi BMC `10.10.10.5`. Port tables: [vlan-plan.md](vlan-plan.md).
 
 ## Service map
 

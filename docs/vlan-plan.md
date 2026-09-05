@@ -25,7 +25,7 @@ IP addressing, DHCP pools, IPv6 layout, and DNS policy. Firewall rules:
 | `10.10.30.12`      | sudri        | k3s worker                                                          |
 | `10.10.30.13`      | austri       | k3s worker                                                          |
 | `10.10.30.14`      | vestri       | k3s worker                                                          |
-| `10.10.30.15`      | zpi          | Audio casting (RPi 5); MAC `d8:3a:dd:cf:e1:75`                      |
+| `10.10.30.15`      | zpi          | Audio casting (RPi 5); eth `d8:3a:dd:cf:e1:75`; Wi-Fi `d8:3a:dd:cf:e1:78` (no reservation) |
 | `10.10.30.20`      | truenas      | HA, Immich, Authelia (TrueNAS Apps); Forgejo, Blocky                |
 | `10.10.30.21`      | blocky       | IoT DNS filter (TrueNAS Docker)                                     |
 | `10.10.30.100`     | traefik-lb   | Traefik LoadBalancer (MetalLB)                                      |
@@ -40,8 +40,8 @@ IP addressing, DHCP pools, IPv6 layout, and DNS policy. Firewall rules:
 | `10.10.10.2`  | crs310 | CRS310 CPU (RouterOS), **IPv4 only** |
 | `10.10.10.3`  | usw-nc | UniFi Flex Mini (network closet); MAC `f4:e2:c6:55:40:ab` |
 | `10.10.10.4`  | usw-lr | UniFi Flex Mini (living room); MAC `d0:21:f9:b2:bf:5d` |
+| `10.10.10.5`  | turing-bmc | Turing Pi BMC; MAC `d0:ea:11:6d:36:a9`; CRS310 ether5 |
 | DHCP `.100–.200` | U7 Lite | AP mgmt; MAC `a8:9c:6c:b8:f6:27` — no reservation |
-| DHCP `.100–.200` | Turing Pi BMC | Mgmt NIC — no reservation until MAC known |
 
 ## DHCP pools (dnsmasq on router)
 
@@ -76,9 +76,9 @@ Leave Caddy on `.30.1` so mgmt DNS stays infrastructure-only.
 | ---- | ------ | ---- | ---------------------- |
 | 1    | tagged trunk | 10,20,30,40,50 | OptiPlex i350 (janus) |
 | 2    | native 10 + tagged 20,40,50 | mgmt + SSIDs | Ubiquiti U7 Lite (`a8:9c:6c:b8:f6:27`) |
-| 3    | access | 30   | Turing Pi 2.5          |
+| 3    | access | 30   | Turing Pi 2.5 nodes (`d0:ea:11:6d:36:a7`) |
 | 4    | access | 30   | TrueNAS                |
-| 5    | access | 30   | Zpi (RPi 5)            |
+| 5    | access | 10   | Turing Pi BMC (`d0:ea:11:6d:36:a9`) |
 | 6    | native 10 + tagged 20,40 | mgmt + trusted + iot | USW-NC port 4 |
 | 7–8  | disabled | — | unused                 |
 | 9–10 | disabled | — | SFP+ unused            |
@@ -113,7 +113,7 @@ Static `10.10.10.3/24`, gateway/DNS `10.10.10.1`. Management follows **All**
 | Port | UniFi assignment | Meaning | Device |
 | ---- | ---------------- | ------- | ------ |
 | 1    | **All** | native 10 + tagged rest | USW-NC port 2 |
-| 2–5  | network **iot** (40) | access; tagged blocked | Hue (`ec:b5:fa:12:d3:7c`), Trådfri (`68:ec:8a:02:69:43`), spare |
+| 2–5  | network **iot** (40) | access; tagged blocked | Hue (`ec:b5:fa:12:d3:7c`), Trådfri (`68:ec:8a:02:69:43`), Chromecast eth (`44:09:b8:01:80:87`), spare |
 
 Static `10.10.10.4/24`, gateway/DNS `10.10.10.1`.
 

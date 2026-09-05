@@ -52,10 +52,18 @@ in
       "10-wan" = {
         matchConfig.Name = cfg.wanInterface;
         networkConfig = {
-          DHCP = "ipv4";
+          DHCP = if cfg.enableIpv6 then "yes" else "ipv4";
           IPv6AcceptRA = cfg.enableIpv6;
         };
         linkConfig.RequiredForOnline = "routable";
+      }
+      // lib.optionalAttrs cfg.enableIpv6 {
+        # DHCPv6-PD: hint /56 (OBOS typical). WithoutRA so PD starts even if
+        # the ISP RA omits M/O. Document the real prefix in docs/vlan-plan.md.
+        dhcpV6Config = {
+          WithoutRA = "solicit";
+          PrefixDelegationHint = "::/56";
+        };
       };
 
       "20-lan-trunk" = {
@@ -81,6 +89,20 @@ in
             networkConfig = {
               ConfigureWithoutCarrier = true;
               IPv6AcceptRA = false;
+            }
+            // lib.optionalAttrs cfg.enableIpv6 {
+              DHCPPrefixDelegation = true;
+              IPv6SendRA = true;
+            };
+          }
+          // lib.optionalAttrs cfg.enableIpv6 {
+            # SubnetId 0x10/0x20/… matches vlan-plan nibble carving.
+            # Token ::1 → gateway is <prefix>::1 on each VLAN.
+            dhcpPrefixDelegationConfig = {
+              UplinkInterface = cfg.wanInterface;
+              SubnetId = "0x${toString vlan.id}";
+              Announce = true;
+              Token = "::1";
             };
           };
         }

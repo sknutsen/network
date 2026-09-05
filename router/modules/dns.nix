@@ -56,6 +56,7 @@ in
           ''"crs310.${C.domain}. A ${C.hosts.crs310}"''
           ''"usw-nc.${C.domain}. A ${C.hosts.uswNc}"''
           ''"usw-lr.${C.domain}. A ${C.hosts.uswLr}"''
+          ''"turing-bmc.${C.domain}. A ${C.hosts.turingBmc}"''
           ''"nordri.${C.domain}. A ${C.hosts.nordri}"''
           ''"sudri.${C.domain}. A ${C.hosts.sudri}"''
           ''"austri.${C.domain}. A ${C.hosts.austri}"''

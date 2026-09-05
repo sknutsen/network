@@ -63,6 +63,7 @@
     crs310 = "10.10.10.2";
     uswNc = "10.10.10.3";
     uswLr = "10.10.10.4";
+    turingBmc = "10.10.10.5";
     nordri = "10.10.30.11";
     sudri = "10.10.30.12";
     austri = "10.10.30.13";
@@ -89,14 +90,22 @@
     truenas = "cc:28:aa:42:c2:9d";
     uswNc = "f4:e2:c6:55:40:ab";
     uswLr = "d0:21:f9:b2:bf:5d";
+    turingBmc = "d0:ea:11:6d:36:a9";
+    turingNodes = "d0:ea:11:6d:36:a7"; # board 2.5GbE; RK1s have their own MACs
     u7Lite = "a8:9c:6c:b8:f6:27";
     zpi = "d8:3a:dd:cf:e1:75";
+    zpiWifi = "d8:3a:dd:cf:e1:78"; # Wi-Fi; no reservation (eth is VLAN 30)
     pingu = "f0:2f:74:dd:e6:48";
     remorse = "96:5b:ef:ae:02:04";
     pixel7Wifi1 = "ee:15:ec:33:4e:84";
     pixel7Wifi2 = "76:37:82:bf:88:3d";
     hue = "ec:b5:fa:12:d3:7c";
     tradfri = "68:ec:8a:02:69:43";
+    rusken = "b0:4a:39:a2:e9:20";
+    samsungTv = "bc:45:5b:92:63:70"; # unverified
+    odyssey = "e8:aa:cb:df:cb:1e"; # unverified
+    chromecastWifi = "f4:f5:d8:5f:f1:7a";
+    chromecastEth = "44:09:b8:01:80:87";
   };
 
   vpn = {

@@ -116,7 +116,7 @@ choices on this list. Do not invent a parallel numbering scheme.
 | 13 | Nintendo Switch local play | Deferred until local play is tested |
 | 18 | Future public apps | Per-app checklist in the brief |
 
-Remaining MAC reservations (RK1s, BMC, Socrates, Peon, leftover IoT) are first-boot work, not a brief: [OPEN-QUESTIONS.md](../router/OPEN-QUESTIONS.md).
+Remaining MAC reservations (per-RK1 NICs, Socrates, Peon, Switch; confirm TV/Odyssey) are first-boot work, not a brief: [OPEN-QUESTIONS.md](../router/OPEN-QUESTIONS.md).
 
 ## Target repo layout
 

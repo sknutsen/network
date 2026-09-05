@@ -17,17 +17,17 @@ Stages marked **(parallel)** can run concurrently. Architecture:
 
 - [x] Verify OptiPlex 9020 MT: I217LM → WAN; i350-T2 port 1 → CRS310 trunk
       (`ethtool -p lan0`)
-- [ ] Label ports per [inventory.md](inventory.md)
-- [ ] Cable LAN first (trunk, AP, TrueNAS, Turing Pi, USW-NC/USW-LR/SW-O); **bridge OBOS Nett modem
-      at cutover**, then modem → `wan0`
+- [x] Label ports per [inventory.md](inventory.md)
+- [x] Cable LAN first (trunk, AP, TrueNAS, Turing Pi, USW-NC/USW-LR/SW-O);
+      **bridge OBOS Nett modem at cutover**, then modem → `wan0`
 
 ## Stage 2 — Core router (depends: Stage 1 WAN link)
 
 - [x] Install NixOS with nixos-anywhere + disko (`.#optiplex`); WAN DHCP
-- [ ] VLAN interfaces; dnsmasq per [vlan-plan.md](vlan-plan.md)
-- [ ] Default deny firewall; basic NAT; allow UniFi ports on LAN INPUT
-- [ ] Unbound split-horizon; Caddy (`enableCaddy`; WAN closed until Stage 7)
-- [ ] IoT DHCP DNS = Unbound (`enableBlocky = false`); do not point IoT at
+- [x] VLAN interfaces; dnsmasq per [vlan-plan.md](vlan-plan.md)
+- [x] Default deny firewall; basic NAT; allow UniFi ports on LAN INPUT
+- [x] Unbound split-horizon; Caddy (`enableCaddy`; WAN closed until Stage 7)
+- [x] IoT DHCP DNS = Unbound (`enableBlocky = false`); do not point IoT at
       Blocky yet
 - [ ] IPv6: set `enableIpv6 = true`; native /64 per VLAN; document OBOS Nett
       prefix **and Blocky GUA** in vlan-plan; leave `blockyIpv6` null until GUA
@@ -35,19 +35,19 @@ Stages marked **(parallel)** can run concurrently. Architecture:
 - [x] **UniFi OS Server** on OptiPlex (functional): vendor binaries +
       `unifi.nix` systemd/rootless Podman; data `/var/lib/unifi-os-server`; UI
       `:11443`; inform `:8080` (Headscale must not use `:8080`)
-- [x] Inform Host Override = **`10.10.10.1`** (AP and Flex Minis native VLAN 10). Do not use
-      `10.10.30.1` — that is Caddy, not Inform.
-- [ ] node_exporter for Prometheus scraping
+- [x] Inform Host Override = **`10.10.10.1`** (AP and Flex Minis native VLAN
+      10). Do not use `10.10.30.1` — that is Caddy, not Inform.
+- [x] node_exporter for Prometheus scraping
 
 ## Stage 3 — Switch and WiFi VLANs (parallel: Stage 2 once router VLANs exist)
 
 - [x] CRS310: import [switch/crs310.rsc](../switch/crs310.rsc) (L2 VLAN filter;
       mgmt `10.10.10.2`; ether6 trunk to USW-NC)
 - [ ] U7 Lite: adopt in UniFi OS Server on router; SSIDs `Hai-Fi Wai-Fi` /
-  `(IoT)` / `(Guest)` → VLANs 20/40/50; guest isolation; Inform Host
-  `10.10.10.1`
-- [ ] USW-NC / USW-LR: adopt; mgmt `10.10.10.3` / `10.10.10.4` on VLAN 10;
-      port profiles per [vlan-plan.md](vlan-plan.md)
+      `(IoT)` / `(Guest)` → VLANs 20/40/50; guest isolation; Inform Host
+      `10.10.10.1`
+- [ ] USW-NC / USW-LR: adopt; mgmt `10.10.10.3` / `10.10.10.4` on VLAN 10; port
+      profiles per [vlan-plan.md](vlan-plan.md)
 - [ ] Test wired + wireless clients land in correct subnet
 
 ## Stage 4 — Segmentation hardening (depends: Stage 3)
@@ -66,12 +66,11 @@ confirms `.21` answers.
 **TrueNAS (internal only — no WAN exposure yet):**
 
 - [x] Static IP `10.10.30.20` (dnsmasq reservation `cc:28:aa:42:c2:9d`)
-- [x] **Home Assistant** — TrueNAS App on `10.10.30.20:30103`
-      (`ha.lab.zdk.no`)
+- [x] **Home Assistant** — TrueNAS App on `10.10.30.20:30103` (`ha.lab.zdk.no`)
 - [x] **Immich** — TrueNAS App on `10.10.30.20:30041` (`immich.lab.zdk.no`)
 - [x] **Authelia** — TrueNAS App on `10.10.30.20:9091`; portal
-      `https://auth.lab.zdk.no` ([README](../services/authelia/README.md)).
-      Do not also start compose Authelia on `:9091`.
+      `https://auth.lab.zdk.no` ([README](../services/authelia/README.md)). Do
+      not also start compose Authelia on `:9091`.
 - [ ] **Forgejo** (compose) — internal `code.lab.zdk.no`, no Authelia
 - [ ] **Blocky** (`10.10.30.21` alias on TrueNAS) via
       `services/truenas/docker-compose.yml`
@@ -81,10 +80,10 @@ confirms `.21` answers.
 - [ ] Validate IoT DNS: DHCP DNS is `.21`; `dig @8.8.8.8 example.com` from IoT
       still resolves (intercept); IoT cannot use Unbound on `10.10.40.1` as a
       bypass. IoT lease is **1 h**.
-- [x] Caddy on janus: Authelia on lab UIs except `auth` / `code.lab` /
-      `ha.lab` / `immich.lab` / `truenas.lab` / `unifi.lab` / (later)
-      `headscale.lab`. UI is `https://truenas.lab.zdk.no` (not the raw IP —
-      TrueNAS host firewall is same-subnet only).
+- [x] Caddy on janus: Authelia on lab UIs except `auth` / `code.lab` / `ha.lab`
+      / `immich.lab` / `truenas.lab` / `unifi.lab` / (later) `headscale.lab`. UI
+      is `https://truenas.lab.zdk.no` (not the raw IP — TrueNAS host firewall is
+      same-subnet only).
 - [x] DNS-01: Domeneshop plugin on Caddy (`withPlugins`) + sops
       `caddy.domeneshopToken`/`Secret`; `caddyEmail`; lab certs issue. Caddyfile
       `dns01` snippet uses public resolvers (`1.1.1.1` / `9.9.9.9`) and
@@ -110,7 +109,7 @@ confirms `.21` answers.
 **TLS (v1):** Caddy ACME **DNS-01 (Domeneshop)** for lab **and** public names.
 Custom Caddy with `github.com/caddy-dns/domainnameshop` + sops API credentials.
 `dns01` snippet: public resolvers + 60s propagation delay. Unbound still points
-lab names at `10.10.30.1` for browsing. `enableWanCaddy` is only for *serving*
+lab names at `10.10.30.1` for browsing. `enableWanCaddy` is only for _serving_
 WAN 80/443, not issuance. step-ca not in v1.
 
 ## Stage 6 — VPN and Headscale (depends: Stage 4; parallel with Stage 5)
@@ -128,15 +127,17 @@ exposure** happens here.
 
 **Immich (`img.zdk.no`) and Home Assistant (`ha.zdk.no`):**
 
-- [ ] Domeneshop: `A`/`AAAA` for `img` and `ha` (same WAN IP as other public names)
-- [ ] `enableWanCaddy = true` so WAN 80/443 hit Caddy. Certs already use
-      DNS-01 (same as lab); `lab_only` still aborts WAN clients on lab Host
-      headers. No public A/AAAA for `*.lab.zdk.no`.
-- [ ] HA `configuration.yaml`: `external_url` / `internal_url` / `trusted_proxies`
+- [ ] Domeneshop: `A`/`AAAA` for `img` and `ha` (same WAN IP as other public
+      names)
+- [ ] `enableWanCaddy = true` so WAN 80/443 hit Caddy. Certs already use DNS-01
+      (same as lab); `lab_only` still aborts WAN clients on lab Host headers. No
+      public A/AAAA for `*.lab.zdk.no`.
+- [ ] HA `configuration.yaml`: `external_url` / `internal_url` /
+      `trusted_proxies`
 - [ ] Immich admin: external domain `https://img.zdk.no`
 - [ ] External validation: `curl -I https://img.zdk.no` and `https://ha.zdk.no`
-- [ ] Confirm `immich.lab.zdk.no` / `ha.lab.zdk.no` fail from WAN (no public DNS;
-      Caddy `lab_only`)
+- [ ] Confirm `immich.lab.zdk.no` / `ha.lab.zdk.no` fail from WAN (no public
+      DNS; Caddy `lab_only`)
 
 **Forgejo (`code.zdk.no`) — can enable independently:**
 
@@ -178,15 +179,15 @@ exposure** happens here.
 
 ## Parallel workstreams
 
-| Stream            | Stages | Notes                                                     |
-| ----------------- | ------ | --------------------------------------------------------- |
-| A — Physical      | 0, 1   | Inventory + cabling                                       |
-| B — Router core   | 2      | Blocks VLAN testing                                       |
-| C — L2 wireless   | 3      | After router trunks                                       |
-| D — Policy        | 4      | Firewall except IoT DNS cutover                           |
+| Stream            | Stages | Notes                                                                                   |
+| ----------------- | ------ | --------------------------------------------------------------------------------------- |
+| A — Physical      | 0, 1   | Inventory + cabling                                                                     |
+| B — Router core   | 2      | Blocks VLAN testing                                                                     |
+| C — L2 wireless   | 3      | After router trunks                                                                     |
+| D — Policy        | 4      | Firewall except IoT DNS cutover                                                         |
 | E — Homelab       | 5      | TrueNAS Apps (HA/Immich/Authelia) + compose (Forgejo/Blocky) + k8s; then `enableBlocky` |
-| F — Remote access | 6, 7   | WireGuard/Headscale then WAN INPUT to Caddy               |
-| G — GitOps        | 0→8    | Repo scaffolding                                          |
+| F — Remote access | 6, 7   | WireGuard/Headscale then WAN INPUT to Caddy                                             |
+| G — GitOps        | 0→8    | Repo scaffolding                                                                        |
 
 **Max parallelism after Stage 2:** C and E in parallel with D (except
 `enableBlocky`, which waits on Blocky from E). F (WireGuard) after Stage 4.
@@ -194,9 +195,9 @@ Stage 7 needs Caddy on janus (Stage 2) plus TrueNAS backends from E.
 
 ## Suggested next commits
 
-Already in tree: vlan/firewall/inventory docs, router flake, `nodes/` RK1
-flake, `k8s/` Flux tree, CRS310 `.rsc`, TrueNAS compose, Caddyfile,
-Authelia config (live App), Blocky/Promtail stubs, Zdk IngressRoute stub.
+Already in tree: vlan/firewall/inventory docs, router flake, `nodes/` RK1 flake,
+`k8s/` Flux tree, CRS310 `.rsc`, TrueNAS compose, Caddyfile, Authelia config
+(live App), Blocky/Promtail stubs, Zdk IngressRoute stub.
 
 Still to add:
 

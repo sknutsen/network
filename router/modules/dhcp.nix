@@ -7,6 +7,7 @@ let
   reservations = [
     { ethernet = C.macs.uswNc; name = "usw-nc"; ipAddress = C.hosts.uswNc; }
     { ethernet = C.macs.uswLr; name = "usw-lr"; ipAddress = C.hosts.uswLr; }
+    { ethernet = C.macs.turingBmc; name = "turing-bmc"; ipAddress = C.hosts.turingBmc; }
     { ethernet = C.macs.zpi; name = "zpi"; ipAddress = C.hosts.zpi; }
     { ethernet = C.macs.truenas; name = "truenas"; ipAddress = C.hosts.truenas; }
     { ethernet = C.macs.pingu; name = "pingu"; ipAddress = C.hosts.pingu; }
@@ -21,6 +22,17 @@ let
     }
     { ethernet = C.macs.hue; name = "hue"; ipAddress = C.hosts.hue; }
     { ethernet = C.macs.tradfri; name = "tradfri"; ipAddress = C.hosts.tradfri; }
+    { ethernet = C.macs.rusken; name = "rusken"; ipAddress = C.hosts.rusken; }
+    { ethernet = C.macs.samsungTv; name = "samsung-tv"; ipAddress = C.hosts.samsungTv; } # MAC unverified
+    { ethernet = C.macs.odyssey; name = "odyssey"; ipAddress = C.hosts.odyssey; } # MAC unverified
+    {
+      ethernet = [
+        C.macs.chromecastWifi
+        C.macs.chromecastEth
+      ];
+      name = "chromecast";
+      ipAddress = C.hosts.chromecast;
+    }
   ];
 
   gw = cidr: lib.head (lib.splitString "/" cidr);

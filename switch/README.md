@@ -20,9 +20,9 @@ Mgmt address: `10.10.10.2/24` on VLAN 10 (**IPv4 only** — `disable-ipv6=yes` o
 |------|-----------|------|------|
 | 1 | ether1 | tagged trunk | 10,20,30,40,50 → janus |
 | 2 | ether2 | native 10 + tagged 20,40,50 | U7 Lite |
-| 3 | ether3 | access 30 | Turing Pi |
+| 3 | ether3 | access 30 | Turing Pi nodes (`d0:ea:11:6d:36:a7`) |
 | 4 | ether4 | access 30 | TrueNAS |
-| 5 | ether5 | access 30 | Zpi |
+| 5 | ether5 | access 10 | Turing Pi BMC (`d0:ea:11:6d:36:a9`) |
 | 6 | ether6 | native 10 + tagged 20,40 | USW-NC (port 4) |
 | 7–8 | ether7/8 | disabled | unused |
 | 9–10 | sfp-sfpplus1/2 | disabled | unused |
