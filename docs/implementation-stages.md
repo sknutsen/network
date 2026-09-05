@@ -43,22 +43,22 @@ Stages marked **(parallel)** can run concurrently. Architecture:
 
 - [x] CRS310: import [switch/crs310.rsc](../switch/crs310.rsc) (L2 VLAN filter;
       mgmt `10.10.10.2`; ether6 trunk to USW-NC)
-- [ ] U7 Lite: adopt in UniFi OS Server on router; SSIDs `Hai-Fi Wai-Fi` /
+- [x] U7 Lite: adopt in UniFi OS Server on router; SSIDs `Hai-Fi Wai-Fi` /
       `(IoT)` / `(Guest)` → VLANs 20/40/50; guest isolation; Inform Host
       `10.10.10.1`
-- [ ] USW-NC / USW-LR: adopt; mgmt `10.10.10.3` / `10.10.10.4` on VLAN 10; port
+- [x] USW-NC / USW-LR: adopt; mgmt `10.10.10.3` / `10.10.10.4` on VLAN 10; port
       profiles per [vlan-plan.md](vlan-plan.md)
-- [ ] Test wired + wireless clients land in correct subnet
+- [x] Test wired + wireless clients land in correct subnet
 
 ## Stage 4 — Segmentation hardening (depends: Stage 3)
 
 Blocky **deploy** is Stage 5 compose. Do not flip `enableBlocky` until Stage 5
 confirms `.21` answers.
 
-- [ ] Apply [firewall-matrix.md](firewall-matrix.md) except IoT DNS cutover
+- [x] Apply [firewall-matrix.md](firewall-matrix.md) except IoT DNS cutover
       (`enableBlocky` stays false)
-- [ ] mDNS: static IPs first; Avahi reflector servers↔IoT only if needed
-- [ ] Trusted→IoT cast allows (TV/Chromecast/Odyssey) here or with HA — not at
+- [x] mDNS: static IPs first; Avahi reflector servers↔IoT only if needed
+- [x] Trusted→IoT cast allows (TV/Chromecast/Odyssey) here or with HA — not at
       Stage 3. Uncomment the nftables cast rule when enabling.
 
 ## Stage 5 — Internal services (parallel: Stage 4; needs servers VLAN)

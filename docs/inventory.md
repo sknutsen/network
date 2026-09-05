@@ -105,18 +105,17 @@ DHCP `dhcp-host` rows live in `router/modules/dhcp.nix` (MACs in
 | `remorse.lab.zdk.no`        | `10.10.20.12` | 20                                     | `96:5b:ef:ae:02:04`                                               |
 | `peon.lab.zdk.no`           | `10.10.20.13` | 20                                     | —                                                                 |
 | `pixel7.lab.zdk.no`         | `10.10.20.14` | 20                                     | `ee:15:ec:33:4e:84`, `76:37:82:bf:88:3d`                          |
-| `samsung-tv.iot.lab.zdk.no` | `10.10.40.10` | 40                                     | `bc:45:5b:92:63:70` (unverified)                                  |
+| `samsung-tv.iot.lab.zdk.no` | `10.10.40.10` | 40                                     | `bc:45:5b:92:63:70`                                               |
 | `rusken.iot.lab.zdk.no`     | `10.10.40.11` | 40                                     | `b0:4a:39:a2:e9:20`                                               |
 | `hue.iot.lab.zdk.no`        | `10.10.40.12` | 40                                     | `ec:b5:fa:12:d3:7c`                                               |
 | `tradfri.iot.lab.zdk.no`    | `10.10.40.13` | 40                                     | `68:ec:8a:02:69:43`                                               |
 | `switch.iot.lab.zdk.no`     | `10.10.40.14` | 40                                     | —                                                                 |
-| `odyssey.iot.lab.zdk.no`    | `10.10.40.15` | 40                                     | `e8:aa:cb:df:cb:1e` (unverified)                                  |
+| `odyssey.iot.lab.zdk.no`    | `10.10.40.15` | 40                                     | `e8:aa:cb:df:cb:1e`                                               |
 | `chromecast.iot.lab.zdk.no` | `10.10.40.16` | 40                                     | `f4:f5:d8:5f:f1:7a` (Wi-Fi), `44:09:b8:01:80:87` (eth)            |
 
 U7 Lite (`a8:9c:6c:b8:f6:27`) is on VLAN 10 DHCP — no reserved IP.
 
-Still unknown (do not block Stage 2): per-RK1 NICs (nordri–vestri), Socrates,
-Peon, Nintendo Switch. Confirm Samsung TV and Odyssey MACs (marked unverified).
+Still unknown: per-RK1 NICs (nordri–vestri), Socrates, Peon, Nintendo Switch.
 
 ## VLAN assignment rationale
 

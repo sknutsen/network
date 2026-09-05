@@ -23,8 +23,8 @@ let
     { ethernet = C.macs.hue; name = "hue"; ipAddress = C.hosts.hue; }
     { ethernet = C.macs.tradfri; name = "tradfri"; ipAddress = C.hosts.tradfri; }
     { ethernet = C.macs.rusken; name = "rusken"; ipAddress = C.hosts.rusken; }
-    { ethernet = C.macs.samsungTv; name = "samsung-tv"; ipAddress = C.hosts.samsungTv; } # MAC unverified
-    { ethernet = C.macs.odyssey; name = "odyssey"; ipAddress = C.hosts.odyssey; } # MAC unverified
+    { ethernet = C.macs.samsungTv; name = "samsung-tv"; ipAddress = C.hosts.samsungTv; }
+    { ethernet = C.macs.odyssey; name = "odyssey"; ipAddress = C.hosts.odyssey; }
     {
       ethernet = [
         C.macs.chromecastWifi

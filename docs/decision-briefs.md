@@ -29,7 +29,7 @@ Resolved** here, and remove the row from `plan.md` § Remaining decisions.
 | 14 | [Hairpin NAT](#14-hairpin-nat) | Resolved — off | — |
 | 15 | [CrowdSec](#15-crowdsec) | Resolved | — |
 | 16 | [mDNS / Avahi reflector](#16-mdns--avahi-reflector) | Resolved — static IPs first | Stage 4–5 if discovery fails |
-| 17 | [Trusted → IoT cast rules](#17-trusted--iot-cast-rules) | Resolved — wait for HA | Stage 4–5 |
+| 17 | [Trusted → IoT cast rules](#17-trusted--iot-cast-rules) | Resolved — per-device allows | — |
 | 18 | [Future public apps](#18-future-public-apps) | Per-app — Immich + HA documented | Each new WAN service |
 | 19 | [Guest DNS via Blocky](#19-guest-dns-via-blocky) | Resolved — public resolvers | Post Stage 4 if wanted |
 
@@ -501,7 +501,7 @@ auto-detection. Never reflect to guest or trusted broadly.
 
 ## 17. Trusted → IoT cast rules
 
-**Status:** **Resolved** — wait until Stage 4–5 / HA.
+**Status:** **Resolved** — trusted → TV / Chromecast / Odyssey (Stage 4).
 
 ### Context
 
@@ -518,9 +518,10 @@ Phones/laptops on trusted VLAN cast to TV, Chromecast, Odyssey on IoT.
 
 ### Decision
 
-**Do not open cast rules at Stage 3.** Stage 3 is subnet placement only. At
-Stage 4–5 / when HA is up, add **per-device allows** (trusted → TV, Chromecast,
-Odyssey) before any Avahi reflector. Document each target in firewall-matrix.
+**Per-device allows** in `firewall.nix` (trusted → `10.10.40.10` TV,
+`10.10.40.16` Chromecast, `10.10.40.15` Odyssey, `10.10.40.12` Hue,
+`10.10.40.13` Dirigera). No Avahi. Nintendo Switch local play stays closed
+(`10.10.40.14`).
 
 ---
 

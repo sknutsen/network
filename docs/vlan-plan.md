@@ -232,9 +232,8 @@ gives no prefix — see [decision briefs](decision-briefs.md#1-ipv6-prefix-size)
 2. **Cross-VLAN reflector (if needed):** Avahi on router, scoped **servers
    (VLAN 30) ↔ IoT (VLAN 40) only** — for HA discovery and casting. Never
    reflect to guest or trusted broadly.
-3. **Trusted → IoT casting:** Prefer firewall allow rules to specific cast
-   target IPs (TV, Chromecast, Odyssey) over wide mDNS reflection to trusted
-   VLAN.
+3. **Trusted → IoT:** firewall allows to specific IPs (TV, Chromecast, Odyssey,
+   Hue, Dirigera) over wide mDNS reflection to trusted VLAN.
 4. **Do not** move Home Assistant to IoT VLAN for discovery.
 
 ## WireGuard overlay

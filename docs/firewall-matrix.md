@@ -31,7 +31,7 @@ Router-enforced nftables policy on NixOS. VLAN design: [vlan-plan.md](vlan-plan.
 | 7 | guest (50) | RFC1918 | all | **DENY** | Guest isolation |
 | 8 | guest (50) | internet | tcp/udp | **ALLOW** | Public DNS (1.1.1.1 / 9.9.9.9) |
 | 9 | trusted (20) | servers (30) | tcp/udp | **ALLOW** | Admin UIs; HA/Authelia/Forgejo HTTP on TrueNAS **dropped** (11a) |
-| 10 | trusted (20) | iot cast targets | see below | **DEFERRED** Stage 4–5 | Commented in `firewall.nix` until HA/cast; specific IPs only |
+| 10 | trusted (20) | iot cast + hub targets | see below | **ALLOW** | TV / Chromecast / Odyssey / Hue / Dirigera (`firewall.nix`). Not the rest of VLAN 40 |
 | 11 | trusted (20) | `10.10.30.20` | 2222/tcp | **ALLOW** | Forgejo SSH (LAN); not `:22` (TrueNAS SSH) |
 | 11a | any forward | `10.10.30.20` | 3000, 9091, 30041, 30103/tcp | **DENY** | Caddy on janus (OUTPUT) is the only client |
 | 12 | vpn (`10.10.255.0/24`) | trusted + servers + mgmt | tcp/udp | **ALLOW** | WireGuard peers |
@@ -40,13 +40,15 @@ Router-enforced nftables policy on NixOS. VLAN design: [vlan-plan.md](vlan-plan.
 | 15 | any internal | wan | all | **ALLOW** | NAT outbound |
 | 16 | trusted (20) | CRS310 `10.10.10.2` | all | **ALLOW** | SSH/Winbox/ping from office (pingu, Peon). Not the rest of VLAN 10 |
 
-### Trusted → IoT cast targets (Stage 4–5 / HA — not Stage 3)
+### Trusted → IoT targets (Stage 4)
 
 | Target | IP | Ports (typical) |
 |--------|-----|-----------------|
 | Samsung TV | `10.10.40.10` | UDP 1900, TCP 8008–8009 |
 | Chromecast | `10.10.40.16` | UDP 5353, TCP 8008–8009 |
 | Odyssey Smart Monitor | `10.10.40.15` | Per Samsung app |
+| Philips Hue hub | `10.10.40.12` | TCP 80, 443 (Hue / Entertainment app) |
+| IKEA Dirigera | `10.10.40.13` | TCP 80, 443 (Home Smart app) |
 
 **Deferred:** Nintendo Switch local wireless play (trusted ↔ `10.10.40.14`) — add only if needed.
 

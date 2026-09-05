@@ -119,8 +119,8 @@ servers (+ VPN), not mgmt.
 resurrect the TrueNAS Network Application. The updater unit stays disabled so
 `nixos-rebuild` does not fail when the binary exits 1.
 
-Stage 3 leftover: adopt U7 Lite and USW-NC / USW-LR; map SSIDs and Flex Mini
-port profiles per vlan-plan (`Hai-Fi Wai-Fi` / `(IoT)` / `(Guest)`).
+Stage 3 done: U7 Lite + Flex Minis adopted; SSIDs and ports per vlan-plan
+(`Hai-Fi Wai-Fi` / `(IoT)` / `(Guest)`).
 
 **If binaries are missing** (reinstall): run the vendor installer as root
 (`sudo ./linux-x64-*-x64`), then `systemctl start uosserver`.

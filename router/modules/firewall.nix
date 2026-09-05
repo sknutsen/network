@@ -1,4 +1,4 @@
-# Intent from docs/firewall-matrix.md — Stage 2 starts restrictive; Stage 4 completes.
+# Intent from docs/firewall-matrix.md — Stage 4 minus IoT DNS cutover (enableBlocky).
 { config, lib, ... }:
 let
   cfg = config.homelab.router;
@@ -196,8 +196,8 @@ in
           iifname $TRUSTED oifname $SERVERS accept
           iifname $TRUSTED ip daddr $CRS310 accept
           iifname $TRUSTED oifname $WAN accept
-          # Cast targets (optional) — enable specific daddrs in Stage 4–5
-          # iifname $TRUSTED ip daddr { ${C.hosts.samsungTv}, ${C.hosts.chromecast}, ${C.hosts.odyssey} } accept
+          # Trusted → specific IoT only (cast + vendor apps). Not the rest of VLAN 40.
+          iifname $TRUSTED ip daddr { ${C.hosts.samsungTv}, ${C.hosts.chromecast}, ${C.hosts.odyssey}, ${C.hosts.hue}, ${C.hosts.tradfri} } accept
 
           # --- Servers ---
           iifname $SERVERS oifname $WAN accept

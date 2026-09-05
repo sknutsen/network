@@ -102,8 +102,8 @@
     hue = "ec:b5:fa:12:d3:7c";
     tradfri = "68:ec:8a:02:69:43";
     rusken = "b0:4a:39:a2:e9:20";
-    samsungTv = "bc:45:5b:92:63:70"; # unverified
-    odyssey = "e8:aa:cb:df:cb:1e"; # unverified
+    samsungTv = "bc:45:5b:92:63:70";
+    odyssey = "e8:aa:cb:df:cb:1e";
     chromecastWifi = "f4:f5:d8:5f:f1:7a";
     chromecastEth = "44:09:b8:01:80:87";
   };
