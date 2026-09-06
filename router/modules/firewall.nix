@@ -75,6 +75,7 @@ in
       define TRUENAS = ${C.hosts.truenas}
       define BLOCKY = ${C.hosts.blocky}
       define CRS310 = ${C.hosts.crs310}
+      define BMC = ${C.hosts.turingBmc}
       ${
         if iotDns6 then
           "define BLOCKY6 = ${cfg.blockyIpv6}"
@@ -199,7 +200,7 @@ in
           # App HTTP on TrueNAS is Caddy-only (this host OUTPUT, not forward).
           ip daddr $TRUENAS tcp dport { ${toString C.forgejo.uiPort}, 9091, 30041, 30103 } drop
           iifname $TRUSTED oifname $SERVERS accept
-          iifname $TRUSTED ip daddr $CRS310 accept
+          iifname $TRUSTED ip daddr { $CRS310, $BMC } accept
           iifname $TRUSTED oifname $WAN accept
           # Trusted → specific IoT only (cast + vendor apps). Not the rest of VLAN 40.
           iifname $TRUSTED ip daddr { ${C.hosts.samsungTv}, ${C.hosts.chromecast}, ${C.hosts.odyssey}, ${C.hosts.hue}, ${C.hosts.tradfri} } accept

@@ -99,14 +99,22 @@
     chromecast = "10.10.40.16";
   };
 
+  # VLAN 30 ULA — same last hextet as IPv4 (mnemonic). Nodes flake mirrors this.
+  hosts6 = {
+    nordri = "fd10:10:10:30::11";
+    sudri = "fd10:10:10:30::12";
+    austri = "fd10:10:10:30::13";
+    vestri = "fd10:10:10:30::14";
+  };
+
   # Burned-in / observed MACs. dnsmasq reservations in modules/dhcp.nix.
   # u7Lite has no reserved IP yet (DHCP pool on VLAN 10).
   macs = {
     truenas = "cc:28:aa:42:c2:9d";
     uswNc = "f4:e2:c6:55:40:ab";
     uswLr = "d0:21:f9:b2:bf:5d";
-    turingBmc = "d0:ea:11:6d:36:a9";
-    turingNodes = "d0:ea:11:6d:36:a7"; # board 2.5GbE; RK1s have their own MACs
+    turingBmc = "d0:ea:11:6d:36:a7";
+    turingNodes = "d0:ea:11:6d:36:a9"; # board 2.5GbE; RK1s have their own MACs
     u7Lite = "a8:9c:6c:b8:f6:27";
     zpi = "d8:3a:dd:cf:e1:75";
     zpiWifi = "d8:3a:dd:cf:e1:78"; # Wi-Fi; no reservation (eth is VLAN 30)
