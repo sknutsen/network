@@ -122,17 +122,23 @@ truenas.lab.zdk.no {
 }
 
 # UniFi UI is :11443 on janus. unifi.lab.zdk.no → Caddy (.30.1) in Unbound.
-# Until this vhost exists, browse https://10.10.10.1:11443 (trusted/mgmt).
 # Inform stays http://10.10.10.1:8080 — do not proxy Inform.
+# Caddy 2.11+ HTTPS-to-IP defaults Host to 127.0.0.1:11443; UniFi OS then
+# accepts GET / but rejects /api/ws/* upgrades (blank UI after login).
+# HTTP/1.1 + empty Origin are required for those sockets. No gzip.
 unifi.lab.zdk.no {
 	import lab_only
 	import dns01
 	reverse_proxy https://127.0.0.1:11443 {
 		transport http {
 			tls_insecure_skip_verify
+			versions 1.1
 		}
+		flush_interval -1
+		header_up Host {hostport}
+		header_up Origin ""
+		header_up -Referer
 	}
-	encode gzip
 }
 
 # k8s UIs — 502 until Traefik is up (Stage 5 k8s)
