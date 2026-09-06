@@ -75,7 +75,7 @@ flowchart TB
   swo --- peon[Peon]
 ```
 
-USW-NC (closet) uplinks on its port 4. USW-LR (living room) uplinks on port 1. SW-O is unmanaged, so every office drop is VLAN 20. Mgmt IPs: CRS310 `10.10.10.2`, USW-NC `10.10.10.3`, USW-LR `10.10.10.4`. Turing Pi BMC is on VLAN 30 (`10.10.30.5`). Port tables: [vlan-plan.md](vlan-plan.md).
+USW-NC (closet) uplinks on its port 4. USW-LR (living room) uplinks on port 1. SW-O is unmanaged, so every office drop is VLAN 20. Mgmt IPs: CRS310 `10.10.10.2`, USW-NC `10.10.10.3`, USW-LR `10.10.10.4`. Turing Pi BMC is on VLAN 30 (`10.10.30.30`). Port tables: [vlan-plan.md](vlan-plan.md).
 
 ## Service map
 

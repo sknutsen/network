@@ -20,7 +20,7 @@ IP addressing, DHCP pools, IPv6 layout, and DNS policy. Firewall rules:
 
 | IP                 | Host         | Role                                                                |
 | ------------------ | ------------ | ------------------------------------------------------------------- |
-| `10.10.30.5`       | turing-bmc   | Turing Pi BMC (onboard switch, same L2 as RK1s); MAC `c4:ff:84:10:08:5b` |
+| `10.10.30.30`       | turing-bmc   | Turing Pi BMC (onboard switch, same L2 as RK1s); MAC `c4:ff:84:10:08:5b` |
 | `10.10.30.10`      | _(reserved)_ | k8s API VIP — reserved for future kube-vip; API at `nordri` `.11:6443` |
 | `10.10.30.11`      | nordri       | k3s control plane                                                   |
 | `10.10.30.12`      | sudri        | k3s worker                                                          |
@@ -86,7 +86,7 @@ Leave Caddy on `.30.1` so mgmt DNS stays infrastructure-only.
 | 7–8  | disabled | — | unused                 |
 | 9–10 | disabled | — | SFP+ unused            |
 
-Config: [switch/crs310.rsc](../switch/crs310.rsc). CRS310 mgmt: `10.10.10.2` (`crs310.lab.zdk.no`). Trusted (`10.10.20.0/24`) may reach CRS310 (`10.10.10.2`) and the Turing Pi BMC on VLAN 30 (`10.10.30.5`); USW/AP stay VLAN-10-only. UniFi devices (AP + Flex Minis) use native VLAN 10 so Inform is `10.10.10.1` (not Caddy at `10.10.30.1`).
+Config: [switch/crs310.rsc](../switch/crs310.rsc). CRS310 mgmt: `10.10.10.2` (`crs310.lab.zdk.no`). Trusted (`10.10.20.0/24`) may reach CRS310 (`10.10.10.2`) and the Turing Pi BMC on VLAN 30 (`10.10.30.30`); USW/AP stay VLAN-10-only. UniFi devices (AP + Flex Minis) use native VLAN 10 so Inform is `10.10.10.1` (not Caddy at `10.10.30.1`).
 
 **USW Flex Mini VLAN limit:** these switches cannot use custom port profiles
 (native + a tagged allow-list). That is a hardware limit, not a UI bug. Each

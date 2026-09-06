@@ -16,7 +16,7 @@ design: [vlan-plan.md](vlan-plan.md).
 
 **Turing Pi ethernet:** two 1GbE RJ45s on the board, **bridged** into one onboard switch with the BMC and the four RK1s. One cable → CRS310 port 3 (VLAN 30). Do not plug the second RJ45 into another VLAN (that bridges 10↔30). CRS310 `d0:ea:11:6d:36:a7`/`a9` are switch port MACs (CPU `…:a5`), not the board.
 
-**Turing Pi BMC:** same L2 as the nodes. MAC `c4:ff:84:10:08:5b` → `10.10.30.5` (`turing-bmc.lab.zdk.no`).
+**Turing Pi BMC:** same L2 as the nodes. MAC `c4:ff:84:10:08:5b` → `10.10.30.30` (`turing-bmc.lab.zdk.no`).
 
 ## Infrastructure (mgmt / L2)
 
@@ -27,7 +27,7 @@ design: [vlan-plan.md](vlan-plan.md).
 | **USW-NC**        | UniFi Flex Mini                 | `f4:e2:c6:55:40:ab`                                                                  | CRS310 ether6 ↔ port 4; mgmt `10.10.10.3`  | Network closet. Trunk native 10 + tagged 20/40. Port 2 → USW-LR; port 5 → SW-O                     |
 | **USW-LR**        | UniFi Flex Mini                 | `d0:21:f9:b2:bf:5d`                                                                  | USW-NC port 2 ↔ port 1; mgmt `10.10.10.4`  | Living room. Trunk native 10 + tagged 40; access 40 for Hue/Trådfri                                |
 | **SW-O**          | Unmanaged switch                | —                                                                                    | USW-NC port 5                              | Office. All ports VLAN 20 (pingu, Peon). No tagging                                                |
-| **Turing Pi BMC** | Turing Pi 2.5 BMC               | `c4:ff:84:10:08:5b`                                                                  | CRS310 port 3 (with nodes); `10.10.30.5`   | Same onboard switch as RK1s; `turing-bmc.lab.zdk.no`                                               |
+| **Turing Pi BMC** | Turing Pi 2.5 BMC               | `c4:ff:84:10:08:5b`                                                                  | CRS310 port 3 (with nodes); `10.10.30.30`   | Same onboard switch as RK1s; `turing-bmc.lab.zdk.no`                                               |
 | **U7 Lite**       | Ubiquiti UniFi AP (WiFi 7)      | `a8:9c:6c:b8:f6:27`                                                                  | CRS310 port 2 (trunk) + owned PoE injector | **Acquired**; SSIDs → VLANs 20/40/50 via UniFi OS Server on router; no reserved IP (VLAN 10 DHCP)  |
 
 ## Trusted (VLAN 20) — SSID `Hai-Fi Wai-Fi`
@@ -92,7 +92,7 @@ DHCP `dhcp-host` rows live in `router/modules/dhcp.nix` (MACs in
 | `crs310.lab.zdk.no`         | `10.10.10.2`  | 10                                     | CPU `d0:ea:11:6d:36:a5` (static)                                  |
 | `usw-nc.lab.zdk.no`         | `10.10.10.3`  | 10                                     | `f4:e2:c6:55:40:ab`                                               |
 | `usw-lr.lab.zdk.no`         | `10.10.10.4`  | 10                                     | `d0:21:f9:b2:bf:5d`                                               |
-| `turing-bmc.lab.zdk.no`     | `10.10.30.5`  | 30                                     | `c4:ff:84:10:08:5b`                                               |
+| `turing-bmc.lab.zdk.no`     | `10.10.30.30`  | 30                                     | `c4:ff:84:10:08:5b`                                               |
 | `nordri.lab.zdk.no`         | `10.10.30.11` | 30                                     | — (board 2.5GbE MAC not reserved)                                 |
 | `sudri.lab.zdk.no`          | `10.10.30.12` | 30                                     | — (same board uplink)                                             |
 | `austri.lab.zdk.no`         | `10.10.30.13` | 30                                     | — (same board uplink)                                             |
