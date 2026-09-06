@@ -21,10 +21,10 @@
 
     interface = lib.mkOption {
       type = lib.types.str;
-      default = "enP2p33s0";
+      default = "end0";
       description = ''
-        Turing Pi 2.5 RK1 2.5GbE name on mainline. Confirm at first boot
-        (`ip -br link`) — some images show end0 instead.
+        GiyoMoon 25.11 names the RK1 NIC end0 (observed on all four slots).
+        Confirm at first boot (`ip -br link`) if a later image differs.
       '';
     };
 
@@ -62,8 +62,12 @@
 
     enableIpv6 = lib.mkOption {
       type = lib.types.bool;
-      default = false;
-      description = "Accept RA on VLAN 30 after Stage 2 PD. IPv4 static stays.";
+      default = true;
+      description = ''
+        Lab ULA on VLAN 30 (`fd10:10:10:30::<last-hextet>/64`) plus a route
+        to `fd10:10:10::/48` via janus. No IPv6 default route (OBOS has no
+        WAN v6). Off = IPv4 only.
+      '';
     };
 
     enableK3s = lib.mkOption {

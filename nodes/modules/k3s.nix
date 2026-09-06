@@ -45,11 +45,17 @@ in
       nfs-utils
     ];
 
+    # Router is the PEP. These are east-west (VLAN 30) holes for Flux charts.
     networking.firewall.allowedTCPPorts = [
       C.k3s.kubeletPort
+      C.k3s.metallbMemberlistPort
     ]
+    ++ C.k3s.longhornTcpPorts
     ++ lib.optionals isServer [ C.k3s.apiPort ];
-    networking.firewall.allowedUDPPorts = [ C.k3s.flannelVxlanPort ];
+    networking.firewall.allowedUDPPorts = [
+      C.k3s.flannelVxlanPort
+      C.k3s.metallbMemberlistPort
+    ];
 
     services.k3s = {
       enable = true;

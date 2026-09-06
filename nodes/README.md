@@ -10,7 +10,7 @@ NixOS flake for the k3s cluster. Configs: `nordri` (control plane),
 
 This flake is **separate** from the repo-root router flake (`.#optiplex`).
 k3s stays **off** (`enableK3s = false`) until Stage 5. Flux/Helm live under
-`k8s/` and are still stubs.
+[k8s/README.md](../k8s/README.md).
 
 ## Layout
 
@@ -41,10 +41,11 @@ U-Boot must stay on eMMC. The OS lives on NVMe. Follow
 4. Power on. Confirm `ip -br link` and set `homelab.node.interface` if it
    is not `enP2p33s0`. Confirm root is `LABEL=NIXOS_SD`.
 5. Set the static IP from inventory (or rebuild this flake — it assigns
-   `.11`–`.14`). SSH keys for `zdk` and `root` match the router.
+   `.11`–`.14` and ULA `fd10:10:10:30::11`–`::14`). SSH keys for `zdk` and
+   `root` match the router (remorse + pingu).
 
-BMC Ethernet is VLAN 10 (mgmt) only — CRS310 port 5. Node NICs are VLAN 30
-access (CRS310 port 3).
+BMC and RK1s share the Turing onboard switch (both RJ45s are one L2).
+One cable → CRS310 port 3. `turing-bmc.lab.zdk.no` is `10.10.30.30`.
 
 ## Adopt this flake
 
@@ -75,7 +76,8 @@ nix eval './nodes#nixosConfigurations.nordri.config.networking.hostName'
 
 ## Stage 5 — k3s
 
-1. Confirm static IPs: nordri `.11`, sudri `.12`, austri `.13`, vestri `.14`.
+1. Confirm static IPs: nordri `.11`, sudri `.12`, austri `.13`, vestri `.14`
+   (and ULA `::11`–`::14` on `fd10:10:10:30::/64`).
 2. On nordri set `enableK3s = true` and rebuild. API is
    `https://10.10.30.11:6443`. Control-plane taint is set in `k3s.nix`
    (k3s does not taint CP by default; we add it).
@@ -102,9 +104,9 @@ Do not mix mainline and BSP nodes in one cluster.
 |------|--------|
 | NIC name | Confirm `enP2p33s0` vs `end0` |
 | NVMe by-id | Fill `diskDevice` before any disko reimage |
-| MACs | Board 2.5GbE `d0:ea:11:6d:36:a7` is documented; per-RK1 NICs still open |
+| MACs | Per-RK1 NICs still open; CRS310 `…:a7`/`a9` are switch ports, not the board |
 | k3s token | After nordri `enableK3s` |
-| IPv6 | `enableIpv6` after Stage 2 PD |
+| IPv6 | ULA on (`enableIpv6`); no WAN default route |
 
 Escape hatches (Ubuntu / Talos) if NixOS blocks progress:
 [docs/reference/escape-hatches-ubuntu-talos.md](../docs/reference/escape-hatches-ubuntu-talos.md).

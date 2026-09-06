@@ -7,7 +7,8 @@
 let
   cfg = config.homelab.node;
   sshKeys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMUD4Q4Mg/bYYjZp1NWhXCOzmOTfwDePpkA+jGAU0QGx sondreknutsen1@gmail.com"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMUD4Q4Mg/bYYjZp1NWhXCOzmOTfwDePpkA+jGAU0QGx sondreknutsen1@gmail.com" # remorse
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBkibUkmHzKXS0Q1mxZXLiCnooKH/8BWnNeNMGuQqwLD sondreknutsen1@gmail.com" # pingu
   ];
 in
 {
