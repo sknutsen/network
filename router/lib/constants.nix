@@ -113,7 +113,7 @@
     truenas = "cc:28:aa:42:c2:9d";
     uswNc = "f4:e2:c6:55:40:ab";
     uswLr = "d0:21:f9:b2:bf:5d";
-    turingBmc = "d0:ea:11:6d:36:a7";
+    turingBmc = "c4:ff:84:10:08:5b"; # observed lease hostname turingpi (not board 2.5GbE)
     turingNodes = "d0:ea:11:6d:36:a9"; # board 2.5GbE; RK1s have their own MACs
     u7Lite = "a8:9c:6c:b8:f6:27";
     zpi = "d8:3a:dd:cf:e1:75";
