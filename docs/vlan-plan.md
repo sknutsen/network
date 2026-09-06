@@ -8,7 +8,7 @@ IP addressing, DHCP pools, IPv6 layout, and DNS policy. Firewall rules:
 
 | VLAN ID | Name    | IPv4 subnet     | Gateway      | Purpose                    |
 | ------- | ------- | --------------- | ------------ | -------------------------- |
-| 10      | mgmt    | `10.10.10.0/24` | `10.10.10.1` | Switch/AP/BMC management   |
+| 10      | mgmt    | `10.10.10.0/24` | `10.10.10.1` | Switch/AP management       |
 | 20      | trusted | `10.10.20.0/24` | `10.10.20.1` | User devices (SSID `Hai-Fi Wai-Fi`) |
 | 30      | servers | `10.10.30.0/24` | `10.10.30.1` | Homelab, TrueNAS, k8s      |
 | 40      | iot     | `10.10.40.0/24` | `10.10.40.1` | IoT devices (SSID `Hai-Fi Wai-Fi (IoT)`) |
@@ -20,6 +20,7 @@ IP addressing, DHCP pools, IPv6 layout, and DNS policy. Firewall rules:
 
 | IP                 | Host         | Role                                                                |
 | ------------------ | ------------ | ------------------------------------------------------------------- |
+| `10.10.30.5`       | turing-bmc   | Turing Pi BMC (onboard switch, same L2 as RK1s); MAC `c4:ff:84:10:08:5b` |
 | `10.10.30.10`      | _(reserved)_ | k8s API VIP — reserved for future kube-vip; API at `nordri` `.11:6443` |
 | `10.10.30.11`      | nordri       | k3s control plane                                                   |
 | `10.10.30.12`      | sudri        | k3s worker                                                          |
@@ -43,7 +44,6 @@ as IPv4). Gateway `fd10:10:10:30::1`. No IPv6 default route — ISP has none.
 | `10.10.10.2`  | crs310 | CRS310 CPU (RouterOS), **IPv4 only** |
 | `10.10.10.3`  | usw-nc | UniFi Flex Mini (network closet); MAC `f4:e2:c6:55:40:ab` |
 | `10.10.10.4`  | usw-lr | UniFi Flex Mini (living room); MAC `d0:21:f9:b2:bf:5d` |
-| `10.10.10.5`  | turing-bmc | Turing Pi BMC; MAC `c4:ff:84:10:08:5b`; CRS310 ether5 |
 | DHCP `.100–.200` | U7 Lite | AP mgmt; MAC `a8:9c:6c:b8:f6:27` — no reservation |
 
 ## DHCP pools (dnsmasq on router)
@@ -79,14 +79,14 @@ Leave Caddy on `.30.1` so mgmt DNS stays infrastructure-only.
 | ---- | ------ | ---- | ---------------------- |
 | 1    | tagged trunk | 10,20,30,40,50 | OptiPlex i350 (janus) |
 | 2    | native 10 + tagged 20,40,50 | mgmt + SSIDs | Ubiquiti U7 Lite (`a8:9c:6c:b8:f6:27`) |
-| 3    | access | 30   | Turing Pi 2.5 nodes (`d0:ea:11:6d:36:a9`) |
+| 3    | access | 30   | Turing Pi (both RJ45s = one L2; use one cable) |
 | 4    | access | 30   | TrueNAS                |
-| 5    | access | 10   | Turing Pi BMC (`c4:ff:84:10:08:5b`) |
+| 5    | disabled | — | unused (do not plug the second Turing RJ45 — it bridges 10↔30) |
 | 6    | native 10 + tagged 20,40 | mgmt + trusted + iot | USW-NC port 4 |
 | 7–8  | disabled | — | unused                 |
 | 9–10 | disabled | — | SFP+ unused            |
 
-Config: [switch/crs310.rsc](../switch/crs310.rsc). CRS310 mgmt: `10.10.10.2` (`crs310.lab.zdk.no`). Trusted (`10.10.20.0/24`) may reach CRS310 and the Turing Pi BMC (`10.10.10.5`); USW/AP stay VLAN-10-only. UniFi devices (AP + Flex Minis) use native VLAN 10 so Inform is `10.10.10.1` (not Caddy at `10.10.30.1`).
+Config: [switch/crs310.rsc](../switch/crs310.rsc). CRS310 mgmt: `10.10.10.2` (`crs310.lab.zdk.no`). Trusted (`10.10.20.0/24`) may reach CRS310 (`10.10.10.2`) and the Turing Pi BMC on VLAN 30 (`10.10.30.5`); USW/AP stay VLAN-10-only. UniFi devices (AP + Flex Minis) use native VLAN 10 so Inform is `10.10.10.1` (not Caddy at `10.10.30.1`).
 
 **USW Flex Mini VLAN limit:** these switches cannot use custom port profiles
 (native + a tagged allow-list). That is a hardware limit, not a UI bug. Each

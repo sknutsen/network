@@ -8,28 +8,26 @@ design: [vlan-plan.md](vlan-plan.md).
 | Name        | Hardware        | OS            | Static IP                                                                                 | Connection                                    | Role                                                                                                                                |
 | ----------- | --------------- | ------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | **TrueNAS** | NAS             | TrueNAS SCALE | `10.10.30.20` (+ `.21` alias for Blocky); MAC `cc:28:aa:42:c2:9d`                         | Wired (port 4)                                | HA, Immich, Authelia, Forgejo (TrueNAS Apps); Blocky; **UI:** `https://truenas.lab.zdk.no` (Caddy), not direct IP from trusted/mgmt |
-| **nordri**  | RK1 (Turing Pi) | NixOS + k3s   | `10.10.30.11` / `fd10:10:10:30::11`                                                       | Wired (port 3); board MAC `d0:ea:11:6d:36:a9` | k3s control plane                                                                                                                   |
-| **sudri**   | RK1 (Turing Pi) | NixOS + k3s   | `10.10.30.12` / `fd10:10:10:30::12`                                                       | Wired (port 3); board MAC `d0:ea:11:6d:36:a9` | k3s worker                                                                                                                          |
-| **austri**  | RK1 (Turing Pi) | NixOS + k3s   | `10.10.30.13` / `fd10:10:10:30::13`                                                       | Wired (port 3); board MAC `d0:ea:11:6d:36:a9` | k3s worker                                                                                                                          |
-| **vestri**  | RK1 (Turing Pi) | NixOS + k3s   | `10.10.30.14` / `fd10:10:10:30::14`                                                       | Wired (port 3); board MAC `d0:ea:11:6d:36:a9` | k3s worker                                                                                                                          |
+| **nordri**  | RK1 (Turing Pi) | NixOS + k3s   | `10.10.30.11` / `fd10:10:10:30::11`                                                       | Wired (port 3) | k3s control plane                                                                                                                   |
+| **sudri**   | RK1 (Turing Pi) | NixOS + k3s   | `10.10.30.12` / `fd10:10:10:30::12`                                                       | Wired (port 3) | k3s worker                                                                                                                          |
+| **austri**  | RK1 (Turing Pi) | NixOS + k3s   | `10.10.30.13` / `fd10:10:10:30::13`                                                       | Wired (port 3) | k3s worker                                                                                                                          |
+| **vestri**  | RK1 (Turing Pi) | NixOS + k3s   | `10.10.30.14` / `fd10:10:10:30::14`                                                       | Wired (port 3) | k3s worker                                                                                                                          |
 | **Zpi**     | Raspberry Pi 5  | Raspbian      | `10.10.30.15`; MAC `d8:3a:dd:cf:e1:75` (eth), `d8:3a:dd:cf:e1:78` (Wi-Fi, no reservation) | Not on CRS310                                 | Audio casting to speaker system                                                                                                     |
 
-**Turing Pi nodes ethernet:** one 2.5GbE on CRS310 port 3 (`d0:ea:11:6d:36:a9`).
-Not reserved — the four RK1s use `.11`–`.14` with their own MACs once they boot.
+**Turing Pi ethernet:** two 1GbE RJ45s on the board, **bridged** into one onboard switch with the BMC and the four RK1s. One cable → CRS310 port 3 (VLAN 30). Do not plug the second RJ45 into another VLAN (that bridges 10↔30). CRS310 `d0:ea:11:6d:36:a7`/`a9` are switch port MACs (CPU `…:a5`), not the board.
 
-**Turing Pi BMC:** CRS310 port 5 → **VLAN 10 (mgmt)** only. MAC
-`c4:ff:84:10:08:5b` → `10.10.10.5` (`turing-bmc.lab.zdk.no`).
+**Turing Pi BMC:** same L2 as the nodes. MAC `c4:ff:84:10:08:5b` → `10.10.30.5` (`turing-bmc.lab.zdk.no`).
 
 ## Infrastructure (mgmt / L2)
 
 | Name              | Hardware                        | MAC                                                                                  | Connection                                 | Notes                                                                                              |
 | ----------------- | ------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
 | **janus**         | Dell OptiPlex 9020 MT + i350-T2 | `wan0` `34:17:eb:96:84:20`; `lan0` `a0:36:9f:33:ae:96`; `spare0` `a0:36:9f:33:ae:97` | I217LM → WAN; i350 port 1 → CRS310 trunk   | `janus.lab.zdk.no` → `10.10.30.1`; NixOS + **UniFi OS Server (functional)** + Headscale (`:8081`)  |
-| **CRS310**        | MikroTik CRS310-8G+2S+IN        | —                                                                                    | Router trunk on port 1; mgmt `10.10.10.2`  | **Acquired**; L2 only — [switch/crs310.rsc](../switch/crs310.rsc); no PoE — AP uses owned injector |
+| **CRS310**        | MikroTik CRS310-8G+2S+IN        | CPU `d0:ea:11:6d:36:a5`; ether3 `…:a7`, ether5 `…:a9` (port MACs, not clients)        | Router trunk on port 1; mgmt `10.10.10.2`  | **Acquired**; L2 only — [switch/crs310.rsc](../switch/crs310.rsc); no PoE — AP uses owned injector |
 | **USW-NC**        | UniFi Flex Mini                 | `f4:e2:c6:55:40:ab`                                                                  | CRS310 ether6 ↔ port 4; mgmt `10.10.10.3`  | Network closet. Trunk native 10 + tagged 20/40. Port 2 → USW-LR; port 5 → SW-O                     |
 | **USW-LR**        | UniFi Flex Mini                 | `d0:21:f9:b2:bf:5d`                                                                  | USW-NC port 2 ↔ port 1; mgmt `10.10.10.4`  | Living room. Trunk native 10 + tagged 40; access 40 for Hue/Trådfri                                |
 | **SW-O**          | Unmanaged switch                | —                                                                                    | USW-NC port 5                              | Office. All ports VLAN 20 (pingu, Peon). No tagging                                                |
-| **Turing Pi BMC** | Turing Pi 2.5 BMC               | `c4:ff:84:10:08:5b`                                                                  | CRS310 port 5 (access 10); `10.10.10.5`    | VLAN 10 only; `turing-bmc.lab.zdk.no`                                                              |
+| **Turing Pi BMC** | Turing Pi 2.5 BMC               | `c4:ff:84:10:08:5b`                                                                  | CRS310 port 3 (with nodes); `10.10.30.5`   | Same onboard switch as RK1s; `turing-bmc.lab.zdk.no`                                               |
 | **U7 Lite**       | Ubiquiti UniFi AP (WiFi 7)      | `a8:9c:6c:b8:f6:27`                                                                  | CRS310 port 2 (trunk) + owned PoE injector | **Acquired**; SSIDs → VLANs 20/40/50 via UniFi OS Server on router; no reserved IP (VLAN 10 DHCP)  |
 
 ## Trusted (VLAN 20) — SSID `Hai-Fi Wai-Fi`
@@ -91,11 +89,11 @@ DHCP `dhcp-host` rows live in `router/modules/dhcp.nix` (MACs in
 | `auth.lab.zdk.no`           | `10.10.30.1`  | 30 (Caddy → Authelia App `:9091`)      | —                                                                 |
 | `blocky.lab.zdk.no`         | `10.10.30.21` | 30                                     | — (alias on TrueNAS)                                              |
 | `headscale.lab.zdk.no`      | `10.10.30.1`  | 30 (Caddy → `127.0.0.1:8081`)          | —                                                                 |
-| `crs310.lab.zdk.no`         | `10.10.10.2`  | 10                                     | — (static on switch)                                              |
+| `crs310.lab.zdk.no`         | `10.10.10.2`  | 10                                     | CPU `d0:ea:11:6d:36:a5` (static)                                  |
 | `usw-nc.lab.zdk.no`         | `10.10.10.3`  | 10                                     | `f4:e2:c6:55:40:ab`                                               |
 | `usw-lr.lab.zdk.no`         | `10.10.10.4`  | 10                                     | `d0:21:f9:b2:bf:5d`                                               |
-| `turing-bmc.lab.zdk.no`     | `10.10.10.5`  | 10                                     | `c4:ff:84:10:08:5b`                                               |
-| `nordri.lab.zdk.no`         | `10.10.30.11` | 30                                     | — (board uplink `d0:ea:11:6d:36:a9`, not reserved)                |
+| `turing-bmc.lab.zdk.no`     | `10.10.30.5`  | 30                                     | `c4:ff:84:10:08:5b`                                               |
+| `nordri.lab.zdk.no`         | `10.10.30.11` | 30                                     | — (board 2.5GbE MAC not reserved)                                 |
 | `sudri.lab.zdk.no`          | `10.10.30.12` | 30                                     | — (same board uplink)                                             |
 | `austri.lab.zdk.no`         | `10.10.30.13` | 30                                     | — (same board uplink)                                             |
 | `vestri.lab.zdk.no`         | `10.10.30.14` | 30                                     | — (same board uplink)                                             |

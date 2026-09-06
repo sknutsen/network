@@ -8,7 +8,7 @@ Router-enforced nftables policy on NixOS. VLAN design: [vlan-plan.md](vlan-plan.
 
 | Zone | VLAN | Internet | Notes |
 |------|------|----------|-------|
-| mgmt | 10 | As needed for updates | Admin/BMC only |
+| mgmt | 10 | As needed for updates | Admin / switch / AP |
 | trusted | 20 | ALLOW | User devices |
 | servers | 30 | ALLOW | Homelab hosts |
 | iot | 40 | ALLOW (filtered DNS) | No LAN initiate |
@@ -36,9 +36,9 @@ Router-enforced nftables policy on NixOS. VLAN design: [vlan-plan.md](vlan-plan.
 | 11a | any forward | `10.10.30.20` | 30142, 9091, 30041, 30103/tcp | **DENY** | Caddy on janus (OUTPUT) is the only client |
 | 12 | vpn (`10.10.255.0/24`) | trusted + servers + mgmt | tcp/udp | **ALLOW** | WireGuard peers |
 | 13 | servers (30) | internet | tcp/udp | **ALLOW** | |
-| 14 | mgmt (10) | servers (30) | as needed | **ALLOW** | BMC → nodes for provisioning |
+| 14 | mgmt (10) | servers (30) | as needed | **ALLOW** | Flash/provision from mgmt; BMC shares node L2 |
 | 15 | any internal | wan | all | **ALLOW** | NAT outbound |
-| 16 | trusted (20) | CRS310 `10.10.10.2`, BMC `10.10.10.5` | all | **ALLOW** | SSH/Winbox/BMC UI from office. Not USW/AP on VLAN 10 |
+| 16 | trusted (20) | CRS310 `10.10.10.2` | all | **ALLOW** | SSH/Winbox from office. BMC is on VLAN 30 (rule 9). Not USW/AP |
 
 ### Trusted → IoT targets (Stage 4)
 
