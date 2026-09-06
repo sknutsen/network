@@ -7,3 +7,4 @@
 
 # Immich DB password (example stays in git)
 /services/immich/.env
+/.DS_Store
