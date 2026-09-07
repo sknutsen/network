@@ -53,9 +53,10 @@ in
     tcpdump
   ];
 
-  # sops-nix — enable once a cluster sops file + per-node age keys exist.
   # Keep the file inside this flake (nodes/secrets/) — ../secrets is out of tree.
-  # sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+  sops.defaultSopsFile = ../secrets/cluster.yaml;
+  sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+  sops.secrets."k3s/token" = { };
 
   system.stateVersion = "25.11";
 }

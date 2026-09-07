@@ -23,10 +23,12 @@ in
   config = lib.mkIf cfg.enableK3s {
     assertions = [
       {
-        assertion = isServer || cfg.k3sTokenFile != null;
-        message = "k3s agents need homelab.node.k3sTokenFile (sops path to the nordri node-token).";
+        assertion = isServer || cfg.k3sTokenFile != null || config.sops.secrets ? "k3s/token";
+        message = "k3s agents need homelab.node.k3sTokenFile or sops.secrets.\"k3s/token\".";
       }
     ];
+
+    sops.secrets."k3s/token".restartUnits = [ "k3s.service" ];
 
     environment.systemPackages = with pkgs; [
       k3s
@@ -61,7 +63,8 @@ in
       enable = true;
       role = cfg.role;
       clusterInit = isServer;
-      tokenFile = cfg.k3sTokenFile;
+      tokenFile =
+        if cfg.k3sTokenFile != null then cfg.k3sTokenFile else config.sops.secrets."k3s/token".path;
       serverAddr = if isServer then "" else C.k3s.api;
       extraFlags = commonFlags ++ lib.optionals isServer serverFlags;
     };

@@ -29,7 +29,10 @@ spec:
       retries: 3
   values:
     grafana:
-      adminPassword: changeme # replace via sops when secrets/cluster.yaml exists
+      admin:
+        existingSecret: grafana-admin
+        userKey: admin-user
+        passwordKey: admin-password
       persistence:
         enabled: true
         storageClassName: longhorn

@@ -1,0 +1,12 @@
+# Recipients for nodes/secrets/*. Janus does not get the k3s token.
+keys:
+  - &cluster age10r8tatzk4q8g9q23s4z336j3u86k74ytmt6ky07mk0av9luux9rqnwns99
+  - &pingu age1r203lu8zp7twadza7cqaxjykfa53vtsk04cljpnt8rgknml9qf0qh6j4qr
+  - &remorse age1l0lcgknsxv8jkhc89vr6g7pj6cp9rtqkqejjpnuhwed6c52kqphsrwzd7d
+creation_rules:
+  - path_regex: cluster\.yaml$
+    key_groups:
+      - age:
+          - *cluster
+          - *pingu
+          - *remorse

@@ -12,6 +12,5 @@
     enableIpv6 = true; # lab ULA; no WAN v6
     enableK3s = true; # Stage 5
     enableLonghornPrep = true;
-    k3sTokenFile = "/var/lib/rancher/k3s/node-token";
   };
 }

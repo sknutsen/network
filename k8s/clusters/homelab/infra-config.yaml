@@ -16,3 +16,8 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./k8s/clusters/homelab/infra/config
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+

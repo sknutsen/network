@@ -6,6 +6,7 @@ resources:
   - metallb.yaml
   - longhorn.yaml
   - traefik.yaml
+  - grafana-admin.secret.yaml
   - kube-prometheus-stack.yaml
   - loki.yaml
   - capacitor.yaml
