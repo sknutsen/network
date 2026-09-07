@@ -1,6 +1,6 @@
 # In-cluster Capacitor (gimlet-io OCI). Laptop "Capacitor Next" is optional
 # and does not replace this — Caddy serves capacitor.lab.zdk.no + Authelia.
-apiVersion: source.toolkit.fluxcd.io/v1beta2
+apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
   name: capacitor
