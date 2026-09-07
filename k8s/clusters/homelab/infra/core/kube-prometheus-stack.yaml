@@ -41,6 +41,17 @@ spec:
         server:
           domain: grafana.lab.zdk.no
           root_url: https://grafana.lab.zdk.no
+        # Caddy Authelia already authenticated the request (Remote-User).
+        users:
+          auto_assign_org_role: Admin
+        auth:
+          disable_login_form: true
+        auth.proxy:
+          enabled: true
+          header_name: Remote-User
+          header_property: username
+          auto_sign_up: true
+          enable_login_token: true
       ingress:
         enabled: false
     alertmanager:
