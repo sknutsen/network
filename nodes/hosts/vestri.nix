@@ -10,8 +10,8 @@
     diskLayout = "giyomoon-image";
     diskDevice = "/dev/disk/by-id/nvme-KINGSTON_SFYRD2000G_50026B738282E22B";
     enableIpv6 = true; # lab ULA; no WAN v6
-    enableK3s = false; # Stage 5
+    enableK3s = true; # Stage 5
     enableLonghornPrep = true;
-    k3sTokenFile = null;
+    k3sTokenFile = "/var/lib/rancher/k3s/node-token";
   };
 }

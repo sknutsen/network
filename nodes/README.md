@@ -105,12 +105,12 @@ Static IPs and Longhorn host prep are done. Next:
    (k3s does not taint CP by default).
 2. `sudo cat /var/lib/rancher/k3s/server/node-token` on nordri.
 3. **Token on workers.** Agents assert `k3sTokenFile != null`. The nodes
-   flake cannot import `../secrets` (pure eval). Pragmatic first join:
-   copy the token to `/var/lib/rancher/k3s/server/node-token` on each
-   worker and set `k3sTokenFile` to that path. Then put the same value in
-   `nodes/secrets/cluster.yaml` (sops-nix + per-node age keys) and point
-   `k3sTokenFile` at the decrypted secret. Do not put the live token in
-   git plaintext.
+   flake cannot import `../secrets` (pure eval). `/var/lib/rancher/k3s/server/`
+   exists only on the control plane. Pragmatic first join: `mkdir -p
+   /var/lib/rancher/k3s` on each worker, copy the token to
+   `/var/lib/rancher/k3s/node-token`, set `k3sTokenFile` to that path.
+   Later: `nodes/secrets/cluster.yaml` (sops-nix). Do not commit the live
+   token in plaintext.
 4. Workers: `enableK3s = true` + token path, deploy one at a time.
    Do not add kube-vip; `.10` stays reserved.
 5. Flux bootstrap and HelmReleases: [k8s/README.md](../k8s/README.md).
@@ -122,8 +122,11 @@ install Traefik, MetalLB (`10.10.30.100–110`), and Longhorn.
 ```bash
 # after nordri k3s is up
 ssh zdk@10.10.30.11 'sudo kubectl get nodes -o wide'
-ssh zdk@10.10.30.11 'sudo cat /etc/rancher/k3s/k3s.yaml'
-# rewrite server: https://10.10.30.11:6443  → kubeconfig on Remorse
+mkdir -p ~/.kube
+ssh zdk@10.10.30.11 'sudo cat /etc/rancher/k3s/k3s.yaml' \
+  | sed 's#127.0.0.1#10.10.30.11#' > ~/.kube/config
+chmod 600 ~/.kube/config
+kubectl get nodes -o wide
 ```
 
 ## Kernel profile
