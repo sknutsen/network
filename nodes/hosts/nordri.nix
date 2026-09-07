@@ -8,6 +8,7 @@
     interface = "end0"; # observed first boot (GiyoMoon 25.11)
     kernelProfile = "mainline";
     diskLayout = "giyomoon-image";
+    diskDevice = "/dev/disk/by-id/nvme-KINGSTON_SNV2S500G_50026B76866B3AE3";
     enableIpv6 = true; # lab ULA; no WAN v6
     enableK3s = false; # Stage 5
     enableLonghornPrep = true;

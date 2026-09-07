@@ -8,6 +8,10 @@ let
     { ethernet = C.macs.uswNc; name = "usw-nc"; ipAddress = C.hosts.uswNc; }
     { ethernet = C.macs.uswLr; name = "usw-lr"; ipAddress = C.hosts.uswLr; }
     { ethernet = C.macs.turingBmc; name = "turing-bmc"; ipAddress = C.hosts.turingBmc; }
+    { ethernet = C.macs.nordri; name = "nordri"; ipAddress = C.hosts.nordri; }
+    { ethernet = C.macs.sudri; name = "sudri"; ipAddress = C.hosts.sudri; }
+    { ethernet = C.macs.austri; name = "austri"; ipAddress = C.hosts.austri; }
+    { ethernet = C.macs.vestri; name = "vestri"; ipAddress = C.hosts.vestri; }
     { ethernet = C.macs.zpi; name = "zpi"; ipAddress = C.hosts.zpi; }
     { ethernet = C.macs.truenas; name = "truenas"; ipAddress = C.hosts.truenas; }
     { ethernet = C.macs.pingu; name = "pingu"; ipAddress = C.hosts.pingu; }

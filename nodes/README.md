@@ -9,23 +9,35 @@ NixOS flake for the k3s cluster. Configs: `nordri` (control plane),
 - [docs/plans/rk1-bsp-fork.md](../docs/plans/rk1-bsp-fork.md)
 
 This flake is **separate** from the repo-root router flake (`.#optiplex`).
-k3s stays **off** (`enableK3s = false`) until Stage 5. Flux/Helm live under
+All four nodes are on this flake. k3s stays **off** (`enableK3s = false`)
+until the Stage 5 steps below. Flux/Helm live under
 [k8s/README.md](../k8s/README.md).
 
 ## Layout
 
 ```
 nodes/
-├── flake.nix                 # aarch64 nixosConfigurations + uboot package
+├── flake.nix                 # aarch64 nixosConfigurations, deploy-rs, uboot
 ├── lib/constants.nix         # IPs mirrored from router (flake purity)
 ├── hosts/{nordri,sudri,austri,vestri}.nix
 ├── modules/                  # hardware, net, ssh, k3s, Longhorn prep
 └── bsp/                      # deferred vendor kernel — do not select
 ```
 
-**Stage flags** in each host file: `enableK3s` stays false until static IPs
-work and the nordri token is in sops. `kernelProfile` stays `"mainline"`.
-`diskLayout` stays `"giyomoon-image"` after the first BMC flash.
+**Stage flags:** `enableK3s` stays false until the nordri token exists.
+`kernelProfile` stays `"mainline"`. `diskLayout` stays `"giyomoon-image"`.
+`interface` is `end0` (GiyoMoon 25.11). `diskDevice` is the NVMe by-id
+(unused until a disko reimage).
+
+| Host | Slot | IPv4 / ULA | NIC | NVMe |
+|------|------|------------|-----|------|
+| nordri | 1 | `.11` / `::11` | `end0` `ba:ef:57:8b:58:5e` | Kingston 500G |
+| sudri | 2 | `.12` / `::12` | `end0` `1e:86:1c:db:07:c1` | Kingston 500G |
+| austri | 3 | `.13` / `::13` | `end0` `ce:a3:67:c6:1d:a4` | Samsung 2TB |
+| vestri | 4 | `.14` / `::14` | `end0` `b6:51:50:02:89:03` | Kingston 2TB |
+
+BMC and RK1s share the Turing onboard switch (both RJ45s are one L2).
+One cable → CRS310 port 3. `turing-bmc.lab.zdk.no` is `10.10.30.30`.
 
 ## First flash (GiyoMoon image → NVMe)
 
@@ -38,59 +50,81 @@ U-Boot must stay on eMMC. The OS lives on NVMe. Follow
 3. Power off. Flash `uboot.img` (BMC UI, or
    `nix build ./nodes#uboot-turing-rk1` on an `aarch64-linux` builder) to
    eMMC so the eMMC is U-Boot only.
-4. Power on. Confirm `ip -br link` and set `homelab.node.interface` if it
-   is not `enP2p33s0`. Confirm root is `LABEL=NIXOS_SD`.
-5. Set the static IP from inventory (or rebuild this flake — it assigns
-   `.11`–`.14` and ULA `fd10:10:10:30::11`–`::14`). SSH keys for `zdk` and
-   `root` match the router (remorse + pingu).
+4. Power on. Confirm root is `LABEL=NIXOS_SD` on `nvme0n1p2` and the NIC is
+   `end0` (`ip -br link`).
+5. Adopt this flake (next section). SSH keys for `zdk` and `root` match
+   the router (remorse + pingu). Password SSH goes away.
 
-BMC and RK1s share the Turing onboard switch (both RJ45s are one L2).
-One cable → CRS310 port 3. `turing-bmc.lab.zdk.no` is `10.10.30.30`.
+Do not use `nixos-anywhere` on a running GiyoMoon root — it is an installer
+and will fight the eMMC U-Boot + `NIXOS_SD` layout.
 
-## Adopt this flake
+## Adopt / rebuild
 
 From the **repo root**. Git flakes ignore untracked files — stage the tree
-or pass `--flake "path:$PWD/nodes#nordri"`. Quote flake URIs in zsh.
+or pass `--flake "path:$PWD/nodes#nordri"`. Quote flake URIs (`#` is a
+comment in bash/zsh).
 
-The first rebuild after the vendor image replaces password SSH with
-key-only. Keep BMC serial until that works.
+After SSH keys work, **deploy-rs** is the usual path. `remoteBuild` is on, so
+this Mac evaluates the flake and the node builds the aarch64 closure. Magic
+rollback reverts a switch that drops SSH. `sshUser` is `zdk` (passwordless
+sudo). Do not deploy a change that intentionally moves SSH (new address or
+port) without `--magic-rollback=false`.
 
 ```bash
-# On the node (native aarch64):
-nixos-rebuild switch --flake /path/to/net/nodes#nordri
+# One node (prefer this; same for sudri / austri / vestri).
+# --skip-checks: skip pre-deploy `nix flake check`.
+nix run './nodes' -- --skip-checks './nodes#nordri'
 
-# From a Linux workstation (after SSH from trusted VLAN):
-nixos-rebuild switch --flake './nodes#nordri' --target-host root@10.10.30.11
+# Dry-run activation on the node:
+nix run './nodes' -- --skip-checks --dry-activate './nodes#nordri'
 
-# This Mac cannot build aarch64-linux locally. Use --build-on remote, or
-# build on a node / a machine with boot.binfmt.emulatedSystems.
-nixos-rebuild switch --flake './nodes#nordri' \
-  --target-host root@10.10.30.11 --build-on remote
+# All four. Independent machines — do not roll back the ones that
+# succeeded if one fails. When enabling k3s, do nordri first.
+nix run './nodes' -- --skip-checks --rollback-succeeded=false './nodes'
+```
+
+On-node fallback (copy the flake over, or after you are already on the box):
+
+```bash
+sudo nixos-rebuild switch --flake '/path/to/nodes#nordri'
 ```
 
 Eval (no build) from any flake-capable host:
 
 ```bash
 nix eval './nodes#nixosConfigurations.nordri.config.networking.hostName'
+nix eval './nodes#deploy.nodes.nordri.hostname'
 ```
 
 ## Stage 5 — k3s
 
-1. Confirm static IPs: nordri `.11`, sudri `.12`, austri `.13`, vestri `.14`
-   (and ULA `::11`–`::14` on `fd10:10:10:30::/64`).
-2. On nordri set `enableK3s = true` and rebuild. API is
-   `https://10.10.30.11:6443`. Control-plane taint is set in `k3s.nix`
-   (k3s does not taint CP by default; we add it).
-3. `sudo cat /var/lib/rancher/k3s/server/node-token` → sops
-   `secrets/cluster.yaml`. Point each agent's `k3sTokenFile` at that secret.
-4. Set `enableK3s = true` on workers and rebuild. Do not add kube-vip;
-   `.10` stays reserved.
-5. Flux bootstrap and HelmReleases are [k8s/README.md](../k8s/README.md),
-   not this flake. Host iscsi + `/var/lib/longhorn` prep is already on
-   (`enableLonghornPrep`).
+Static IPs and Longhorn host prep are done. Next:
+
+1. **nordri only:** `enableK3s = true`, deploy. API
+   `https://10.10.30.11:6443`. `k3s.nix` adds the control-plane taint
+   (k3s does not taint CP by default).
+2. `sudo cat /var/lib/rancher/k3s/server/node-token` on nordri.
+3. **Token on workers.** Agents assert `k3sTokenFile != null`. The nodes
+   flake cannot import `../secrets` (pure eval). Pragmatic first join:
+   copy the token to `/var/lib/rancher/k3s/server/node-token` on each
+   worker and set `k3sTokenFile` to that path. Then put the same value in
+   `nodes/secrets/cluster.yaml` (sops-nix + per-node age keys) and point
+   `k3sTokenFile` at the decrypted secret. Do not put the live token in
+   git plaintext.
+4. Workers: `enableK3s = true` + token path, deploy one at a time.
+   Do not add kube-vip; `.10` stays reserved.
+5. Flux bootstrap and HelmReleases: [k8s/README.md](../k8s/README.md).
+   Host iscsi + `/var/lib/longhorn` is already on (`enableLonghornPrep`).
 
 Bundled k3s Traefik, ServiceLB, and local-path are disabled so Flux can
 install Traefik, MetalLB (`10.10.30.100–110`), and Longhorn.
+
+```bash
+# after nordri k3s is up
+ssh zdk@10.10.30.11 'sudo kubectl get nodes -o wide'
+ssh zdk@10.10.30.11 'sudo cat /etc/rancher/k3s/k3s.yaml'
+# rewrite server: https://10.10.30.11:6443  → kubeconfig on Remorse
+```
 
 ## Kernel profile
 
@@ -98,15 +132,16 @@ install Traefik, MetalLB (`10.10.30.100–110`), and Longhorn.
 Selecting `"bsp"` fails an assertion until `nodes/bsp/` is filled in.
 Do not mix mainline and BSP nodes in one cluster.
 
-## First-boot leftovers
+## Leftovers
 
-| Item | Notes |
+| Item | Status |
 |------|--------|
-| NIC name | Confirm `enP2p33s0` vs `end0` |
-| NVMe by-id | Fill `diskDevice` before any disko reimage |
-| MACs | Per-RK1 NICs still open; CRS310 `…:a7`/`a9` are switch ports, not the board |
-| k3s token | After nordri `enableK3s` |
-| IPv6 | ULA on (`enableIpv6`); no WAN default route |
+| NIC name | Done — `end0` on all four |
+| RK1 MACs | Done — reserved in router dnsmasq |
+| NVMe by-id | Done — `diskDevice` set; still `giyomoon-image` |
+| IPv6 ULA | Done — no WAN default route |
+| k3s token / `cluster.yaml` | Next (Stage 5) |
+| sops-nix on nodes | Next — file must live under `nodes/secrets/` |
 
 Escape hatches (Ubuntu / Talos) if NixOS blocks progress:
 [docs/reference/escape-hatches-ubuntu-talos.md](../docs/reference/escape-hatches-ubuntu-talos.md).

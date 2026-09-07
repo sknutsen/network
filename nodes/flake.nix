@@ -15,6 +15,10 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    deploy-rs = {
+      url = "github:serokell/deploy-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -23,10 +27,34 @@
     turing-rk1,
     sops-nix,
     disko,
+    deploy-rs,
     ...
   }: let
     system = "aarch64-linux";
     lib = nixpkgs.lib;
+    constants = import ./lib/constants.nix;
+    pkgs = nixpkgs.legacyPackages.${system};
+
+    # Workstations that run `deploy` (Macs + a node). Janus is not here.
+    deploySystems = [
+      "aarch64-linux"
+      "aarch64-darwin"
+      "x86_64-darwin"
+    ];
+
+    # Activation scripts from this pin; rust CLI from nixpkgs (cache, RK1 RAM).
+    deployPkgs = import nixpkgs {
+      inherit system;
+      overlays = [
+        deploy-rs.overlays.default
+        (_self: super: {
+          deploy-rs = {
+            inherit (pkgs) deploy-rs;
+            lib = super.deploy-rs.lib;
+          };
+        })
+      ];
+    };
 
     mkHost = {
       hostname,
@@ -45,6 +73,11 @@
           }
         ];
       };
+
+    mkDeployNode = hostname: nixos: {
+      hostname = constants.hosts.${hostname};
+      profiles.system.path = deployPkgs.deploy-rs.lib.activate.nixos nixos;
+    };
   in {
     nixosConfigurations = {
       nordri = mkHost { hostname = "nordri"; };
@@ -53,8 +86,35 @@
       vestri = mkHost { hostname = "vestri"; };
     };
 
-    packages.${system}.uboot-turing-rk1 = turing-rk1.packages.${system}.uboot-turing-rk1;
+    # sshUser zdk, passwordless sudo to root (common.nix). remoteBuild: Macs
+    # can eval this flake but cannot build aarch64-linux closures.
+    deploy = {
+      sshUser = "zdk";
+      user = "root";
+      remoteBuild = true;
+      nodes = lib.mapAttrs mkDeployNode self.nixosConfigurations;
+    };
 
-    formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
+    checks.${system} = deployPkgs.deploy-rs.lib.deployChecks self.deploy;
+
+    packages =
+      lib.genAttrs deploySystems (sys: {
+        deploy-rs = nixpkgs.legacyPackages.${sys}.deploy-rs;
+      })
+      // {
+        ${system} = {
+          uboot-turing-rk1 = turing-rk1.packages.${system}.uboot-turing-rk1;
+          deploy-rs = nixpkgs.legacyPackages.${system}.deploy-rs;
+        };
+      };
+
+    apps = lib.genAttrs deploySystems (sys: {
+      default = {
+        type = "app";
+        program = "${nixpkgs.legacyPackages.${sys}.deploy-rs}/bin/deploy";
+      };
+    });
+
+    formatter.${system} = pkgs.nixfmt-rfc-style;
   };
 }

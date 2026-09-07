@@ -12,8 +12,7 @@ unanswered leftovers only.
 
 1. [ ] **MAC addresses** for remaining dnsmasq reservations. Known hosts are in
        `router/lib/constants.nix` (`macs`) and `router/modules/dhcp.nix`. Still
-       unknown: per-RK1 NICs (nordri–vestri), Socrates, Peon, Nintendo Switch.
-       Do not block Stage 2.
+       unknown: Socrates, Peon, Nintendo Switch. RK1 `end0` MACs are reserved.
 
 ## Operational (not design — already on Stage 1–2 checklists)
 

@@ -96,7 +96,7 @@ confirms `.21` answers.
 
 **Kubernetes:**
 
-- [ ] RK1: GiyoMoon NixOS mainline on NVMe; static IPs
+- [x] RK1: GiyoMoon NixOS mainline on NVMe; `nodes/` flake; static `.11`–`.14` + ULA (`end0`)
 - [ ] k3s cluster (nordri CP + sudri/austri/vestri workers); Flux bootstrap;
       **keep CP taint on nordri**; API at `10.10.30.11:6443`
 - [ ] Longhorn: default StorageClass, replica 3, NVMe at `/var/lib/longhorn` on

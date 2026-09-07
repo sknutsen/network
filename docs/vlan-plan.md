@@ -22,10 +22,10 @@ IP addressing, DHCP pools, IPv6 layout, and DNS policy. Firewall rules:
 | ------------------ | ------------ | ------------------------------------------------------------------- |
 | `10.10.30.30`       | turing-bmc   | Turing Pi BMC (onboard switch, same L2 as RK1s); MAC `c4:ff:84:10:08:5b` |
 | `10.10.30.10`      | _(reserved)_ | k8s API VIP — reserved for future kube-vip; API at `nordri` `.11:6443` |
-| `10.10.30.11`      | nordri       | k3s control plane                                                   |
-| `10.10.30.12`      | sudri        | k3s worker                                                          |
-| `10.10.30.13`      | austri       | k3s worker                                                          |
-| `10.10.30.14`      | vestri       | k3s worker                                                          |
+| `10.10.30.11`      | nordri       | k3s control plane; `end0` `ba:ef:57:8b:58:5e`                       |
+| `10.10.30.12`      | sudri        | k3s worker; `end0` `1e:86:1c:db:07:c1`                              |
+| `10.10.30.13`      | austri       | k3s worker; `end0` `ce:a3:67:c6:1d:a4`                              |
+| `10.10.30.14`      | vestri       | k3s worker; `end0` `b6:51:50:02:89:03`                              |
 | `10.10.30.15`      | zpi          | Audio casting (RPi 5); eth `d8:3a:dd:cf:e1:75`; Wi-Fi `d8:3a:dd:cf:e1:78` (no reservation) |
 | `10.10.30.20`      | truenas      | HA, Immich, Authelia, Forgejo (TrueNAS Apps); Blocky                |
 | `10.10.30.21`      | blocky       | IoT DNS filter (TrueNAS Docker)                                     |

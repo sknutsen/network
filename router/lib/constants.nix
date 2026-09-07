@@ -114,6 +114,10 @@
     uswNc = "f4:e2:c6:55:40:ab";
     uswLr = "d0:21:f9:b2:bf:5d";
     turingBmc = "c4:ff:84:10:08:5b"; # onboard switch (both RJ45s); not a dedicated BMC NIC
+    nordri = "ba:ef:57:8b:58:5e";
+    sudri = "1e:86:1c:db:07:c1";
+    austri = "ce:a3:67:c6:1d:a4";
+    vestri = "b6:51:50:02:89:03";
     u7Lite = "a8:9c:6c:b8:f6:27";
     zpi = "d8:3a:dd:cf:e1:75";
     zpiWifi = "d8:3a:dd:cf:e1:78"; # Wi-Fi; no reservation (eth is VLAN 30)

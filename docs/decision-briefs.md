@@ -193,8 +193,9 @@ automating CP failover.
 ### Context
 
 Longhorn is the chosen k8s StorageClass ([decisions.md](decisions.md)). Four
-RK1 nodes with 256 GB+ NVMe each at `/var/lib/longhorn`. Each volume replicates
-to three nodes.
+RK1 nodes share `/var/lib/longhorn` on the OS NVMe (no extra NAS partition).
+Observed disks: nordri/sudri Kingston 500G; austri Samsung 2TB; vestri
+Kingston 2TB. Each volume replicates to three nodes.
 
 ### Decision
 
@@ -203,11 +204,11 @@ to three nodes.
 | Default StorageClass | Longhorn |
 | Replica count | **3** |
 | Data path | `/var/lib/longhorn` on NVMe (all four RK1s) |
-| Min disk per node | 256 GB |
+| Min disk per node | 500G (nordri/sudri); 2TB (austri/vestri) |
 | Off-cluster backup | Velero or TrueNAS ZFS snapshots |
 
-Usable replicated capacity: roughly one node's worth (~256 GB) after overhead —
-sufficient for homelab Prometheus/Loki/Zdk.
+Usable replica-3 capacity is raw/3 (~1.4 TB) but a single PVC cannot exceed the
+smallest node (~430 GB after OS). Extra space on austri/vestri is Longhorn slack.
 
 ### Options considered
 

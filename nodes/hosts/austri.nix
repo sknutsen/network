@@ -8,6 +8,7 @@
     interface = "end0"; # observed first boot (GiyoMoon 25.11)
     kernelProfile = "mainline";
     diskLayout = "giyomoon-image";
+    diskDevice = "/dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_2TB_S6P1NS0T611720V";
     enableIpv6 = true; # lab ULA; no WAN v6
     enableK3s = false; # Stage 5
     enableLonghornPrep = true;

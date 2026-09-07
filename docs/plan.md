@@ -115,12 +115,12 @@ choices on this list. Do not invent a parallel numbering scheme.
 | 13 | Nintendo Switch local play | Deferred until local play is tested |
 | 18 | Future public apps | Per-app checklist in the brief |
 
-Remaining MAC reservations (per-RK1 NICs, Socrates, Peon, Switch) are first-boot work, not a brief: [OPEN-QUESTIONS.md](../router/OPEN-QUESTIONS.md).
+Remaining MAC reservations (Socrates, Peon, Switch) are leftovers, not a brief: [OPEN-QUESTIONS.md](../router/OPEN-QUESTIONS.md). RK1 NICs are reserved.
 
 ## Target repo layout
 
-Stage 5–8 leftovers: encrypted secrets and runbooks. `nodes/` and the `k8s/`
-Flux tree exist (k3s / bootstrap still off). DNSUpdater stays a Nix stub until
+Stage 5–8 leftovers: k3s on, encrypted `cluster.yaml`, Flux bootstrap. All four
+RK1s are on the `nodes/` flake (`enableK3s = false`). `k8s/` tree exists. DNSUpdater stays a Nix stub until
 [that repo](https://github.com/sknutsen/DNSUpdater) ships a package.
 
 ```

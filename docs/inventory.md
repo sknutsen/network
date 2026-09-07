@@ -8,13 +8,13 @@ design: [vlan-plan.md](vlan-plan.md).
 | Name        | Hardware        | OS            | Static IP                                                                                 | Connection                                    | Role                                                                                                                                |
 | ----------- | --------------- | ------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | **TrueNAS** | NAS             | TrueNAS SCALE | `10.10.30.20` (+ `.21` alias for Blocky); MAC `cc:28:aa:42:c2:9d`                         | Wired (port 4)                                | HA, Immich, Authelia, Forgejo (TrueNAS Apps); Blocky; **UI:** `https://truenas.lab.zdk.no` (Caddy), not direct IP from trusted/mgmt |
-| **nordri**  | RK1 (Turing Pi) | NixOS + k3s   | `10.10.30.11` / `fd10:10:10:30::11`                                                       | Wired (port 3) | k3s control plane                                                                                                                   |
-| **sudri**   | RK1 (Turing Pi) | NixOS + k3s   | `10.10.30.12` / `fd10:10:10:30::12`                                                       | Wired (port 3) | k3s worker                                                                                                                          |
-| **austri**  | RK1 (Turing Pi) | NixOS + k3s   | `10.10.30.13` / `fd10:10:10:30::13`                                                       | Wired (port 3) | k3s worker                                                                                                                          |
-| **vestri**  | RK1 (Turing Pi) | NixOS + k3s   | `10.10.30.14` / `fd10:10:10:30::14`                                                       | Wired (port 3) | k3s worker                                                                                                                          |
+| **nordri**  | RK1 slot 1 | NixOS (GiyoMoon → flake) | `10.10.30.11` / `fd10:10:10:30::11` | `end0` `ba:ef:57:8b:58:5e`; Kingston SNV2S500G | k3s control plane (off until Stage 5) |
+| **sudri**   | RK1 slot 2 | NixOS (GiyoMoon → flake) | `10.10.30.12` / `fd10:10:10:30::12` | `end0` `1e:86:1c:db:07:c1`; Kingston SNV2S500G | k3s worker (off until Stage 5) |
+| **austri**  | RK1 slot 3 | NixOS (GiyoMoon → flake) | `10.10.30.13` / `fd10:10:10:30::13` | `end0` `ce:a3:67:c6:1d:a4`; Samsung 970 EVO Plus 2TB | k3s worker (off until Stage 5) |
+| **vestri**  | RK1 slot 4 | NixOS (GiyoMoon → flake) | `10.10.30.14` / `fd10:10:10:30::14` | `end0` `b6:51:50:02:89:03`; Kingston SFYRD2000G | k3s worker (off until Stage 5) |
 | **Zpi**     | Raspberry Pi 5  | Raspbian      | `10.10.30.15`; MAC `d8:3a:dd:cf:e1:75` (eth), `d8:3a:dd:cf:e1:78` (Wi-Fi, no reservation) | Not on CRS310                                 | Audio casting to speaker system                                                                                                     |
 
-**Turing Pi ethernet:** two 1GbE RJ45s on the board, **bridged** into one onboard switch with the BMC and the four RK1s. One cable → CRS310 port 3 (VLAN 30). Do not plug the second RJ45 into another VLAN (that bridges 10↔30). CRS310 `d0:ea:11:6d:36:a7`/`a9` are switch port MACs (CPU `…:a5`), not the board.
+**Turing Pi ethernet:** two 1GbE RJ45s, **bridged** into one onboard switch with the BMC and the four RK1s. One cable → CRS310 port 3 (VLAN 30). Do not plug the second RJ45 into another VLAN (that bridges 10↔30). CRS310 `d0:ea:11:6d:36:a7`/`a9` are switch port MACs (CPU `…:a5`), not the board. RK1 NICs are `end0` (GiyoMoon 25.11). Extra NVMe on austri/vestri stays one filesystem for Longhorn — not a second NAS.
 
 **Turing Pi BMC:** same L2 as the nodes. MAC `c4:ff:84:10:08:5b` → `10.10.30.30` (`turing-bmc.lab.zdk.no`).
 
@@ -93,10 +93,10 @@ DHCP `dhcp-host` rows live in `router/modules/dhcp.nix` (MACs in
 | `usw-nc.lab.zdk.no`         | `10.10.10.3`  | 10                                     | `f4:e2:c6:55:40:ab`                                               |
 | `usw-lr.lab.zdk.no`         | `10.10.10.4`  | 10                                     | `d0:21:f9:b2:bf:5d`                                               |
 | `turing-bmc.lab.zdk.no`     | `10.10.30.30`  | 30                                     | `c4:ff:84:10:08:5b`                                               |
-| `nordri.lab.zdk.no`         | `10.10.30.11` | 30                                     | — (board 2.5GbE MAC not reserved)                                 |
-| `sudri.lab.zdk.no`          | `10.10.30.12` | 30                                     | — (same board uplink)                                             |
-| `austri.lab.zdk.no`         | `10.10.30.13` | 30                                     | — (same board uplink)                                             |
-| `vestri.lab.zdk.no`         | `10.10.30.14` | 30                                     | — (same board uplink)                                             |
+| `nordri.lab.zdk.no`         | `10.10.30.11` | 30                                     | `ba:ef:57:8b:58:5e`                                               |
+| `sudri.lab.zdk.no`          | `10.10.30.12` | 30                                     | `1e:86:1c:db:07:c1`                                               |
+| `austri.lab.zdk.no`         | `10.10.30.13` | 30                                     | `ce:a3:67:c6:1d:a4`                                               |
+| `vestri.lab.zdk.no`         | `10.10.30.14` | 30                                     | `b6:51:50:02:89:03`                                               |
 | `zpi.lab.zdk.no`            | `10.10.30.15` | 30                                     | `d8:3a:dd:cf:e1:75` (eth); Wi-Fi `d8:3a:dd:cf:e1:78` not reserved |
 | `pingu.lab.zdk.no`          | `10.10.20.10` | 20                                     | `f0:2f:74:dd:e6:48`                                               |
 | `socrates.lab.zdk.no`       | `10.10.20.11` | 20                                     | —                                                                 |
@@ -113,7 +113,7 @@ DHCP `dhcp-host` rows live in `router/modules/dhcp.nix` (MACs in
 
 U7 Lite (`a8:9c:6c:b8:f6:27`) is on VLAN 10 DHCP — no reserved IP.
 
-Still unknown: per-RK1 NICs (nordri–vestri), Socrates, Peon, Nintendo Switch.
+Still unknown: Socrates, Peon, Nintendo Switch.
 
 ## VLAN assignment rationale
 

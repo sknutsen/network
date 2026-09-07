@@ -43,7 +43,8 @@ are canonical.
 | K8s cluster       | **4× RK1** on Turing Pi 2.5, **k3s**                           | ARM64 homelab; expandable with x86 workers                      |
 | K8s control plane | **`nordri` sole CP** at `10.10.30.11:6443`; **CP taint kept**; `.10` reserved | Workloads on `sudri`–`vestri`; no kube-vip until second CP |
 | RK1 node OS       | **NixOS** (GiyoMoon mainline)                                  | Unified ops with router; escape hatches documented only         |
-| Storage (K8s)     | **Longhorn** — default StorageClass, **replica 3**, NVMe at `/var/lib/longhorn` per RK1 | 4 nodes × 256 GB+; ~256 GB usable replicated capacity; Velero/ZFS backup off-cluster |
+| RK1 NixOS deploy  | **deploy-rs** (`nodes#`, `remoteBuild`)                        | Multi-node + magic rollback; Mac evaluates, node builds; janus still `nixos-rebuild` |
+| Storage (K8s)     | **Longhorn** — default StorageClass, **replica 3**, NVMe at `/var/lib/longhorn` per RK1 | 2×500G + 2×2TB; replica-3 usable ~raw/3; single PVC ≤ smallest node; Velero/ZFS off-cluster |
 | Auth / SSO        | **Authelia** TrueNAS App (`10.10.30.20:9091`)                  | Caddy `forward_auth` for lab UIs; portal `auth.lab.zdk.no`; exceptions below |
 | Secrets           | **sops-nix + age**; key `/var/lib/sops-nix/key.txt` on janus   | One SOPS workflow; workstation age identity in `.sops.yaml`     |
 | VPN               | **WireGuard** (`51820`) + **Headscale** on janus               | Headscale **`127.0.0.1:8081`** behind Caddy (`headscale.lab.zdk.no`); **not** `:8080` (UniFi Inform) |
