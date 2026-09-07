@@ -1,0 +1,19 @@
+# Flux bootstrap netpol only allows ingress from pods in flux-system.
+# Capacitor lives there; Traefik is in another namespace.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-capacitor
+  namespace: flux-system
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: onechart
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9000

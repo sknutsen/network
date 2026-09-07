@@ -4,3 +4,4 @@ resources:
   - metallb-pool.yaml
   - loki-lb.yaml
   - ingressroutes.yaml
+  - capacitor-netpol.yaml
