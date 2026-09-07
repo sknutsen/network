@@ -1,0 +1,11 @@
+# Root overlay for the bootstrap Kustomization (path ./k8s/clusters/homelab).
+# Without this file, kustomize-controller includes every YAML in the tree and
+# applies IPAddressPool before MetalLB CRDs exist. infra-config dependsOn
+# infra-core so the pool waits. List flux-system so prune cannot drop controllers.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - flux-system
+  - infra-core.yaml
+  - infra-config.yaml
+  - apps.yaml

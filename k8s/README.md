@@ -10,6 +10,7 @@ in-cluster HTTP only. Authelia stays on Caddy, not in this tree.
 
 ```
 k8s/clusters/homelab/
+├── kustomization.yaml    # required: only flux-system + the three Kustomization CRs
 ├── flux-system/          # created by `flux bootstrap` — do not hand-write
 ├── infra-core.yaml       # Flux Kustomization → infra/core
 ├── infra-config.yaml     # pools, IngressRoutes, Loki LB (needs CRDs)
@@ -20,10 +21,14 @@ k8s/clusters/homelab/
 ```
 
 `flux bootstrap` writes `gotk-components.yaml` / `gotk-sync.yaml` under
-`flux-system/`. Do not invent those files. After bootstrap, Flux reconciles
-this directory and picks up the three Kustomization CRs at the top level.
-Do **not** add a `kustomization.yaml` next to them unless it also lists
-`flux-system` (otherwise prune can drop the controllers).
+`flux-system/`. Do not invent those files. After bootstrap, the
+`flux-system` Kustomization builds this directory. The root
+`kustomization.yaml` must exist and must list `flux-system` plus
+`infra-core.yaml` / `infra-config.yaml` / `apps.yaml`. Without it,
+kustomize-controller applies `infra/config` immediately (MetalLB CRDs
+are not installed yet). `--token-auth` stores the GitHub PAT in
+`flux-system/flux-system` (HTTPS); `gh` OAuth tokens cannot create
+deploy keys.
 
 ## Bootstrap (Stage 5, after k3s is up)
 
