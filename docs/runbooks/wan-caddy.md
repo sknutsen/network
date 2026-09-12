@@ -64,3 +64,15 @@ app uses that URL at home and away (Unbound splits `img.zdk.no` to Caddy).
 - Uncomment `code.zdk.no` / `zdk.no` in the Caddyfile
 - Open WAN SSH
 - Enable hairpin NAT to test from Remorse
+
+## SSL Labs (2026-09-12)
+
+Unpublished API scan of `84.48.97.100`:
+
+| Host | Grade |
+| ---- | ----- |
+| `img.zdk.no` | **A** |
+| `ha.zdk.no` | **A** |
+
+TLS 1.2 + 1.3, forward secrecy, no Heartbleed/FREAK/POODLE. No HSTS — that is
+the usual gap to A+. Caddy default. Do not publish lab names.

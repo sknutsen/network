@@ -138,17 +138,16 @@ exposure** happens here.
 
 **Immich (`img.zdk.no`) and Home Assistant (`ha.zdk.no`):**
 
-- [ ] Domeneshop: `A`/`AAAA` for `img` and `ha` (same WAN IP as other public
-      names)
-- [ ] `enableWanCaddy = true` so WAN 80/443 hit Caddy. Certs already use DNS-01
-      (same as lab); `lab_only` still aborts WAN clients on lab Host headers. No
-      public A/AAAA for `*.lab.zdk.no`.
-- [ ] HA `configuration.yaml`: `external_url` / `internal_url` /
-      `trusted_proxies`
-- [ ] Immich admin: external domain `https://img.zdk.no`
-- [ ] External validation: `curl -I https://img.zdk.no` and `https://ha.zdk.no`
-- [ ] Confirm `immich.lab.zdk.no` / `ha.lab.zdk.no` fail from WAN (no public
-      DNS; Caddy `lab_only`)
+- [x] Domeneshop: `A` for `img` and `ha` → `84.48.97.100` (no AAAA)
+- [x] `enableWanCaddy = true`; WAN 80/443 to Caddy; `wan_https4` meter
+      (2026-09-12)
+- [x] HA `configuration.yaml`: `external_url` / `internal_url` /
+      `trusted_proxies` (2026-09-12)
+- [x] Immich admin: external domain `https://img.zdk.no` (2026-09-12)
+- [x] External validation: Pixel LTE, WG off — `https://img.zdk.no` and
+      `https://ha.zdk.no` resolve (2026-09-12)
+- [x] Public DNS: `immich.lab` / `ha.lab` NXDOMAIN. `lab_only` still on
+      the vhosts.
 
 **Forgejo (`code.zdk.no`) — can enable independently:**
 
@@ -166,11 +165,11 @@ exposure** happens here.
 
 **Always at Stage 7:**
 
-- [ ] Confirm `*.lab.zdk.no` **not** WAN-reachable (no public DNS; Caddy
-      `lab_only`; WAN INPUT is Caddy 80/443 only)
-- [ ] nftables rate-limit on WAN 443 (CrowdSec deferred — add only if logs
-      warrant)
-- [ ] SSL Labs scan on public hostnames
+- [x] `*.lab.zdk.no` has no public `A`/`AAAA` (NXDOMAIN). WAN INPUT is
+      Caddy 80/443 only; SSH still trusted-only.
+- [x] nftables `wan_https4` on WAN 80/443 (25/s per source). CrowdSec
+      deferred.
+- [x] SSL Labs: `img.zdk.no` and `ha.zdk.no` both **A** (2026-09-12). TLS 1.2/1.3, no HSTS (A+ would need it).
 
 ## Stage 8 — Operationalize (depends: all above)
 
