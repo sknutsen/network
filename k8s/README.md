@@ -70,7 +70,11 @@ Loki is a **sibling** HelmRelease, not part of kube-prometheus-stack. Promtail
 on TrueNAS pushes to `.101:3100` — no Authelia.
 
 Chart node-exporter is **off**. Scrapes the NixOS exporters on janus
-(`10.10.30.1:9100`) and the four RK1s.
+(`10.10.30.1:9100`) and the four RK1s, the presence exporter
+(`10.10.30.1:9101`), and Blocky (`10.10.30.21:4000/metrics`).
+
+Grafana sidecar loads `grafana-dashboard-network` (folder **Network**,
+dashboard **Network**). Edit `infra/core/dashboards/network-overview.json`.
 
 ## Hosts / IngressRoutes
 

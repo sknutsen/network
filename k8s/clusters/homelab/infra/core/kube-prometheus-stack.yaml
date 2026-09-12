@@ -54,6 +54,16 @@ spec:
           enable_login_token: true
       ingress:
         enabled: false
+      sidecar:
+        dashboards:
+          enabled: true
+          label: grafana_dashboard
+          labelValue: "1"
+          folderAnnotation: grafana_folder
+          searchNamespace: monitoring
+          provider:
+            allowUiUpdates: false
+            foldersFromFilesStructure: false
       additionalDataSources:
         - name: Loki
           type: loki
@@ -113,6 +123,19 @@ spec:
                   - 10.10.30.14:9100
                 labels:
                   instance: vestri
+          - job_name: network-presence
+            static_configs:
+              - targets:
+                  - 10.10.30.1:9101
+                labels:
+                  instance: janus
+          - job_name: blocky
+            metrics_path: /metrics
+            static_configs:
+              - targets:
+                  - 10.10.30.21:4000
+                labels:
+                  instance: blocky
     nodeExporter:
       enabled: false
     prometheus-node-exporter:

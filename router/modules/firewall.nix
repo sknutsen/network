@@ -175,8 +175,8 @@ in
               ""
           }
 
-          # node_exporter — scrape from servers VLAN / VPN later
-          iifname $SERVERS tcp dport 9100 accept
+          # Prometheus exporters — scrape from servers VLAN only
+          iifname $SERVERS tcp dport { ${toString C.monitoring.nodeExporterPort}, ${toString C.monitoring.presenceExporterPort} } accept
 
           counter drop
         }

@@ -176,6 +176,8 @@ exposure** happens here.
 
 ## Stage 8 — Operationalize (depends: all above)
 
+- [ ] Network dashboard live: rebuild janus (presence `:9101`); Flux apply
+      scrape jobs + Grafana **Network**; publish Blocky `:4000` on `.21`
 - [ ] `validate.sh` in CI (flake check, caddy fmt)
 - [x] Runbooks: router restore, WG key rotation, ACME failure, Capacitor,
       IoT DNS — [runbooks/](runbooks/)

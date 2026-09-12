@@ -136,6 +136,7 @@ services:
     ports:
       - "10.10.30.21:53:53/udp"
       - "10.10.30.21:53:53/tcp"
+      - "10.10.30.21:4000:4000"
     volumes:
       - ../dns/blocky.yml:/app/config.yml:ro
       - ../dns/iot-lab-deny.txt:/app/iot-lab-deny.txt:ro

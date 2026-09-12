@@ -26,3 +26,9 @@ blocking:
   blockType: nxDomain
 
 # DoT :853 omitted until Blocky has a cert (firewall DNATs 853; fail closed).
+
+# Prometheus scrapes 10.10.30.21:4000/metrics from k8s (VLAN 30).
+# TrueNAS Custom App must publish host port 4000 on the .21 alias.
+prometheus:
+  enable: true
+  path: /metrics

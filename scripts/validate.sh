@@ -32,6 +32,16 @@ else
   fi
 fi
 
+echo "==> network-presence exporter tests"
+if command -v python3 >/dev/null 2>&1; then
+  if ! python3 -m unittest discover -s "$root/router/modules" -p 'test_*.py' -q; then
+    echo "network-presence exporter tests failed" >&2
+    fail=1
+  fi
+else
+  echo "python3 not found — skip exporter tests"
+fi
+
 echo "==> nix flake check"
 if command -v nix >/dev/null 2>&1; then
   if ! nix --extra-experimental-features 'nix-command flakes' flake check --all-systems "$root"; then

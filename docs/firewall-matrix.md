@@ -80,6 +80,7 @@ trusted, servers (jump/k8s), or VPN — not from VLAN 10.
 | wg0 | janus | 53/udp+tcp | **ALLOW** Stage 6 | Split-horizon Unbound for VPN clients |
 | servers + iot | janus | 5353/udp | **ALLOW** | Avahi reflector (30↔40 only) |
 | localhost | Headscale | 8081/tcp | — | Caddy reverse_proxy only; no extra INPUT |
+| servers | janus | 9100, 9101/tcp | **ALLOW** | node_exporter + presence exporter. Not trusted/mgmt/VPN/WAN |
 
 ## East-west (VLAN 30)
 

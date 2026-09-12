@@ -80,7 +80,7 @@ router/
     ├── vpn.nix             # WireGuard + Headscale (Stage 6 flags)
     ├── unifi.nix           # UniFi OS Server (rootless Podman + systemd)
     ├── dnsupdater.nix      # Domeneshop DDNS (DNSUpdater flake + sops)
-    ├── monitoring.nix      # node_exporter
+    ├── monitoring.nix      # node_exporter + presence exporter (leases/ARP)
     └── ssh.nix
 ```
 

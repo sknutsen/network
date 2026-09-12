@@ -152,6 +152,12 @@
     discoveryPort = 10001;
   };
 
+  # Prometheus exporters on janus. Scraped from VLAN 30 only.
+  monitoring = {
+    nodeExporterPort = 9100;
+    presenceExporterPort = 9101;
+  };
+
   # Loopback only — Caddy proxies headscale.lab.zdk.no. Do not bind :8080
   # (UniFi Inform) or :11443 (UniFi UI).
   headscale = {

@@ -166,8 +166,15 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 | Component | Location |
 |-----------|----------|
 | Prometheus, Grafana, Alertmanager, Loki | k8s — `kube-prometheus-stack` |
-| node_exporter | Router + each Linux host |
+| Grafana **Network** dashboard | `grafana.lab.zdk.no` folder Network (Authelia) |
+| node_exporter | Router + each Linux host (`:9100`) |
+| Presence exporter | janus `10.10.30.1:9101` — dnsmasq leases + ARP vs `constants.nix` |
+| Blocky metrics | `10.10.30.21:4000/metrics` (publish this port on the TrueNAS Custom App) |
 | TrueNAS Docker logs | Promtail sidecar/agent → Loki in k8s |
+
+UniFi remains the Wi-Fi / Flex Mini UI (`unifi.lab.zdk.no`). It is not DHCP and not the router, so the Grafana Network dashboard is the LAN device/IP/MAC view. UniFi poller and CRS310 SNMP are not in v1.
+
+**Apply:** `nixos-rebuild` janus (exporter + nftables `:9101`); push this tree so Flux reloads scrape configs and the dashboard ConfigMap; publish Blocky `:4000` on `10.10.30.21`.
 
 **TrueNAS log options:** (a) Promtail in compose shipping to Loki (HA/Immich/Authelia Apps + Forgejo/Blocky); (b) Vector agent on TrueNAS host. **Caddy logs** are on janus (`journalctl -u caddy`). UniFi OS Server logs stay on the router unless forwarded later.
 
