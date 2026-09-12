@@ -58,7 +58,7 @@ Router-enforced nftables policy on NixOS. VLAN design: [vlan-plan.md](vlan-plan.
 |--------|-------------|-------|--------|-------|
 | ISP DHCP server | router WAN | 68/udp (sport 67) | **ALLOW** | DHCPv4 client — INPUT, not forward. Replies are often broadcasts and miss conntrack `related` |
 | ISP DHCPv6 server | router WAN | 546/udp (sport 547) | **ALLOW** | DHCPv6-PD client; **only when IPv6 is enabled** |
-| internet | janus WAN | 443/tcp, 80/tcp | **ALLOW** | **WAN INPUT to Caddy** (`enableWanCaddy`, Stage 7+). Not DNAT to TrueNAS |
+| internet | janus WAN | 443/tcp, 80/tcp | **ALLOW** | **WAN INPUT to Caddy** (`enableWanCaddy`). Per-IP SYN meter `wan_https4` (25/s). Not DNAT to TrueNAS |
 | internet | router | WireGuard UDP **51820** | **ALLOW** | VPN |
 | internet | any LAN | 22/tcp | **DENY** | No WAN SSH |
 | trusted (20) | router | 22/tcp | **ALLOW** | Only VLAN that may SSH to router |

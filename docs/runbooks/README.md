@@ -9,6 +9,7 @@ Short operational procedures. Design lives in the rest of `docs/`.
 | [wireguard-clients.md](wireguard-clients.md) | First Pixel / Remorse tunnel configs |
 | [wireguard-rotation.md](wireguard-rotation.md) | Stage 6+ server or client WG key rotation |
 | [headscale.md](headscale.md) | Stage 6 Headscale user, preauth, client login |
+| [wan-caddy.md](wan-caddy.md) | Stage 7 WAN 80/443, img/ha validation |
 | [acme-failure.md](acme-failure.md) | Lab or public certs fail to issue / renew |
 | [capacitor.md](capacitor.md) | `capacitor.lab.zdk.no` 502, Authelia, or Flux OCI |
 

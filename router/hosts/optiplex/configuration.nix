@@ -28,7 +28,7 @@ in {
     enableDnsUpdater = false;
     enableUnifi = true;
     enableCaddy = true;
-    enableWanCaddy = false; # WAN 80/443 for img.zdk.no and ha.zdk.no
+    enableWanCaddy = true; # Stage 7 — WAN 80/443 for img.zdk.no and ha.zdk.no
     caddyEmail = "admin@zdk.no";
     enableBlocky = true; # Blocky answers on 10.10.30.21; IoT DHCP + DNAT cutover
   };

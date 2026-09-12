@@ -135,7 +135,10 @@ in
           }
           ${
             if cfg.enableCaddy && cfg.enableWanCaddy then
-              ''iifname $WAN tcp dport { 80, 443 } accept''
+              ''# Stage 7 — WAN Caddy. Per-source SYN limit; established
+          # already accepted above. Over-limit hits the chain drop.
+          # CrowdSec deferred (decision-briefs §15).
+          iifname $WAN tcp dport { 80, 443 } ct state new meter wan_https4 { ip saddr limit rate 25/second burst 50 packets } accept''
             else
               ""
           }

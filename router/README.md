@@ -84,7 +84,7 @@ router/
     └── ssh.nix
 ```
 
-**Stage flags** in `hosts/optiplex/configuration.nix`: `enableBlocky` is **true** (Blocky at `10.10.30.21`). `enableWireGuard` is **true** (`wg0` `10.10.255.1`, WAN `51820/udp`). `enableHeadscale` is **true** (`127.0.0.1:8081`). `enableWanCaddy` stays **false** until Stage 7 (WAN 80/443 for `img.zdk.no` and `ha.zdk.no`). Lab and public TLS is ACME **DNS-01** (Domeneshop plugin + sops; `dns01` snippet in the Caddyfile). Caddyfile: `services/caddy/Caddyfile`.
+**Stage flags** in `hosts/optiplex/configuration.nix`: `enableBlocky` is **true** (Blocky at `10.10.30.21`). `enableWireGuard` is **true** (`wg0` `10.10.255.1`, WAN `51820/udp`). `enableHeadscale` is **true** (`127.0.0.1:8081`). `enableWanCaddy` is **true** (WAN 80/443 for `img.zdk.no` and `ha.zdk.no`). Lab and public TLS is ACME **DNS-01** (Domeneshop plugin + sops; `dns01` snippet in the Caddyfile). Caddyfile: `services/caddy/Caddyfile`.
 
 ## Build / deploy (once hardware knobs are set)
 
