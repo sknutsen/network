@@ -44,11 +44,38 @@ let
   iotDns =
     if cfg.enableBlocky then C.hosts.blocky else gw C.vlans.iot.ipv4;
 
+  # option 6 must be forced on IoT: some clients omit it from the
+  # parameter-request list and then write the gateway (10.10.40.1).
+  dnsOptionLine = name:
+    let
+      servers =
+        if name == "iot" then
+          iotDns
+        else if name == "guest" then
+          "1.1.1.1,9.9.9.9"
+        else
+          gw C.vlans.${name}.ipv4;
+      kind = if name == "iot" && cfg.enableBlocky then "dhcp-option-force" else "dhcp-option";
+    in
+    "${kind}=tag:${name},option:dns-server,${servers}\n";
+
   domainSearchLine = name:
     if name == "iot" && cfg.enableBlocky then
-      "# IoT: no domain-search — Blocky denies lab names; don't probe\n"
+      "# IoT: no domain-search / no option 15 — Blocky denies lab names\n"
     else
       "dhcp-option=tag:${name},option:domain-search,${C.domain}\n";
+
+  # Scoped domain= so option 15 is not sent on IoT after Blocky (a bare
+  # domain=lab.zdk.no applies to every VLAN and becomes search lab.zdk.no).
+  domainLines = lib.concatMapStrings (
+    name:
+    let vlan = C.vlans.${name};
+    in
+    if name == "iot" && cfg.enableBlocky then
+      ""
+    else
+      "domain=${C.domain},${vlan.network}\n"
+  ) (lib.attrNames C.vlans);
 
   vlanDhcpSections = lib.concatStrings (
     lib.mapAttrsToList (
@@ -56,16 +83,10 @@ let
         # VLAN ${toString vlan.id} (${name})
         interface=vlan${toString vlan.id}
         dhcp-range=set:${name},${vlan.dhcpRange.start},${vlan.dhcpRange.end},${vlan.dhcpRange.lease}
+        # Tag dhcp-host rows outside the pool (Hue .12, etc.)
+        dhcp-range=set:${name},${lib.head (lib.splitString "/" vlan.network)},static,${vlan.dhcpRange.lease}
         dhcp-option=tag:${name},option:router,${gw vlan.ipv4}
-        dhcp-option=tag:${name},option:dns-server,${
-          if name == "iot" then
-            iotDns
-          else if name == "guest" then
-            "1.1.1.1,9.9.9.9"
-          else
-            gw vlan.ipv4
-        }
-        ${domainSearchLine name}
+        ${dnsOptionLine name}${domainSearchLine name}
       ''
     ) C.vlans
   );
@@ -81,6 +102,7 @@ in
 {
   environment.etc."dnsmasq-homelab.conf".text = ''
     # Generated from router/lib/constants.nix
+    ${domainLines}
     ${vlanDhcpSections}
     ${reservationLines}
   '';
@@ -89,8 +111,8 @@ in
     enable = true;
     settings = {
       # DHCP only — Unbound is the recursive resolver.
+      # domain= is scoped per VLAN in dnsmasq-homelab.conf (not global).
       port = 0;
-      domain = C.domain;
       expand-hosts = true;
       dhcp-authoritative = true;
       local = "/${C.domain}/";
