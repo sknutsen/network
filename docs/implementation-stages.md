@@ -52,11 +52,11 @@ Stages marked **(parallel)** can run concurrently. Architecture:
 
 ## Stage 4 — Segmentation hardening (depends: Stage 3)
 
-Blocky **deploy** is Stage 5 compose. Do not flip `enableBlocky` until Stage 5
-confirms `.21` answers.
+Blocky **deploy** was Stage 5 compose. `enableBlocky` is **true** (IoT DHCP +
+DNAT to `.21`).
 
 - [x] Apply [firewall-matrix.md](firewall-matrix.md) except IoT DNS cutover
-      (`enableBlocky` stays false)
+      (cutover is Stage 5; `enableBlocky` is now true)
 - [x] mDNS: static IPs first; Avahi reflector servers↔IoT (Matter / Dirigera)
 - [x] Trusted→IoT cast allows (TV/Chromecast/Odyssey) here or with HA — not at
       Stage 3. Uncomment the nftables cast rule when enabling.
@@ -91,20 +91,25 @@ confirms `.21` answers.
       certmagic must not use `127.0.0.53`. No public A records for lab names.
 - [x] Forgejo: internal HTTPS via `code.lab.zdk.no`; **LAN SSH on `:30143`**
       (trusted + VPN)
-- [ ] Promtail stub in compose (`--profile logging`) → Loki; enable after Loki
-      is up; push URL must not go through Authelia
+- [x] Promtail on TrueNAS (`docker compose --profile logging up -d promtail`)
+      → Loki `10.10.30.101:3100`. Drops samples older than 24h (Mailcow
+      history). Push URL is not behind Authelia.
 
 **Kubernetes:**
 
 - [x] RK1: GiyoMoon NixOS mainline on NVMe; `nodes/` flake; static `.11`–`.14` + ULA (`end0`)
-- [ ] k3s cluster (nordri CP + sudri/austri/vestri workers); Flux bootstrap;
-      **keep CP taint on nordri**; API at `10.10.30.11:6443`
-- [ ] Longhorn: default StorageClass, replica 3, NVMe at `/var/lib/longhorn` on
+- [x] k3s cluster (nordri CP + sudri/austri/vestri workers); Flux bootstrap
+      (`--token-auth`); **CP taint kept on nordri**; API at
+      `10.10.30.11:6443`. No kube-vip; `.10` reserved.
+- [x] Longhorn: default StorageClass, replica 3, NVMe at `/var/lib/longhorn` on
       all RK1s
-- [ ] MetalLB pool `10.10.30.100–110`; Traefik LB at `.100`
-- [ ] kube-prometheus-stack (Prometheus, Grafana, Alertmanager, Loki)
-- [ ] Capacitor at `capacitor.lab.zdk.no` via Caddy + Authelia
-- [ ] Zdk ingress stub only — no app deploy until Zdk repo ships
+- [x] MetalLB pool `10.10.30.100–110`; Traefik LB at `.100`
+- [x] kube-prometheus-stack (Prometheus, Grafana, Alertmanager) + Loki sibling
+      HelmRelease. Grafana login is Authelia (`Remote-User`); no Grafana form.
+- [x] Capacitor at `capacitor.lab.zdk.no` via Caddy + Authelia (`allow-capacitor`
+      netpol for Traefik)
+- [x] Zdk ingress stub only — GitRepository **suspended**; no app deploy until
+      Zdk repo ships
 
 **TLS (v1):** Caddy ACME **DNS-01 (Domeneshop)** for lab **and** public names.
 Custom Caddy with `github.com/caddy-dns/domainnameshop` + sops API credentials.
@@ -171,11 +176,14 @@ exposure** happens here.
 ## Ongoing — Repo scaffolding (parallel from day 0)
 
 - [x] Scaffold `router/` NixOS flake (+ OPEN-QUESTIONS.md)
-- [x] Scaffold `nodes/` RK1 NixOS flake (k3s off until Stage 5)
+- [x] Scaffold `nodes/` RK1 NixOS flake (k3s now on)
 - [x] Scaffold `k8s/` Flux tree (bootstrap + infra HelmReleases)
 - [x] Encrypted `secrets/router.yaml` + `secrets/.sops.yaml` (janus / pingu /
       remorse age recipients). Caddy Domeneshop env via sops-nix template.
-- [ ] Encrypted `secrets/cluster.yaml` and `docs/runbooks/`
+- [x] Encrypted cluster secrets: `nodes/secrets/cluster.yaml` (k3s token,
+      sops-nix on RK1s) and `k8s/.../grafana-admin.secret.yaml` (Flux sops).
+      Not `secrets/cluster.yaml` (nodes flake cannot import `../secrets`).
+- [ ] `docs/runbooks/`
 
 ## Parallel workstreams
 
@@ -195,11 +203,9 @@ Stage 7 needs Caddy on janus (Stage 2) plus TrueNAS backends from E.
 
 ## Suggested next commits
 
-Already in tree: vlan/firewall/inventory docs, router flake, `nodes/` RK1 flake,
-`k8s/` Flux tree, CRS310 `.rsc`, TrueNAS compose, Caddyfile, Authelia config
-(live App), Blocky/Promtail stubs, Zdk IngressRoute stub.
+Already in tree through Stage 5 (k3s, Flux, Loki, Promtail, cluster sops).
 
 Still to add:
 
-1. Encrypted `secrets/router.yaml` (age key on janus — do not commit the key)
-2. `docs/runbooks/` (router restore, WG rotation, ACME, Capacitor)
+1. `docs/runbooks/` (router restore, WG rotation, ACME, Capacitor)
+2. Stage 6 WireGuard / Headscale keys in `secrets/router.yaml`

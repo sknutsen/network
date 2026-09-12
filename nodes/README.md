@@ -9,9 +9,8 @@ NixOS flake for the k3s cluster. Configs: `nordri` (control plane),
 - [docs/plans/rk1-bsp-fork.md](../docs/plans/rk1-bsp-fork.md)
 
 This flake is **separate** from the repo-root router flake (`.#optiplex`).
-All four nodes are on this flake. k3s stays **off** (`enableK3s = false`)
-until the Stage 5 steps below. Flux/Helm live under
-[k8s/README.md](../k8s/README.md).
+All four nodes are on this flake with `enableK3s = true`. Flux/Helm live
+under [k8s/README.md](../k8s/README.md).
 
 ## Layout
 
@@ -21,13 +20,13 @@ nodes/
 ├── lib/constants.nix         # IPs mirrored from router (flake purity)
 ├── hosts/{nordri,sudri,austri,vestri}.nix
 ├── modules/                  # hardware, net, ssh, k3s, Longhorn prep
+├── secrets/cluster.yaml      # sops-encrypted k3s token
 └── bsp/                      # deferred vendor kernel — do not select
 ```
 
-**Stage flags:** `enableK3s` stays false until the nordri token exists.
-`kernelProfile` stays `"mainline"`. `diskLayout` stays `"giyomoon-image"`.
-`interface` is `end0` (GiyoMoon 25.11). `diskDevice` is the NVMe by-id
-(unused until a disko reimage).
+**Stage flags:** `enableK3s` is true. `kernelProfile` stays `"mainline"`.
+`diskLayout` stays `"giyomoon-image"`. `interface` is `end0` (GiyoMoon
+25.11). `diskDevice` is the NVMe by-id (unused until a disko reimage).
 
 | Host | Slot | IPv4 / ULA | NIC | NVMe |
 |------|------|------------|-----|------|
@@ -98,23 +97,19 @@ nix eval './nodes#deploy.nodes.nordri.hostname'
 
 ## Stage 5 — k3s
 
-Static IPs and Longhorn host prep are done. Next:
+Live: nordri is the sole control plane (`https://10.10.30.11:6443`, CP
+taint kept). sudri / austri / vestri are agents. Token is
+`sops.secrets."k3s/token"` from `secrets/cluster.yaml` (this flake;
+sops-nix on each node at `/var/lib/sops-nix/key.txt`). Recipients:
+cluster + pingu + remorse — not janus. Do not add kube-vip; `.10` stays
+reserved.
 
-1. **nordri only:** `enableK3s = true`, deploy. API
-   `https://10.10.30.11:6443`. `k3s.nix` adds the control-plane taint
-   (k3s does not taint CP by default).
-2. `sudo cat /var/lib/rancher/k3s/server/node-token` on nordri.
-3. **Token on workers.** Agents assert `k3sTokenFile != null`. The nodes
-   flake cannot import `../secrets` (pure eval). `/var/lib/rancher/k3s/server/`
-   exists only on the control plane. Pragmatic first join: `mkdir -p
-   /var/lib/rancher/k3s` on each worker, copy the token to
-   `/var/lib/rancher/k3s/node-token`, set `k3sTokenFile` to that path.
-   Later: `nodes/secrets/cluster.yaml` (sops-nix). Do not commit the live
-   token in plaintext.
-4. Workers: `enableK3s = true` + token path, deploy one at a time.
-   Do not add kube-vip; `.10` stays reserved.
-5. Flux bootstrap and HelmReleases: [k8s/README.md](../k8s/README.md).
-   Host iscsi + `/var/lib/longhorn` is already on (`enableLonghornPrep`).
+Workers used a plaintext `/var/lib/rancher/k3s/node-token` for first
+join; that file is gone. Override with `homelab.node.k3sTokenFile` only
+if you must bypass sops.
+
+Flux/Helm: [k8s/README.md](../k8s/README.md). Host iscsi +
+`/var/lib/longhorn` is on (`enableLonghornPrep`).
 
 Bundled k3s Traefik, ServiceLB, and local-path are disabled so Flux can
 install Traefik, MetalLB (`10.10.30.100–110`), and Longhorn.
@@ -143,8 +138,8 @@ Do not mix mainline and BSP nodes in one cluster.
 | RK1 MACs | Done — reserved in router dnsmasq |
 | NVMe by-id | Done — `diskDevice` set; still `giyomoon-image` |
 | IPv6 ULA | Done — no WAN default route |
-| k3s token / `cluster.yaml` | Next (Stage 5) |
-| sops-nix on nodes | Next — file must live under `nodes/secrets/` |
+| k3s token / `cluster.yaml` | Done — encrypted `nodes/secrets/cluster.yaml` |
+| sops-nix on nodes | Done — `/var/lib/sops-nix/key.txt` (cluster age key) |
 
 Escape hatches (Ubuntu / Talos) if NixOS blocks progress:
 [docs/reference/escape-hatches-ubuntu-talos.md](../docs/reference/escape-hatches-ubuntu-talos.md).

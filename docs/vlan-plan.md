@@ -30,7 +30,7 @@ IP addressing, DHCP pools, IPv6 layout, and DNS policy. Firewall rules:
 | `10.10.30.20`      | truenas      | HA, Immich, Authelia, Forgejo (TrueNAS Apps); Blocky                |
 | `10.10.30.21`      | blocky       | IoT DNS filter (TrueNAS Docker)                                     |
 | `10.10.30.100`     | traefik-lb   | Traefik LoadBalancer (MetalLB)                                      |
-| `10.10.30.101`     | loki         | Loki push API (MetalLB) — Promtail stub; **no Authelia**            |
+| `10.10.30.101`     | loki         | Loki push API (MetalLB) — Promtail on TrueNAS; **no Authelia**      |
 | `10.10.30.102–110` | —            | MetalLB pool spare                                                  |
 
 **ULA (VLAN 30):** nordri–vestri `fd10:10:10:30::11`–`::14` (same last hextet

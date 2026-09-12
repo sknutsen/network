@@ -30,9 +30,10 @@ are not installed yet). `--token-auth` stores the GitHub PAT in
 `flux-system/flux-system` (HTTPS); `gh` OAuth tokens cannot create
 deploy keys.
 
-## Bootstrap (Stage 5, after k3s is up)
+## Bootstrap
 
-API is `https://10.10.30.11:6443`. Keep the control-plane taint on nordri.
+Done on `main` (`--token-auth`). API is `https://10.10.30.11:6443`. Keep
+the control-plane taint on nordri. Re-run only on a new cluster:
 
 ```bash
 # kubeconfig from nordri:
@@ -77,8 +78,8 @@ Caddy already sends `Host` to Traefik `.100`. Traefik routes:
 
 | Host | Backend |
 |------|---------|
-| `grafana.lab.zdk.no` | `kube-prometheus-stack-grafana:80` |
-| `capacitor.lab.zdk.no` | `capacitor.flux-system:9000` |
+| `grafana.lab.zdk.no` | `kube-prometheus-stack-grafana:80` (Caddy Authelia; Grafana form off) |
+| `capacitor.lab.zdk.no` | `capacitor.flux-system:9000` (Caddy Authelia) |
 | `zdk.no` | `zdk.default:80` (502 until the Zdk repo ships) |
 
 ## Zdk

@@ -177,17 +177,17 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 
 ## Target repo layout
 
-`nodes/` is scaffolded (k3s off). `k8s/` has the Flux tree (bootstrap still
-Stage 5). See [plan.md § Target repo layout](plan.md#target-repo-layout).
+`nodes/` flake has k3s on. `k8s/` Flux tree is bootstrapped. See
+[plan.md § Target repo layout](plan.md#target-repo-layout).
 
 ```
 net/
 ├── docs/           # exists
 ├── router/         # exists
-├── nodes/          # RK1 flake (k3s off until Stage 5)
+├── nodes/          # RK1 flake (k3s on)
 ├── switch/         # exists
 ├── services/       # exists (no dnsupdater dir — Nix stub)
 ├── k8s/            # Flux infra + Zdk stub
-├── secrets/        # examples; live yaml not committed
+├── secrets/        # encrypted router.yaml
 └── scripts/        # validate.sh, generate-viewer.py
 ```

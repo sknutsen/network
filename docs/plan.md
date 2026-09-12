@@ -119,20 +119,20 @@ Remaining MAC reservations (Socrates, Peon, Switch) are leftovers, not a brief: 
 
 ## Target repo layout
 
-Stage 5–8 leftovers: k3s on, encrypted `cluster.yaml`, Flux bootstrap. All four
-RK1s are on the `nodes/` flake (`enableK3s = false`). `k8s/` tree exists. DNSUpdater stays a Nix stub until
-[that repo](https://github.com/sknutsen/DNSUpdater) ships a package.
+Stage 6–8 leftovers: WireGuard / Headscale, WAN Caddy, runbooks. Stage 5 k3s,
+Flux, Loki, and Promtail are live (`enableK3s = true`). DNSUpdater stays a Nix
+stub until [that repo](https://github.com/sknutsen/DNSUpdater) ships a package.
 
 ```
 net/
 ├── flake.nix                    # NixOS configs (optiplex / janus) — exists
 ├── docs/                        # exists
 ├── router/                      # exists
-├── nodes/                       # RK1 NixOS flake (k3s off until Stage 5)
+├── nodes/                       # RK1 NixOS flake (k3s on; sops token)
 ├── switch/                      # exists
 ├── services/                    # exists (truenas, caddy, authelia, dns, promtail, HA/Immich/Forgejo READMEs)
 ├── k8s/clusters/homelab/        # Flux infra + Zdk stub
-├── secrets/                     # .sops.yaml + encrypted router.yaml; cluster example until Stage 5 k8s
+├── secrets/                     # .sops.yaml + encrypted router.yaml
 └── scripts/                     # validate.sh, generate-viewer.py
 ```
 

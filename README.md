@@ -24,17 +24,17 @@ Declarative home network configuration and documentation.
 
 ## Target repo layout
 
-`nodes/` is a NixOS flake (k3s off until Stage 5). DNSUpdater is a Nix stub, not `services/dnsupdater/`.
+`nodes/` is a NixOS flake (k3s on). DNSUpdater is a Nix stub, not `services/dnsupdater/`.
 
 ```
 net/
 ├── flake.nix      # NixOS configs (optiplex / janus)
 ├── docs/          # plan, decisions, vlan, firewall, inventory, reference
 ├── router/        # janus NixOS modules
-├── nodes/         # RK1 NixOS flake (nordri–vestri; k3s off)
+├── nodes/         # RK1 NixOS flake (nordri–vestri; k3s on)
 ├── switch/        # CRS310 RouterOS (L2 VLANs)
 ├── services/      # truenas compose, Caddy, Authelia, Immich, DNS, Promtail
 ├── k8s/           # Flux tree (infra HelmReleases + Zdk stub)
-├── secrets/       # .sops.yaml + encrypted router.yaml; cluster example until k8s
+├── secrets/       # .sops.yaml + encrypted router.yaml
 └── scripts/       # validate.sh, generate-viewer.py
 ```
