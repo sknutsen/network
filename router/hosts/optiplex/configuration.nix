@@ -23,7 +23,7 @@ in {
     lanTrunkInterface = "lan0"; # i350-T2 port 1 a0:36:9f:33:ae:96
     enableIpv6 = false; # OBOS Nett has no IPv6 (Stage 2). Flip when they offer PD; leave blockyIpv6 null until GUA known.
     blockyIpv6 = null; # set after PD, e.g. "<servers-/64>::21"
-    enableWireGuard = false;
+    enableWireGuard = true; # Stage 6 — wg0; Headscale still off
     enableDnsUpdater = false;
     enableUnifi = true;
     enableCaddy = true;
@@ -88,6 +88,7 @@ in {
     git
     age
     sops
+    wireguard-tools
     tcpdump
     dig
     ethtool

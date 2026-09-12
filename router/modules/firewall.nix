@@ -214,7 +214,13 @@ in
           iifname $MGMT oifname { $SERVERS, $WAN } accept
 
           # --- VPN (Stage 6) ---
-          # iifname "wg0" oifname { $TRUSTED, $SERVERS, $MGMT } accept
+          # Split-tunnel only: lab VLANs, not IoT/guest, not WAN exit.
+          ${
+            if cfg.enableWireGuard then
+              ''iifname "wg0" oifname { $TRUSTED, $SERVERS, $MGMT } accept''
+            else
+              ""
+          }
 
           counter drop
         }

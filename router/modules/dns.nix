@@ -18,7 +18,8 @@ in
           (gw C.vlans.trusted.ipv4)
           (gw C.vlans.servers.ipv4)
         ]
-        ++ lib.optionals (!cfg.enableBlocky) [ (gw C.vlans.iot.ipv4) ];
+        ++ lib.optionals (!cfg.enableBlocky) [ (gw C.vlans.iot.ipv4) ]
+        ++ lib.optionals cfg.enableWireGuard [ "10.10.255.1" ];
         access-control = [
           "127.0.0.0/8 allow"
           "${C.vlans.mgmt.network} allow"
