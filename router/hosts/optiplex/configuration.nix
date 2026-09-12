@@ -86,6 +86,8 @@ in {
   environment.systemPackages = with pkgs; [
     vim
     git
+    age
+    sops
     tcpdump
     dig
     ethtool
