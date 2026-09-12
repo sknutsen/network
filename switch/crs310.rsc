@@ -90,3 +90,15 @@ set allowed-interface-list=none
 # CPU stays IPv4-only. Bridge still forwards IPv6 for clients (L2).
 /ipv6 settings
 set disable-ipv6=yes
+
+# SNMPv2c read-only from janus mgmt address only. Community matches
+# router/lib/constants.nix monitoring.crs310SnmpCommunity.
+/snmp
+set enabled=yes
+
+/snmp community
+:do { set [find default=yes] name=zdk-crs310-ro addresses=10.10.10.1 } on-error={
+  :do { add name=zdk-crs310-ro addresses=10.10.10.1 } on-error={
+    set [find where name=zdk-crs310-ro] addresses=10.10.10.1
+  }
+}

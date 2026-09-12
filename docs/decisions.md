@@ -50,7 +50,7 @@ are canonical.
 | VPN               | **WireGuard** (`51820`) + **Headscale** on janus               | Headscale **`127.0.0.1:8081`** behind Caddy (`headscale.lab.zdk.no`); **not** `:8080` (UniFi Inform) |
 | WAN IDS           | **Not in v1** (CrowdSec deferred)                              | nftables rate-limit on 443 first; add CrowdSec if logs warrant  |
 | DDNS              | **DNSUpdater** flake → **Domeneshop**                          | Dynamic `A` for `img`, `ha`, `vpn`; sops `dnsupdater.*`; Loki `10.10.30.101`; add `@`/`code` with those WAN vhosts |
-| Monitoring        | **kube-prometheus-stack** + janus presence exporter + Blocky scrape | Grafana Network dashboard; UniFi/SNMP pollers not in v1         |
+| Monitoring        | **kube-prometheus-stack** + presence + unpoller + CRS310 SNMP + Blocky | Grafana Network; Alertmanager `alertmanager.lab.zdk.no`         |
 | Logging (edge)    | **Promtail** on TrueNAS → Loki; Caddy journald; DNSUpdater → Loki | HA/Immich/Authelia + Forgejo to Loki; DNSUpdater also pushes to `10.10.30.101:3100` |
 | Public services   | **`img.zdk.no`**, **`ha.zdk.no`**; later `zdk.no` + `code.zdk.no` | Immich + HA on TrueNAS; Zdk/Forgejo WAN when those apps are ready |
 | `zdk.no` app      | **[github.com/sknutsen/Zdk](https://github.com/sknutsen/Zdk)** | App code external                                               |

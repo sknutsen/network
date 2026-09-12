@@ -74,8 +74,17 @@ spec:
           jsonData:
             timeout: 60
             maxLines: 1000
+        - name: Alertmanager
+          type: alertmanager
+          uid: alertmanager
+          access: proxy
+          url: http://kube-prometheus-stack-alertmanager.monitoring.svc:9093
+          jsonData:
+            implementation: prometheus
+            handleGrafanaManagedAlerts: false
     alertmanager:
       alertmanagerSpec:
+        externalUrl: https://alertmanager.lab.zdk.no
         storage:
           volumeClaimTemplate:
             spec:
@@ -136,6 +145,34 @@ spec:
                   - 10.10.30.21:4000
                 labels:
                   instance: blocky
+          - job_name: unpoller
+            static_configs:
+              - targets:
+                  - 10.10.30.1:9130
+                labels:
+                  instance: janus
+          - job_name: snmp-crs310
+            scrape_interval: 30s
+            scrape_timeout: 15s
+            metrics_path: /snmp
+            params:
+              module:
+                - if_mib
+              auth:
+                - crs310
+            static_configs:
+              - targets:
+                  - 10.10.10.2
+                labels:
+                  device: crs310
+            relabel_configs:
+              - source_labels:
+                  - __address__
+                target_label: __param_target
+              - replacement: crs310
+                target_label: instance
+              - replacement: 10.10.30.1:9116
+                target_label: __address__
     nodeExporter:
       enabled: false
     prometheus-node-exporter:

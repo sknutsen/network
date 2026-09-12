@@ -1,0 +1,83 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: network
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: network
+      rules:
+        - alert: JanusWanLinkDown
+          expr: node_network_up{instance="janus",device="wan0"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: Janus WAN link is down
+            description: wan0 on janus has been down for 2 minutes.
+        - alert: JanusNodeExporterDown
+          expr: up{job="node-exporter",instance="janus"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Janus node_exporter is down
+            description: Prometheus cannot scrape janus :9100.
+        - alert: NetworkPresenceExporterDown
+          expr: up{job="network-presence"} == 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Presence exporter is down
+            description: DHCP/ARP metrics from janus :9101 are missing.
+        - alert: BlockyMetricsDown
+          expr: up{job="blocky"} == 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Blocky metrics are down
+            description: Prometheus cannot scrape 10.10.30.21:4000.
+        - alert: UnpollerDown
+          expr: up{job="unpoller"} == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: unpoller is down
+            description: UniFi metrics from janus :9130 are missing. Create the local UniFi user unpoller if this is the first deploy.
+        - alert: Crs310SnmpDown
+          expr: up{job="snmp-crs310"} == 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: CRS310 SNMP scrape is down
+            description: janus snmp-exporter cannot reach 10.10.10.2. Import switch/crs310.rsc if SNMP is not enabled.
+        - alert: Crs310CorePortDown
+          expr: ifOperStatus{instance="crs310",ifName=~"ether[12346]"} != 1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: CRS310 core port {{ $labels.ifName }} is down
+            description: Expected-up CRS310 port {{ $labels.ifName }} has ifOperStatus != up for 5 minutes.
+        - alert: NetworkUnknownMac
+          expr: count(network_dhcp_lease_info{known="false",vlan!="guest"} or network_neighbor_info{known="false",vlan!="guest"}) > 0
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: Unknown MAC on a non-guest VLAN
+            description: A DHCP lease or ARP neighbor has been unmatched to inventory for 30 minutes. Guest is ignored.
+        - alert: BlockyBlockingDisabled
+          expr: blocky_blocking_enabled == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Blocky blocking is off
+            description: IoT DNS filtering has been disabled for 15 minutes.

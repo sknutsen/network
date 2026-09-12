@@ -36,7 +36,7 @@ Full table: **[decisions.md](decisions.md)**.
 | Switch / WiFi | CRS310 + 2× USW Flex Mini + U7 Lite + PoE injector (all acquired); UPS deferred |
 | Edge | Caddy on janus; HA, Immich, Authelia, Forgejo as TrueNAS Apps |
 | K8s | 4× RK1, NixOS, k3s, Flux, Traefik, Capacitor |
-| Monitoring | kube-prometheus-stack in k8s (incl. Loki); janus presence exporter; Blocky scrape |
+| Monitoring | kube-prometheus-stack + presence + unpoller + CRS310 SNMP + Blocky; Alertmanager |
 | Public | `img.zdk.no` (Immich), `ha.zdk.no` (HA) — no Authelia; `zdk.no` / `code.zdk.no` later |
 
 ## Architecture overview
@@ -70,7 +70,7 @@ IPs, DHCP, DNS, mDNS: [vlan-plan.md](vlan-plan.md). Firewall: [firewall-matrix.m
 
 | Where | Services |
 |-------|----------|
-| **Router** (janus) | nftables, dnsmasq, Unbound, Caddy, WireGuard, Headscale, DNSUpdater, UniFi OS Server, node_exporter, presence exporter |
+| **Router** (janus) | nftables, dnsmasq, Unbound, Caddy, WireGuard, Headscale, DNSUpdater, UniFi OS Server, node_exporter, presence, unpoller, snmp-exporter |
 | **TrueNAS** `10.10.30.20` | HA, Immich, Authelia, Forgejo (Apps); Blocky, Promtail |
 | **k8s** | k3s, Traefik, Flux, Capacitor, kube-prometheus-stack, Zdk (when ready) |
 | **Zpi** `10.10.30.15` | Audio casting to speakers |

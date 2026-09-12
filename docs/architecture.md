@@ -167,14 +167,17 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 |-----------|----------|
 | Prometheus, Grafana, Alertmanager, Loki | k8s — `kube-prometheus-stack` |
 | Grafana **Network** dashboard | `grafana.lab.zdk.no` folder Network (Authelia) |
+| Alertmanager | `alertmanager.lab.zdk.no` (Authelia) |
 | node_exporter | Router + each Linux host (`:9100`) |
 | Presence exporter | janus `10.10.30.1:9101` — dnsmasq leases + ARP vs `constants.nix` |
-| Blocky metrics | `10.10.30.21:4000/metrics` (publish this port on the TrueNAS Custom App) |
+| unpoller | janus `10.10.30.1:9130` — UniFi OS Server on localhost `:11443` |
+| snmp-exporter | janus `10.10.30.1:9116` → CRS310 `10.10.10.2` SNMPv2c |
+| Blocky metrics | `10.10.30.21:4000/metrics` |
 | TrueNAS Docker logs | Promtail sidecar/agent → Loki in k8s |
 
-UniFi remains the Wi-Fi / Flex Mini UI (`unifi.lab.zdk.no`). It is not DHCP and not the router, so the Grafana Network dashboard is the LAN device/IP/MAC view. UniFi poller and CRS310 SNMP are not in v1.
+UniFi UI stays at `unifi.lab.zdk.no`. unpoller is the Grafana feed for APs/clients. CRS310 port graphs go through snmp-exporter on janus (k8s cannot reach VLAN 10).
 
-**Apply:** `nixos-rebuild` janus (exporter + nftables `:9101`); push this tree so Flux reloads scrape configs and the dashboard ConfigMap; publish Blocky `:4000` on `10.10.30.21`.
+**Apply:** [runbooks/network-monitoring.md](runbooks/network-monitoring.md) — UniFi user `unpoller`, import `switch/crs310.rsc`, `nixos-rebuild` janus, push for Flux.
 
 **TrueNAS log options:** (a) Promtail in compose shipping to Loki (HA/Immich/Authelia Apps + Forgejo/Blocky); (b) Vector agent on TrueNAS host. **Caddy logs** are on janus (`journalctl -u caddy`). UniFi OS Server logs stay on the router unless forwarded later.
 

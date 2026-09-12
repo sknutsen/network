@@ -176,8 +176,9 @@ exposure** happens here.
 
 ## Stage 8 — Operationalize (depends: all above)
 
-- [ ] Network dashboard live: rebuild janus (presence `:9101`); Flux apply
-      scrape jobs + Grafana **Network**; publish Blocky `:4000` on `.21`
+- [ ] Network dashboard live: UniFi user `unpoller`; import CRS310 SNMP;
+      rebuild janus (presence/unpoller/snmp-exporter); Flux apply scrape +
+      Grafana **Network** + Alertmanager; Blocky `:4000` already published
 - [ ] `validate.sh` in CI (flake check, caddy fmt)
 - [x] Runbooks: router restore, WG key rotation, ACME failure, Capacitor,
       IoT DNS — [runbooks/](runbooks/)

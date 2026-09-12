@@ -156,6 +156,10 @@
   monitoring = {
     nodeExporterPort = 9100;
     presenceExporterPort = 9101;
+    unpollerPort = 9130;
+    snmpExporterPort = 9116;
+    # Read-only SNMPv2c; CRS310 allows this community from janus 10.10.10.1 only.
+    crs310SnmpCommunity = "zdk-crs310-ro";
   };
 
   # Loopback only — Caddy proxies headscale.lab.zdk.no. Do not bind :8080

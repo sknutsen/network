@@ -176,7 +176,7 @@ in
           }
 
           # Prometheus exporters — scrape from servers VLAN only
-          iifname $SERVERS tcp dport { ${toString C.monitoring.nodeExporterPort}, ${toString C.monitoring.presenceExporterPort} } accept
+          iifname $SERVERS tcp dport { ${toString C.monitoring.nodeExporterPort}, ${toString C.monitoring.presenceExporterPort}, ${toString C.monitoring.unpollerPort}, ${toString C.monitoring.snmpExporterPort} } accept
 
           counter drop
         }

@@ -69,12 +69,13 @@ kube-prometheus-stack → Capacitor → `infra-config` → `apps`.
 Loki is a **sibling** HelmRelease, not part of kube-prometheus-stack. Promtail
 on TrueNAS pushes to `.101:3100` — no Authelia.
 
-Chart node-exporter is **off**. Scrapes the NixOS exporters on janus
-(`10.10.30.1:9100`) and the four RK1s, the presence exporter
-(`10.10.30.1:9101`), and Blocky (`10.10.30.21:4000/metrics`).
+Chart node-exporter is **off**. Scrapes NixOS exporters on janus
+(`:9100`, presence `:9101`, unpoller `:9130`, snmp-exporter `:9116` →
+CRS310) and the four RK1s, plus Blocky (`10.10.30.21:4000/metrics`).
 
-Grafana sidecar loads `grafana-dashboard-network` (folder **Network**,
-dashboard **Network**). Edit `infra/core/dashboards/network-overview.json`.
+Grafana sidecar loads `grafana-dashboard-network` (folder **Network**).
+Alertmanager is `alertmanager.lab.zdk.no` (Authelia). Rules:
+`infra/core/network-alerts.yaml`.
 
 ## Hosts / IngressRoutes
 
@@ -83,6 +84,7 @@ Caddy already sends `Host` to Traefik `.100`. Traefik routes:
 | Host | Backend |
 |------|---------|
 | `grafana.lab.zdk.no` | `kube-prometheus-stack-grafana:80` (Caddy Authelia; Grafana form off) |
+| `alertmanager.lab.zdk.no` | `kube-prometheus-stack-alertmanager:9093` (Caddy Authelia) |
 | `capacitor.lab.zdk.no` | `capacitor.flux-system:9000` (Caddy Authelia) |
 | `zdk.no` | `zdk.default:80` (502 until the Zdk repo ships) |
 

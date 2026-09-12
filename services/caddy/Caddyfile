@@ -158,6 +158,14 @@ capacitor.lab.zdk.no {
 	encode gzip
 }
 
+alertmanager.lab.zdk.no {
+	import lab_only
+	import dns01
+	import authelia
+	reverse_proxy 10.10.30.100:80
+	encode gzip
+}
+
 # --- Stage 7 leftovers: uncomment when those apps are ready ---
 # zdk.no {
 # 	import dns01

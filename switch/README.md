@@ -28,3 +28,9 @@ Mgmt address: `10.10.10.2/24` on VLAN 10 (**IPv4 only** — `disable-ipv6=yes` o
 | 9–10 | sfp-sfpplus1/2 | disabled | unused |
 
 Downstream of ether6: USW-NC (closet) → USW-LR (living room, Hue/Trådfri) and SW-O (office, pingu + Peon). Flex Mini cannot use custom tagged profiles — **All** on trunks, a single network on access ports. See [vlan-plan.md](../docs/vlan-plan.md).
+
+## SNMP
+
+Read-only SNMPv2c from janus `10.10.10.1` only (`zdk-crs310-ro`). Enabled by
+this script. After `/import`, janus snmp-exporter scrapes `:161` and Prometheus
+scrapes janus `:9116`. Do not open SNMP to other VLANs.

@@ -12,5 +12,6 @@ Short operational procedures. Design lives in the rest of `docs/`.
 | [wan-caddy.md](wan-caddy.md) | Stage 7 WAN 80/443, img/ha validation, DNSUpdater |
 | [acme-failure.md](acme-failure.md) | Lab or public certs fail to issue / renew |
 | [capacitor.md](capacitor.md) | `capacitor.lab.zdk.no` 502, Authelia, or Flux OCI |
+| [network-monitoring.md](network-monitoring.md) | unpoller user, CRS310 SNMP, Grafana Network / Alertmanager |
 
 Do not put secrets in these files. Age key paths and sops *locations* are fine.
