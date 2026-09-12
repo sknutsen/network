@@ -182,7 +182,7 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 
 ```
 net/
-├── docs/           # exists
+├── docs/           # exists (incl. runbooks/)
 ├── router/         # exists
 ├── nodes/          # RK1 flake (k3s on)
 ├── switch/         # exists

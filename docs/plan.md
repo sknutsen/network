@@ -119,14 +119,15 @@ Remaining MAC reservations (Socrates, Peon, Switch) are leftovers, not a brief: 
 
 ## Target repo layout
 
-Stage 6–8 leftovers: WireGuard / Headscale, WAN Caddy, runbooks. Stage 5 k3s,
+Stage 6–8 leftovers: WireGuard / Headscale, WAN Caddy. Runbooks are in
+[runbooks/](runbooks/). Stage 5 k3s,
 Flux, Loki, and Promtail are live (`enableK3s = true`). DNSUpdater stays a Nix
 stub until [that repo](https://github.com/sknutsen/DNSUpdater) ships a package.
 
 ```
 net/
 ├── flake.nix                    # NixOS configs (optiplex / janus) — exists
-├── docs/                        # exists
+├── docs/                        # exists (incl. runbooks/)
 ├── router/                      # exists
 ├── nodes/                       # RK1 NixOS flake (k3s on; sops token)
 ├── switch/                      # exists

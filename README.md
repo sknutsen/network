@@ -14,6 +14,7 @@ Declarative home network configuration and documentation.
 | [docs/inventory.md](docs/inventory.md) | Devices and reservations |
 | [docs/architecture.md](docs/architecture.md) | Diagrams and service map |
 | [docs/implementation-stages.md](docs/implementation-stages.md) | Stage 0–8 checklists |
+| [docs/runbooks/](docs/runbooks/) | Operational procedures (restore, DNS, ACME, Capacitor) |
 | [docs/decision-briefs.md](docs/decision-briefs.md) | Design options with recommendations |
 | [router/OPEN-QUESTIONS.md](router/OPEN-QUESTIONS.md) | Unanswered first-boot leftovers |
 | [docs/reference/](docs/reference/) | Alternatives not chosen |
@@ -29,7 +30,7 @@ Declarative home network configuration and documentation.
 ```
 net/
 ├── flake.nix      # NixOS configs (optiplex / janus)
-├── docs/          # plan, decisions, vlan, firewall, inventory, reference
+├── docs/          # plan, decisions, vlan, firewall, inventory, runbooks, reference
 ├── router/        # janus NixOS modules
 ├── nodes/         # RK1 NixOS flake (nordri–vestri; k3s on)
 ├── switch/        # CRS310 RouterOS (L2 VLANs)

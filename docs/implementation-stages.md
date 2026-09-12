@@ -77,9 +77,11 @@ DNAT to `.21`).
 - [x] **Blocky** — TrueNAS Custom App on `10.10.30.21:53` (alias on `eno1`)
 - [x] Confirm Blocky answers on `.21`; `enableBlocky = true` (DHCP, DNAT, no
       IoT domain-search). `blockyIpv6` stays null until ISP IPv6.
-- [ ] Validate IoT DNS: DHCP DNS is `.21`; `dig @8.8.8.8 example.com` from IoT
-      still resolves (intercept); IoT cannot use Unbound on `10.10.40.1` as a
-      bypass. IoT lease is **1 h**.
+- [x] Validate IoT DNS (2026-09-12): DHCP DNS is `.21` (`dhcp-option-force`;
+      scoped `domain=` so IoT gets no option 15 / search). Intercept
+      `@8.8.8.8` answers; `@10.10.40.1 grafana.lab.zdk.no` is NXDOMAIN
+      (Blocky, not Unbound). Lease **1 h**. Procedure:
+      [runbooks/iot-dns.md](runbooks/iot-dns.md).
 - [x] Caddy on janus: Authelia on lab UIs except `auth` / `code.lab` / `ha.lab`
       / `immich.lab` / `truenas.lab` / `unifi.lab` / (later) `headscale.lab`. UI
       is `https://truenas.lab.zdk.no` (not the raw IP — TrueNAS host firewall is
@@ -169,7 +171,8 @@ exposure** happens here.
 ## Stage 8 — Operationalize (depends: all above)
 
 - [ ] `validate.sh` in CI (flake check, caddy fmt)
-- [ ] Runbooks: router restore, WG key rotation, ACME failure
+- [x] Runbooks: router restore, WG key rotation, ACME failure, Capacitor,
+      IoT DNS — [runbooks/](runbooks/)
 - [ ] Security pass: disable unused services (UPS test only after UPS is
       procured — deferred)
 
@@ -183,7 +186,8 @@ exposure** happens here.
 - [x] Encrypted cluster secrets: `nodes/secrets/cluster.yaml` (k3s token,
       sops-nix on RK1s) and `k8s/.../grafana-admin.secret.yaml` (Flux sops).
       Not `secrets/cluster.yaml` (nodes flake cannot import `../secrets`).
-- [ ] `docs/runbooks/`
+- [x] `docs/runbooks/` — restore, WG rotation (Stage 6 stub), ACME,
+      Capacitor, IoT DNS
 
 ## Parallel workstreams
 
@@ -207,5 +211,4 @@ Already in tree through Stage 5 (k3s, Flux, Loki, Promtail, cluster sops).
 
 Still to add:
 
-1. `docs/runbooks/` (router restore, WG rotation, ACME, Capacitor)
-2. Stage 6 WireGuard / Headscale keys in `secrets/router.yaml`
+1. Stage 6 WireGuard / Headscale keys in `secrets/router.yaml`
