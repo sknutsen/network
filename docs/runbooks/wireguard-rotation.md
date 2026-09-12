@@ -1,6 +1,6 @@
 # WireGuard key rotation
 
-`enableWireGuard` is **true**. Headscale is not deployed yet. Peers:
+`enableWireGuard` is **true**. `enableHeadscale` is **true**. Peers:
 Pixel `10.10.255.2`, Remorse `10.10.255.3`. Client files:
 [wireguard-clients.md](wireguard-clients.md).
 
@@ -46,6 +46,4 @@ ciphertext without an age identity.
 3. Rebuild janus, then install the new private key only on that device.
 4. Leave other peers alone.
 
-## After Headscale is live, add here
-
-- Headscale preauth-key rotation (namespace, expiry, revoke).
+Preauth rotation: [headscale.md](headscale.md).

@@ -38,6 +38,7 @@ DOCS: list[tuple[str, Path, str, str]] = [
     ("rbRouter", ROOT / "docs/runbooks/router-restore.md", "Router restore", "Runbooks"),
     ("rbWgClients", ROOT / "docs/runbooks/wireguard-clients.md", "WG clients", "Runbooks"),
     ("rbWg", ROOT / "docs/runbooks/wireguard-rotation.md", "WG rotation", "Runbooks"),
+    ("rbHs", ROOT / "docs/runbooks/headscale.md", "Headscale", "Runbooks"),
     ("rbAcme", ROOT / "docs/runbooks/acme-failure.md", "ACME failure", "Runbooks"),
     ("rbCap", ROOT / "docs/runbooks/capacitor.md", "Capacitor", "Runbooks"),
     ("openQuestions", ROOT / "router/OPEN-QUESTIONS.md", "Remaining questions", "Build"),

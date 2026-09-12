@@ -47,6 +47,15 @@
       description = "Stage 6 — WireGuard server on WAN.";
     };
 
+    enableHeadscale = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Stage 6 — Headscale on 127.0.0.1:8081 behind Caddy
+        headscale.lab.zdk.no. UniFi Inform keeps :8080. No Authelia.
+      '';
+    };
+
     enableDnsUpdater = lib.mkOption {
       type = lib.types.bool;
       default = false;

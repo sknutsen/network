@@ -99,12 +99,12 @@ code.lab.zdk.no {
 
 # Stage 6 — Headscale on 127.0.0.1:8081 (UniFi Inform owns :8080).
 # No Authelia — Tailscale clients use this as login-server.
-# headscale.lab.zdk.no {
-# 	import lab_only
-# 	import dns01
-# 	reverse_proxy 127.0.0.1:8081
-# 	encode gzip
-# }
+headscale.lab.zdk.no {
+	import lab_only
+	import dns01
+	reverse_proxy 127.0.0.1:8081
+	encode gzip
+}
 
 # TrueNAS UI — native auth, no Authelia. Caddy reaches the host on VLAN 30
 # (OUTPUT); trusted/mgmt browse via truenas.lab.zdk.no, not the raw IP.
