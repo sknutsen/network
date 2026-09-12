@@ -16,11 +16,16 @@ Login-server is reachable from trusted / servers / classic WG
 ssh zdk@10.10.20.1
 sudo systemctl is-active headscale
 sudo ss -lntp | grep 8081
-curl -sI https://headscale.lab.zdk.no | head
+# Headscale rejects HEAD (/ returns 405). Janus systemd-resolved also
+# cannot see Unbound names — use GET, and --resolve on the box.
+curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8081
+curl -sS -o /dev/null -w '%{http_code}\n' --resolve headscale.lab.zdk.no:443:10.10.30.1 \
+  https://headscale.lab.zdk.no
 ```
 
-Expect `active`, `127.0.0.1:8081`, HTTP 200 (or a Headscale page). Cert
-is DNS-01; first hit can take a minute.
+From Remorse, `curl -sS -o /dev/null -w '%{http_code}\n' https://headscale.lab.zdk.no`
+is enough. Expect `active`, `127.0.0.1:8081`, HTTP **200**. The HTML body
+is nearly empty; that is Headscale, not a failed proxy. Cert is DNS-01.
 
 Do **not** bind Headscale to `:8080` or `:11443`.
 
@@ -61,6 +66,9 @@ sudo headscale nodes list
 
 Expect both nodes, same user. `ping` the `100.64.` address of the other
 node.
+
+Joined 2026-09-12: Remorse `100.64.0.1` (`remorse`), Pixel
+`100.64.0.2` (`pixel-7`). Mesh ping Remorse → Pixel succeeded.
 
 ## What this pass does not do
 

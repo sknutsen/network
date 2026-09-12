@@ -126,8 +126,9 @@ WAN 80/443, not issuance. step-ca not in v1.
       (2026-09-12). Remorse (`10.10.255.3`) profile is on janus; turn the
       Mac tunnel on off-lab to confirm handshake.
 - [ ] Remorse away handshake (`10.10.255.3`)
-- [ ] Deploy **Headscale on janus** listening on **`127.0.0.1:8081`** (not
-      `:8080` — UniFi Inform). Caddy `headscale.lab.zdk.no`, no Authelia.
+- [x] Headscale on janus `127.0.0.1:8081`; Caddy `headscale.lab.zdk.no`
+      (no Authelia). User `zdk`; Remorse `100.64.0.1` + Pixel `100.64.0.2`
+      online (2026-09-12).
 - [ ] Confirm VPN → servers/mgmt/Caddy; v6 routes to lab subnets
 
 ## Stage 7 — External access (public services)
