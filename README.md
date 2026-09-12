@@ -25,7 +25,7 @@ Declarative home network configuration and documentation.
 
 ## Target repo layout
 
-`nodes/` is a NixOS flake (k3s on). DNSUpdater is a Nix stub, not `services/dnsupdater/`.
+`nodes/` is a NixOS flake (k3s on). DNSUpdater is the flake module on janus, not `services/dnsupdater/`.
 
 ```
 net/

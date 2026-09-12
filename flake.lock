@@ -20,6 +20,26 @@
         "type": "github"
       }
     },
+    "dns-updater": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789228771,
+        "narHash": "sha256-9v7eT8Uu9TCweiSBdgz+Mg2J4walmcOYUSbIW0hg884=",
+        "owner": "sknutsen",
+        "repo": "DNSUpdater",
+        "rev": "cecbd2bb4a51f4a742fd22d8905ee2fd7ce82764",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sknutsen",
+        "repo": "DNSUpdater",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1787736819,
@@ -39,6 +59,7 @@
     "root": {
       "inputs": {
         "disko": "disko",
+        "dns-updater": "dns-updater",
         "nixpkgs": "nixpkgs",
         "sops-nix": "sops-nix"
       }

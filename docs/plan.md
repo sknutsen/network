@@ -121,8 +121,9 @@ Remaining MAC reservations (Socrates, Peon, Switch) are leftovers, not a brief: 
 
 Stage 6–8 leftovers: WireGuard / Headscale, WAN Caddy. Runbooks are in
 [runbooks/](runbooks/). Stage 5 k3s,
-Flux, Loki, and Promtail are live (`enableK3s = true`). DNSUpdater stays a Nix
-stub until [that repo](https://github.com/sknutsen/DNSUpdater) ships a package.
+Flux, Loki, and Promtail are live (`enableK3s = true`). DNSUpdater is the
+[DNSUpdater](https://github.com/sknutsen/DNSUpdater) flake module on janus
+(Domeneshop `img`/`ha`/`vpn`; sops token/secret; Loki).
 
 ```
 net/

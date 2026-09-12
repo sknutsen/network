@@ -51,6 +51,7 @@ in
           ''"code.zdk.no. A ${C.hosts.caddy}"''
           ''"img.zdk.no. A ${C.hosts.caddy}"''
           ''"ha.zdk.no. A ${C.hosts.caddy}"''
+          # vpn.zdk.no is not local — WireGuard Endpoint is the public A.
           # TrueNAS UI via Caddy — host firewall allows same-subnet only.
           ''"truenas.${C.domain}. A ${C.hosts.caddy}"''
           ''"blocky.${C.domain}. A ${C.hosts.blocky}"''

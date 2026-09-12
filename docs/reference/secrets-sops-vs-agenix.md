@@ -18,7 +18,7 @@ secrets/
 ├── .sops.yaml
 ├── router.yaml.example
 ├── cluster.yaml.example  # pointer only — do not put the k3s token here
-├── router.yaml           # encrypted (Caddy Domeneshop + future WG/DDNS)
+├── router.yaml           # encrypted (Caddy + DNSUpdater Domeneshop, WG)
 nodes/secrets/cluster.yaml                    # k3s token (sops-nix on RK1s)
 k8s/clusters/homelab/infra/core/*.secret.yaml # Flux sops (Grafana admin)
 ```

@@ -35,6 +35,26 @@ curl -sSI --resolve ha.lab.zdk.no:443:84.48.97.100 https://ha.lab.zdk.no | head
 Expect 200 on the public names. Lab Host should be empty / connection
 reset (`lab_only` abort), not an Authelia or HA page.
 
+## DNSUpdater
+
+`enableDnsUpdater` runs the [DNSUpdater](https://github.com/sknutsen/DNSUpdater)
+flake module (`dns-updater.service`). It keeps Domeneshop `A` records for
+`img`, `ha`, and `vpn` on the current public IPv4. Token/secret are sops
+`dnsupdater.domeneshopToken` / `Secret` → template `dnsupdater.env`
+(`TOKEN` / `SECRET`). Logs also go to Loki
+(`http://10.10.30.101:3100/loki/api/v1/push`).
+
+Oneshot + timer: first run ~30s after boot, then every **5 minutes**.
+`systemctl start dns-updater.service` runs immediately. After a rebuild:
+
+```bash
+ssh zdk@10.10.20.1
+systemctl status dns-updater.timer dns-updater.service --no-pager
+journalctl -u dns-updater -n 50 --no-pager
+```
+
+Do not add `@` or `code` until those Caddy vhosts are uncommented.
+
 ## Home Assistant
 
 `/mnt/tank/services/homeassistant/config/configuration.yaml`:

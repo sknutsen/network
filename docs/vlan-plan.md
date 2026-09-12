@@ -171,6 +171,7 @@ flowchart TB
 | `code.zdk.no`  | `10.10.30.1`                  | Public `A`/`AAAA` via DDNS (vhost later) |
 | `img.zdk.no`   | `10.10.30.1`                  | Public `A`/`AAAA` via DDNS               |
 | `ha.zdk.no`    | `10.10.30.1`                  | Public `A`/`AAAA` via DDNS               |
+| `vpn.zdk.no`   | no local-data (public A)      | Public `A` via DDNS (WireGuard)      |
 | `*.lab.zdk.no` | Host records, else Caddy on janus | **No public records**                |
 | `lab.zdk.no`   | `10.10.30.1`                  | **No public record** (not WAN-reachable) |
 
@@ -182,10 +183,11 @@ Authelia is **not** on `auth.lab.zdk.no` (portal), `code.lab.zdk.no` (Forgejo-na
 
 | Record         | Type         | Updated by DDNS                      |
 | -------------- | ------------ | ------------------------------------ |
-| `@` (`zdk.no`) | `A` / `AAAA` | Yes (when Zdk ships)                 |
-| `code`         | `A` / `AAAA` | Yes (when Forgejo WAN is enabled)    |
-| `img`          | `A` / `AAAA` | Yes                                  |
-| `ha`           | `A` / `AAAA` | Yes                                  |
+| `@` (`zdk.no`) | `A` / `AAAA` | When Zdk WAN ships (not in DNSUpdater yet) |
+| `code`         | `A` / `AAAA` | When Forgejo WAN is enabled                |
+| `img`          | `A`          | Yes (DNSUpdater)                           |
+| `ha`           | `A`          | Yes (DNSUpdater)                           |
+| `vpn`          | `A`          | Yes (DNSUpdater; WireGuard Endpoint)       |
 | `lab`          | —            | **No** — internal split-horizon only |
 
 ## IPv6 (prefix delegation)

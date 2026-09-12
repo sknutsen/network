@@ -49,9 +49,9 @@ are canonical.
 | Secrets           | **sops-nix + age**; key `/var/lib/sops-nix/key.txt` on janus   | One SOPS workflow; workstation age identity in `.sops.yaml`     |
 | VPN               | **WireGuard** (`51820`) + **Headscale** on janus               | Headscale **`127.0.0.1:8081`** behind Caddy (`headscale.lab.zdk.no`); **not** `:8080` (UniFi Inform) |
 | WAN IDS           | **Not in v1** (CrowdSec deferred)                              | nftables rate-limit on 443 first; add CrowdSec if logs warrant  |
-| DDNS              | **DNSUpdater** → **Domeneshop** (package in DNSUpdater repo)   | Dynamic `A`/`AAAA` for `@`, `code`, `img`, `ha`; this flake waits |
+| DDNS              | **DNSUpdater** flake → **Domeneshop**                          | Dynamic `A` for `img`, `ha`, `vpn`; sops `dnsupdater.*`; Loki `10.10.30.101`; add `@`/`code` with those WAN vhosts |
 | Monitoring        | **kube-prometheus-stack** in k8s                               | Prometheus, Grafana, Alertmanager, Loki in one Helm release     |
-| Logging (edge)    | **Promtail** on TrueNAS → Loki; Caddy logs on janus            | HA/Immich/Authelia + Forgejo Docker logs to Loki; Caddy via journald |
+| Logging (edge)    | **Promtail** on TrueNAS → Loki; Caddy journald; DNSUpdater → Loki | HA/Immich/Authelia + Forgejo to Loki; DNSUpdater also pushes to `10.10.30.101:3100` |
 | Public services   | **`img.zdk.no`**, **`ha.zdk.no`**; later `zdk.no` + `code.zdk.no` | Immich + HA on TrueNAS; Zdk/Forgejo WAN when those apps are ready |
 | `zdk.no` app      | **[github.com/sknutsen/Zdk](https://github.com/sknutsen/Zdk)** | App code external                                               |
 | Zdk GitOps        | **Flux `GitRepository` + `Kustomization` → Zdk repo**          | Zdk repo owns Deployment/Service/image; `net/` `ingressroute.yaml` stub + Flux CR |

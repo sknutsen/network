@@ -10,7 +10,7 @@ until that path works.
 
 | Path | Why it matters |
 | ---- | -------------- |
-| `/var/lib/sops-nix/key.txt` | Janus age identity. Caddy Domeneshop env (and later WG) will not decrypt without it. |
+| `/var/lib/sops-nix/key.txt` | Janus age identity. Caddy and DNSUpdater Domeneshop env (and WG) will not decrypt without it. |
 | `/var/lib/uosserver`, `/home/uosserver`, `/var/lib/unifi-os-server` | UniFi OS Server state (sites, Inform, AP adoption). |
 | `/var/lib/caddy` | Issued certs. DNS-01 can re-issue; expect a delay. |
 

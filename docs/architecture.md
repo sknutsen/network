@@ -173,7 +173,7 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 
 ## DDNS
 
-[DNSUpdater](https://github.com/sknutsen/DNSUpdater) on router via systemd timer → Domeneshop. Updates `@`, `code`, `img`, and `ha`. Packaging lives in the DNSUpdater repo; this flake stays a placeholder until that ships. Run before Stage 7 WAN enable.
+[DNSUpdater](https://github.com/sknutsen/DNSUpdater) flake module on janus (`services.dns-updater`) → Domeneshop. Updates published `A` records (`img`, `ha`, `vpn`). `@` and `code` stay off until those WAN vhosts are uncommented. Token/secret via sops `dnsupdater.*`. Oneshot timer (boot + 5min). Logs to journald and Loki (`10.10.30.101:3100`).
 
 ## Target repo layout
 
@@ -186,7 +186,7 @@ net/
 ├── router/         # exists
 ├── nodes/          # RK1 flake (k3s on)
 ├── switch/         # exists
-├── services/       # exists (no dnsupdater dir — Nix stub)
+├── services/       # exists (no dnsupdater dir — flake module on janus)
 ├── k8s/            # Flux infra + Zdk stub
 ├── secrets/        # encrypted router.yaml
 └── scripts/        # validate.sh, generate-viewer.py

@@ -11,6 +11,10 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    dns-updater = {
+      url = "github:sknutsen/DNSUpdater";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -18,6 +22,7 @@
     nixpkgs,
     sops-nix,
     disko,
+    dns-updater,
     ...
   }: let
     system = "x86_64-linux";
@@ -28,6 +33,7 @@
       modules = [
         sops-nix.nixosModules.sops
         disko.nixosModules.disko
+        dns-updater.nixosModules.default
         ./router/hosts/optiplex/configuration.nix
       ];
     };

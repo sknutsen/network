@@ -10,8 +10,8 @@ git (`/tmp/pixel-wg.key`, `/tmp/remorse-wg.key`).
 | remorse | `10.10.255.3/32` | this Mac, when away |
 
 Split-tunnel: `AllowedIPs = 10.10.0.0/16`. DNS is Unbound on `10.10.255.1`.
-SSH to janus from a WG address is **denied**. WAN IP is dynamic — update
-`Endpoint` if it changes (DNSUpdater is still a stub).
+SSH to janus from a WG address is **denied**. `Endpoint` is `vpn.zdk.no`
+(DNSUpdater keeps the Domeneshop `A` on the current WAN IPv4).
 
 Pixel validated 2026-09-12 from LTE: handshake, Grafana/Authelia, split-tunnel, SSH denied. Remorse has no handshake yet — leave the Mac tunnel off on Hai-Fi; confirm from off-lab.
 
@@ -25,7 +25,7 @@ DNS = 10.10.255.1
 
 [Peer]
 PublicKey = Co1PKt82qJUOXLsLRvi4+Ml7ZGJwodjb1JHPZ8ibrCA=
-Endpoint = 84.48.97.100:51820
+Endpoint = vpn.zdk.no:51820
 AllowedIPs = 10.10.0.0/16
 PersistentKeepalive = 25
 ```
@@ -40,7 +40,7 @@ DNS = 10.10.255.1
 
 [Peer]
 PublicKey = Co1PKt82qJUOXLsLRvi4+Ml7ZGJwodjb1JHPZ8ibrCA=
-Endpoint = 84.48.97.100:51820
+Endpoint = vpn.zdk.no:51820
 AllowedIPs = 10.10.0.0/16
 PersistentKeepalive = 25
 ```

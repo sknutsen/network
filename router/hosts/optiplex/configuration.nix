@@ -25,7 +25,7 @@ in {
     blockyIpv6 = null; # set after PD, e.g. "<servers-/64>::21"
     enableWireGuard = true; # Stage 6 — wg0
     enableHeadscale = true; # Stage 6 — 127.0.0.1:8081, Caddy vhost
-    enableDnsUpdater = false;
+    enableDnsUpdater = true; # Domeneshop A for img + ha (sops TOKEN/SECRET)
     enableUnifi = true;
     enableCaddy = true;
     enableWanCaddy = true; # Stage 7 — WAN 80/443 for img.zdk.no and ha.zdk.no
@@ -98,7 +98,7 @@ in {
   ];
 
   # Janus decrypts with /var/lib/sops-nix/key.txt. Recipients: secrets/.sops.yaml.
-  # Caddy Domeneshop env is rendered in caddy.nix.
+  # Caddy and DNSUpdater Domeneshop env templates are in their modules.
   sops.defaultSopsFile = ../../../secrets/router.yaml;
   sops.age.keyFile = "/var/lib/sops-nix/key.txt";
 

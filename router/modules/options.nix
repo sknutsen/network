@@ -59,7 +59,11 @@
     enableDnsUpdater = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "After the DNSUpdater repo ships a package — Domeneshop for zdk.no / code / img / ha.";
+      description = ''
+        DNSUpdater → Domeneshop A records (img, ha, vpn). Token/secret
+        from sops dnsupdater.*; Loki on 10.10.30.101. Oneshot timer
+        (boot + 5min). Add @ / code when those WAN vhosts ship.
+      '';
     };
 
     enableUnifi = lib.mkOption {

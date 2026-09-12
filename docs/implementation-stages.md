@@ -148,10 +148,13 @@ exposure** happens here.
       `https://ha.zdk.no` resolve (2026-09-12)
 - [x] Public DNS: `immich.lab` / `ha.lab` NXDOMAIN. `lab_only` still on
       the vhosts.
+- [x] DNSUpdater flake module on janus: Domeneshop `img` + `ha` + `vpn`
+      via sops `dnsupdater.domeneshopToken`/`Secret`; Loki
+      `10.10.30.101:3100` (`enableDnsUpdater = true`)
 
 **Forgejo (`code.zdk.no`) — can enable independently:**
 
-- [ ] Domeneshop: `A`/`AAAA` for `code`; DNSUpdater timer
+- [ ] Domeneshop: `A`/`AAAA` for `code`; add `code` to DNSUpdater records
 - [ ] Caddyfile: uncomment `code.zdk.no`; set Forgejo `ROOT_URL` to
       `https://code.zdk.no`
 - [ ] Confirm no WAN `:22`; LAN SSH still works on trusted/VPN
@@ -159,7 +162,7 @@ exposure** happens here.
 
 **`zdk.no` — when Zdk repo ships deploy spec:**
 
-- [ ] Domeneshop: `A`/`AAAA` for `@`; DNSUpdater
+- [ ] Domeneshop: `A`/`AAAA` for `@`; add `@` to DNSUpdater records
 - [ ] Flux deploy from Zdk repo; Traefik IngressRoute
 - [ ] External validation: `curl -I https://zdk.no`
 
