@@ -13,6 +13,8 @@ Split-tunnel: `AllowedIPs = 10.10.0.0/16`. DNS is Unbound on `10.10.255.1`.
 SSH to janus from a WG address is **denied**. WAN IP is dynamic — update
 `Endpoint` if it changes (DNSUpdater is still a stub).
 
+Pixel validated 2026-09-12 from LTE: handshake, Grafana/Authelia, split-tunnel, SSH denied. Remorse has no handshake yet — leave the Mac tunnel off on Hai-Fi; confirm from off-lab.
+
 ## Pixel (`wg0.conf` or the WireGuard app)
 
 ```ini

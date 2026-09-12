@@ -121,8 +121,11 @@ WAN 80/443, not issuance. step-ca not in v1.
 
 ## Stage 6 — VPN and Headscale (depends: Stage 4; parallel with Stage 5)
 
-- [ ] WireGuard on janus (`51820/udp`); clients (laptop, phone); test
-      split-tunnel routes
+- [x] WireGuard on janus (`51820/udp`); Pixel (`10.10.255.2`) from LTE —
+      Grafana/Authelia, split-tunnel (WAN stays LTE), SSH to janus denied
+      (2026-09-12). Remorse (`10.10.255.3`) profile is on janus; turn the
+      Mac tunnel on off-lab to confirm handshake.
+- [ ] Remorse away handshake (`10.10.255.3`)
 - [ ] Deploy **Headscale on janus** listening on **`127.0.0.1:8081`** (not
       `:8080` — UniFi Inform). Caddy `headscale.lab.zdk.no`, no Authelia.
 - [ ] Confirm VPN → servers/mgmt/Caddy; v6 routes to lab subnets
