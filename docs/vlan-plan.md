@@ -57,7 +57,9 @@ as IPv4). Gateway `fd10:10:10:30::1`. No IPv6 default route — ISP has none.
 | 50 guest   | `.100–.250` | 1 h                      |
 
 **DHCP options:** push Unbound (`10.10.x.1`) as DNS; domain `lab.zdk.no` (search).
-**Exceptions:** guest → `1.1.1.1` / `9.9.9.9`. IoT → Unbound on `10.10.40.1` until Stage 4, then Blocky `10.10.30.21` (`homelab.router.enableBlocky`) and **no** `domain-search`.
+**Exceptions:** guest → `1.1.1.1` / `9.9.9.9`. IoT → Blocky `10.10.30.21`
+(`homelab.router.enableBlocky`) and **no** `domain-search`. Off: IoT uses
+Unbound on `10.10.40.1` (bring-up only).
 
 ## WiFi mapping (UniFi OS Server on router)
 
@@ -70,8 +72,8 @@ as IPv4). Gateway `fd10:10:10:30::1`. No IPv6 default route — ISP has none.
 Caddy A records (`*.lab.zdk.no` → `10.10.30.1`) are independent of Inform.
 Inform Host Override is **`10.10.10.1`** because the AP and Flex Minis use untagged VLAN 10.
 `unifi.lab.zdk.no` is a **single** A record at Caddy (`.30.1`); no extra views
-on mgmt/trusted. Until a Caddy vhost exists, browse `https://10.10.10.1:11443`.
-Leave Caddy on `.30.1` so mgmt DNS stays infrastructure-only.
+on mgmt/trusted. Browse `https://unifi.lab.zdk.no`. Leave Caddy on `.30.1` so
+mgmt DNS stays infrastructure-only.
 
 ## Switch ports (CRS310)
 
@@ -132,7 +134,7 @@ No 802.1Q. Every port is VLAN 20 because USW-NC port 5 is access 20. **pingu** (
 | **i350-T2** port 1 | `a0:36:9f:33:ae:96` | `lan0`   | 802.1Q trunk → CRS310         |
 | **i350-T2** port 2 | `a0:36:9f:33:ae:97` | `spare0` | Unused (link forced down)     |
 
-Port↔MAC for i350 assumed by ascending MAC; confirm with a cable test after first boot.
+Port↔MAC for i350 confirmed at Stage 1 (`ethtool -p lan0`).
 
 **Rejected alternative:** Router-on-a-stick (single NIC for WAN + trunk). See
 [decisions.md](decisions.md).
@@ -154,13 +156,13 @@ flowchart TB
   Unbound --> Internet[Upstream DNS]
 ```
 
-**Stage 2–3 (before Blocky):** IoT DHCP DNS is Unbound on `10.10.40.1`. IoT can resolve `*.lab.zdk.no` during this window. Do not flip `enableBlocky` until Blocky answers on `.21`.
+Bring-up only: IoT DHCP DNS was Unbound on `10.10.40.1` until Blocky answered
+on `.21`. `enableBlocky` is **true**.
 
 | Zone             | Resolver         | Policy                                                          |
 | ---------------- | ---------------- | --------------------------------------------------------------- |
 | Trusted, servers | Unbound (router) | Full split-horizon `*.lab.zdk.no`                               |
-| IoT (Stage 2–3)  | Unbound `10.10.40.1` | Interim — lab names visible; no blocklists                   |
-| IoT (Stage 4+)   | Blocky → Unbound | Blocklists; **deny** `*.lab.zdk.no` (whitelist exceptions only) |
+| IoT              | Blocky → Unbound | Blocklists; **deny** `*.lab.zdk.no` (whitelist exceptions only) |
 | Guest            | Public resolvers | No internal names; restricted DNS possible later                |
 
 ### Split-horizon (Unbound)
@@ -169,8 +171,8 @@ flowchart TB
 | -------------- | --------------------- | ---------------------------------------- |
 | `zdk.no`       | public DNS (no local-data)    | Not a homelab site                       |
 | `code.zdk.no`  | `10.10.30.1`                  | Public `A` via DDNS                      |
-| `img.zdk.no`   | `10.10.30.1`                  | Public `A`/`AAAA` via DDNS               |
-| `ha.zdk.no`    | `10.10.30.1`                  | Public `A`/`AAAA` via DDNS               |
+| `img.zdk.no`   | `10.10.30.1`                  | Public `A` via DDNS (no AAAA)            |
+| `ha.zdk.no`    | `10.10.30.1`                  | Public `A` via DDNS (no AAAA)            |
 | `vpn.zdk.no`   | no local-data (public A)      | Public `A` via DDNS (WireGuard)      |
 | `*.lab.zdk.no` | Host records, else Caddy on janus | **No public records**                |
 | `lab.zdk.no`   | `10.10.30.1`                  | **No public record** (not WAN-reachable) |

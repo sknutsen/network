@@ -51,7 +51,7 @@ flowchart TB
   Caddy --> Immich
   Blocky --> Router
   HA --> IOT
-  InternetUsers[Internet] -->|img.zdk.no ha.zdk.no| Caddy
+  InternetUsers[Internet] -->|img.zdk.no ha.zdk.no code.zdk.no| Caddy
 ```
 
 **Principle:** The router is the **policy enforcement point** and the **always-on edge box**: nftables plus Unbound, dnsmasq, Caddy, UniFi OS Server, Headscale, and DNSUpdater. Blocky, HA, Immich, Forgejo, Authelia, and k8s stay on VLAN hosts.
@@ -100,8 +100,8 @@ sequenceDiagram
   Admin->>WG: UDP WireGuard
   WG->>Svc: RFC1918 direct
 
-  Note over Admin,Svc: Path B — public apps (Stage 7)
-  Admin->>Caddy: HTTPS img.zdk.no / ha.zdk.no
+  Note over Admin,Svc: Path B — public apps
+  Admin->>Caddy: HTTPS img.zdk.no / ha.zdk.no / code.zdk.no
   Caddy->>Svc: No Authelia for current public apps
 
   Note over Admin,Svc: Path C — admin UIs (*.lab.zdk.no)
@@ -146,7 +146,7 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 | `code.lab.zdk.no` | Forgejo `:30142` | Forgejo-native |
 | `ha.lab.zdk.no` | HA `:30103` | HA-native |
 | `immich.lab.zdk.no` | Immich `:30041` | Immich-native |
-| `headscale.lab.zdk.no` | `127.0.0.1:8081` | Headscale-native (Stage 6) |
+| `headscale.lab.zdk.no` | `127.0.0.1:8081` | Headscale-native |
 | `unifi.lab.zdk.no` | UniFi `:11443` | UniFi-native (Caddy proxy) |
 | `capacitor.lab.zdk.no` | Capacitor Service | Authelia |
 | `grafana.lab.zdk.no` | Grafana (k8s) | Authelia |
@@ -154,7 +154,7 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 ## VPN
 
 - **WireGuard** on janus (`51820/udp`) — primary remote access.
-- **Headscale** on janus **`127.0.0.1:8081`** (Stage 6). UniFi Inform owns `:8080`. Caddy `headscale.lab.zdk.no`, no Authelia.
+- **Headscale** on janus **`127.0.0.1:8081`**. UniFi Inform owns `:8080`. Caddy `headscale.lab.zdk.no`, no Authelia. Remorse away handshake on classic WG is still open.
 - VPN pool `10.10.255.0/24`; routes to `10.10.0.0/16` and lab IPv6 subnets when enabled.
 
 ## Monitoring and logging

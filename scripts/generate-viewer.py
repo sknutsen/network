@@ -42,6 +42,7 @@ DOCS: list[tuple[str, Path, str, str]] = [
     ("rbWan", ROOT / "docs/runbooks/wan-caddy.md", "WAN Caddy", "Runbooks"),
     ("rbAcme", ROOT / "docs/runbooks/acme-failure.md", "ACME failure", "Runbooks"),
     ("rbCap", ROOT / "docs/runbooks/capacitor.md", "Capacitor", "Runbooks"),
+    ("rbNet", ROOT / "docs/runbooks/network-monitoring.md", "Network monitoring", "Runbooks"),
     ("openQuestions", ROOT / "router/OPEN-QUESTIONS.md", "Remaining questions", "Build"),
     ("routerReadme", ROOT / "router/README.md", "Router README", "Build"),
     ("switchReadme", ROOT / "switch/README.md", "Switch README", "Build"),
@@ -58,6 +59,7 @@ DOCS: list[tuple[str, Path, str, str]] = [
     ("readme", ROOT / "README.md", "README", "Repo"),
     ("forgejo", ROOT / "services/forgejo/README.md", "Forgejo", "Services"),
     ("homeassistant", ROOT / "services/homeassistant/README.md", "Home Assistant", "Services"),
+    ("immich", ROOT / "services/immich/README.md", "Immich", "Services"),
     ("authelia", ROOT / "services/authelia/README.md", "Authelia", "Services"),
 ]
 

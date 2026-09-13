@@ -1,6 +1,7 @@
 # Home Assistant
 
-Runs in `services/truenas/docker-compose.yml`.
+Live deploy is a **TrueNAS App** on `10.10.30.20:30103`. Do not also start
+the Home Assistant service in `services/truenas/docker-compose.yml`.
 
 | Hostname | WAN | Auth |
 |----------|-----|------|

@@ -3,13 +3,24 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 caddyfile="$root/services/caddy/Caddyfile"
 fail=0
+nix_cmd=(nix --extra-experimental-features "nix-command flakes")
+
+# GitHub Actions sets CI=true. Local runs may skip missing tools; CI must not.
+skip_or_fail() {
+  if [ -n "${CI:-}" ]; then
+    echo "$1 (required in CI)" >&2
+    fail=1
+  else
+    echo "$1 — skip"
+  fi
+}
 
 echo "==> Caddyfile format"
 run_caddy_fmt() {
   if command -v caddy >/dev/null 2>&1; then
     caddy fmt "$caddyfile"
   elif command -v nix >/dev/null 2>&1; then
-    nix --extra-experimental-features 'nix-command flakes' run nixpkgs#caddy -- fmt "$caddyfile"
+    "${nix_cmd[@]}" run nixpkgs#caddy -- fmt "$caddyfile"
   else
     return 2
   fi
@@ -25,7 +36,7 @@ if run_caddy_fmt >"$tmp"; then
 else
   status=$?
   if [ "$status" -eq 2 ]; then
-    echo "caddy/nix not found — skip fmt"
+    skip_or_fail "caddy/nix not found"
   else
     echo "caddy fmt failed" >&2
     fail=1
@@ -39,29 +50,36 @@ if command -v python3 >/dev/null 2>&1; then
     fail=1
   fi
 else
-  echo "python3 not found — skip exporter tests"
+  skip_or_fail "python3 not found"
 fi
 
 echo "==> nix flake check"
 if command -v nix >/dev/null 2>&1; then
-  if ! nix --extra-experimental-features 'nix-command flakes' flake check --all-systems "$root"; then
-    echo "flake check failed (common on Darwin for x86_64-linux). Falling back to eval." >&2
-    nix --extra-experimental-features 'nix-command flakes' \
-      eval "${root}#nixosConfigurations.optiplex.config.networking.hostName"
+  if ! "${nix_cmd[@]}" flake check --all-systems "$root"; then
+    if [ -n "${CI:-}" ]; then
+      echo "flake check failed" >&2
+      fail=1
+    else
+      echo "flake check failed (common on Darwin for x86_64-linux). Falling back to eval." >&2
+    fi
+  fi
+  echo "==> router flake eval"
+  if ! "${nix_cmd[@]}" eval "${root}#nixosConfigurations.optiplex.config.networking.hostName"; then
+    echo "router flake eval failed" >&2
+    fail=1
   fi
 else
-  echo "nix not found — skip flake check"
+  skip_or_fail "nix not found"
 fi
 
 echo "==> nodes flake eval"
 if command -v nix >/dev/null 2>&1; then
-  if ! nix --extra-experimental-features 'nix-command flakes' \
-    eval "path:${root}/nodes#nixosConfigurations.nordri.config.networking.hostName"; then
+  if ! "${nix_cmd[@]}" eval "path:${root}/nodes#nixosConfigurations.nordri.config.networking.hostName"; then
     echo "nodes flake eval failed" >&2
     fail=1
   fi
 else
-  echo "nix not found — skip nodes flake eval"
+  skip_or_fail "nix not found"
 fi
 
 echo "==> kustomize build k8s"
@@ -72,7 +90,7 @@ kustomize_build() {
   elif command -v kustomize >/dev/null 2>&1; then
     kustomize build "$overlay"
   elif command -v nix >/dev/null 2>&1; then
-    nix --extra-experimental-features 'nix-command flakes' run nixpkgs#kustomize -- build "$overlay"
+    "${nix_cmd[@]}" run nixpkgs#kustomize -- build "$overlay"
   else
     return 2
   fi
@@ -87,7 +105,7 @@ for overlay in \
   else
     status=$?
     if [ "$status" -eq 2 ]; then
-      echo "kubectl/kustomize/nix not found — skip kustomize"
+      skip_or_fail "kubectl/kustomize/nix not found"
       break
     fi
     echo "$out" >&2

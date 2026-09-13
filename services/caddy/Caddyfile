@@ -88,7 +88,7 @@ img.zdk.no {
 	import immich_proxy
 }
 
-# Forgejo internal until Stage 7 — HTTP on :30142 (not TLS). No Authelia.
+# Forgejo internal — HTTP on :30142 (not TLS). No Authelia.
 code.lab.zdk.no {
 	import lab_only
 	import dns01
@@ -96,7 +96,7 @@ code.lab.zdk.no {
 	encode gzip
 }
 
-# Stage 6 — Headscale on 127.0.0.1:8081 (UniFi Inform owns :8080).
+# Headscale on 127.0.0.1:8081 (UniFi Inform owns :8080).
 # No Authelia — Tailscale clients use this as login-server.
 headscale.lab.zdk.no {
 	import lab_only
@@ -140,7 +140,7 @@ unifi.lab.zdk.no {
 	}
 }
 
-# k8s UIs — 502 until Traefik is up (Stage 5 k8s)
+# k8s UIs via Traefik MetalLB .100
 grafana.lab.zdk.no {
 	import lab_only
 	import dns01

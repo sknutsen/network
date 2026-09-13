@@ -94,9 +94,9 @@ Full matrix: [decisions.md § Exposure matrix](decisions.md#exposure-matrix).
 
 Stages 0–8 with checklists: **[implementation-stages.md](implementation-stages.md)**.
 
-- **Stage 5:** Internal HA / Immich / Authelia / Forgejo (TrueNAS Apps; LAN
-  SSH `:30143`), Blocky, k8s stack — no WAN.
-- **Stage 7:** WAN is on for `img.zdk.no`, `ha.zdk.no`, and `code.zdk.no`. Apex `zdk.no` is not a homelab site.
+Stages 0–5 and 7 are done. Stage 6 leftovers: Remorse away handshake and VPN
+path confirm. Stage 8 leftover: a security pass. CI runs
+`scripts/validate.sh` on `main` and pull requests.
 
 ## Remaining decisions
 
@@ -109,7 +109,6 @@ choices on this list. Do not invent a parallel numbering scheme.
 
 | Brief # | Topic | Status |
 |---------|-------|--------|
-| 11 | Hardware capability check | Stage 1 physical verify ([brief](decision-briefs.md#11-hardware-capability-check)) |
 | 12 | RK1 BSP / NPU fork | Deferred — [plans/rk1-bsp-fork.md](plans/rk1-bsp-fork.md) |
 | 13 | Nintendo Switch local play | Deferred until local play is tested |
 | 18 | Future public apps | Per-app checklist in the brief |
@@ -118,11 +117,11 @@ Remaining MAC reservations (Socrates, Peon, Switch) are leftovers, not a brief: 
 
 ## Target repo layout
 
-Stage 6–8 leftovers: WireGuard / Headscale, WAN Caddy. Runbooks are in
-[runbooks/](runbooks/). Stage 5 k3s,
-Flux, Loki, and Promtail are live (`enableK3s = true`). DNSUpdater is the
+Stage 6 leftover: Remorse away handshake. Stage 8 leftover: security pass.
+Runbooks are in [runbooks/](runbooks/). k3s, Flux, Loki, Promtail, WAN
+Caddy, WireGuard, and Headscale are live. DNSUpdater is the
 [DNSUpdater](https://github.com/sknutsen/DNSUpdater) flake module on janus
-(Domeneshop `img`/`ha`/`vpn`; sops token/secret; Loki).
+(Domeneshop `img`/`ha`/`code`/`vpn`; sops token/secret; Loki).
 
 ```
 net/

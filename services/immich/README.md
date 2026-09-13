@@ -1,7 +1,8 @@
 # Immich
 
-Photo library on TrueNAS Docker. Deployed via `services/truenas/docker-compose.yml`.
-Caddy on janus terminates TLS.
+Photo library. Live deploy is a **TrueNAS App** on `10.10.30.20:30041`.
+Caddy on janus terminates TLS. Do not also start Immich in
+`services/truenas/docker-compose.yml`.
 
 ## Hostnames
 

@@ -13,7 +13,3 @@ unanswered leftovers only.
 1. [ ] **MAC addresses** for remaining dnsmasq reservations. Known hosts are in
        `router/lib/constants.nix` (`macs`) and `router/modules/dhcp.nix`. Still
        unknown: Socrates, Peon, Nintendo Switch. RK1 `end0` MACs are reserved.
-
-## Operational (not design — already on Stage 1–2 checklists)
-
-- Bridge the OBOS Nett modem at router cutover.

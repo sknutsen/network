@@ -15,7 +15,7 @@ TLS. Do not also start the Forgejo service in
 | Port | Role |
 |------|------|
 | `30142` | UI / HTTPS git via Caddy |
-| `30143` | LAN SSH (trusted + later VPN). Not WAN `:22` |
+| `30143` | LAN SSH (trusted + VPN). Not WAN `:22` |
 
 `ROOT_URL` / `SSH_DOMAIN` should be `https://code.zdk.no` (WAN + LAN via
 Unbound). `SSH_PORT=30143`. LAN SSH still uses `:30143`, not WAN `:22`.
@@ -29,11 +29,10 @@ Unbound). `SSH_PORT=30143`. LAN SSH still uses `:30143`, not WAN `:22`.
   `Hostname` block)
 
 nftables drops forwarded `:30142` so browsers cannot skip Caddy. `:30143` is
-allowed from trusted (and VPN when Stage 6 is on).
+allowed from trusted and VPN.
 
-## Stage 7 checklist
+## Operational notes
 
-1. Disable open registration in Forgejo admin
-2. Create admin account
-3. Confirm router has **no WAN :22** (or `:30143`)
-4. Include the TrueNAS App dataset in NAS backup snapshots
+WAN `https://code.zdk.no` is live (2026-09-13). Keep open registration off,
+no WAN `:22` / `:30143`, and include the TrueNAS App dataset in NAS
+snapshots.

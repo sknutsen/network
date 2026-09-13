@@ -58,8 +58,8 @@ DNAT to `.21`).
 - [x] Apply [firewall-matrix.md](firewall-matrix.md) except IoT DNS cutover
       (cutover is Stage 5; `enableBlocky` is now true)
 - [x] mDNS: static IPs first; Avahi reflector servers↔IoT (Matter / Dirigera)
-- [x] Trusted→IoT cast allows (TV/Chromecast/Odyssey) here or with HA — not at
-      Stage 3. Uncomment the nftables cast rule when enabling.
+- [x] Trusted→IoT cast allows (TV/Chromecast/Odyssey/Hue/Dirigera) in
+      `firewall.nix`
 
 ## Stage 5 — Internal services (parallel: Stage 4; needs servers VLAN)
 
@@ -82,10 +82,10 @@ DNAT to `.21`).
       `@8.8.8.8` answers; `@10.10.40.1 grafana.lab.zdk.no` is NXDOMAIN
       (Blocky, not Unbound). Lease **1 h**. Procedure:
       [runbooks/iot-dns.md](runbooks/iot-dns.md).
-- [x] Caddy on janus: Authelia on lab UIs except `auth` / `code.lab` / `ha.lab`
-      / `immich.lab` / `truenas.lab` / `unifi.lab` / (later) `headscale.lab`. UI
-      is `https://truenas.lab.zdk.no` (not the raw IP — TrueNAS host firewall is
-      same-subnet only).
+- [x] Caddy on janus: Authelia on lab UIs except `auth` / `code.lab` /
+      `headscale.lab` / `ha.lab` / `immich.lab` / `truenas.lab` / `unifi.lab`.
+      UI is `https://truenas.lab.zdk.no` (not the raw IP — TrueNAS host
+      firewall is same-subnet only).
 - [x] DNS-01: Domeneshop plugin on Caddy (`withPlugins`) + sops
       `caddy.domeneshopToken`/`Secret`; `caddyEmail`; lab certs issue. Caddyfile
       `dns01` snippet uses public resolvers (`1.1.1.1` / `9.9.9.9`) and
@@ -171,12 +171,13 @@ exposure** happens here.
 
 ## Stage 8 — Operationalize (depends: all above)
 
-- [ ] Network dashboard live: UniFi user `unpoller`; import CRS310 SNMP;
-      rebuild janus (presence/unpoller/snmp-exporter); Flux apply scrape +
-      Grafana **Network** + Alertmanager; Blocky `:4000` already published
-- [ ] `validate.sh` in CI (flake check, caddy fmt)
-- [x] Runbooks: router restore, WG key rotation, ACME failure, Capacitor,
-      IoT DNS — [runbooks/](runbooks/)
+- [x] Network dashboard stack: unpoller + CRS310 SNMP + presence + Grafana
+      **Network** + Alertmanager (2026-09-12/13). Re-apply:
+      [runbooks/network-monitoring.md](runbooks/network-monitoring.md)
+- [x] `validate.sh` in CI — `.github/workflows/validate.yml` (flake check,
+      Caddy fmt, exporter tests, router/nodes eval, kustomize)
+- [x] Runbooks: router restore, WG clients/rotation, Headscale, WAN Caddy,
+      ACME, Capacitor, IoT DNS, network monitoring — [runbooks/](runbooks/)
 - [ ] Security pass: disable unused services (UPS test only after UPS is
       procured — deferred)
 
@@ -190,8 +191,8 @@ exposure** happens here.
 - [x] Encrypted cluster secrets: `nodes/secrets/cluster.yaml` (k3s token,
       sops-nix on RK1s) and `k8s/.../grafana-admin.secret.yaml` (Flux sops).
       Not `secrets/cluster.yaml` (nodes flake cannot import `../secrets`).
-- [x] `docs/runbooks/` — restore, WG rotation (Stage 6 stub), ACME,
-      Capacitor, IoT DNS
+- [x] `docs/runbooks/` — restore, WG, Headscale, WAN Caddy, ACME,
+      Capacitor, IoT DNS, network monitoring
 
 ## Parallel workstreams
 
@@ -209,10 +210,14 @@ exposure** happens here.
 `enableBlocky`, which waits on Blocky from E). F (WireGuard) after Stage 4.
 Stage 7 needs Caddy on janus (Stage 2) plus TrueNAS backends from E.
 
-## Suggested next commits
+## Suggested next work
 
-Already in tree through Stage 5 (k3s, Flux, Loki, Promtail, cluster sops).
+Already in tree through Stage 7 (WAN Caddy, DNSUpdater `img`/`ha`/`code`/`vpn`,
+WireGuard, Headscale, network dashboard).
 
-Still to add:
+Still open:
 
-1. Stage 6 WireGuard / Headscale keys in `secrets/router.yaml`
+1. Stage 6 leftover: Remorse away handshake (`10.10.255.3`); confirm VPN →
+   servers/mgmt/Caddy
+2. Stage 8 leftover: security pass
+3. Remaining MAC reservations (Socrates, Peon, Switch)

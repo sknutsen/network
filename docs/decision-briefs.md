@@ -23,14 +23,14 @@ Resolved** here, and remove the row from `plan.md` § Remaining decisions.
 | 8 | [Zdk repo boundary](#8-zdk-repo-boundary) | Superseded — will not deploy | — |
 | 9 | [Blocky host placement](#9-blocky-host-placement) | Resolved | — |
 | 10 | [CGNAT verification](#10-cgnat-verification) | Resolved | — |
-| 11 | [Hardware capability check](#11-hardware-capability-check) | Install-time — do at Stage 1 | Stage 1 |
+| 11 | [Hardware capability check](#11-hardware-capability-check) | Resolved — Stage 1 verified | — |
 | 12 | [RK1 BSP / NPU fork](#12-rk1-bsp--npu-fork) | Deferred | When NPU/GPU needed |
 | 13 | [Nintendo Switch local play](#13-nintendo-switch-local-play) | Deferred | If local play fails |
 | 14 | [Hairpin NAT](#14-hairpin-nat) | Resolved — off | — |
 | 15 | [CrowdSec](#15-crowdsec) | Resolved | — |
 | 16 | [mDNS / Avahi reflector](#16-mdns--avahi-reflector) | Resolved — servers↔IoT Avahi | — |
 | 17 | [Trusted → IoT cast rules](#17-trusted--iot-cast-rules) | Resolved — per-device allows | — |
-| 18 | [Future public apps](#18-future-public-apps) | Per-app — Immich + HA documented | Each new WAN service |
+| 18 | [Future public apps](#18-future-public-apps) | Per-app — Immich, HA, Forgejo documented | Each new WAN service |
 | 19 | [Guest DNS via Blocky](#19-guest-dns-via-blocky) | Resolved — public resolvers | Post Stage 4 if wanted |
 
 ---
@@ -77,7 +77,7 @@ delegation).
 | Addressing | Router advertises RA on each VLAN; per-VLAN firewall rules |
 | WAN inbound | **Default deny** (already decided) |
 | NPTv6 | **Not in v1** — revisit only if ISP delegates `/60` or smaller |
-| Prefix size | Document actual delegation at Stage 2 — see [brief #1](#1-ipv6-prefix-size) |
+| Prefix size | **None** — see [brief #1](#1-ipv6-prefix-size) |
 
 ### Options considered
 
@@ -240,8 +240,8 @@ Traefik, monitoring, and apps.
 ### Decision
 
 **Keep the default CP taint on `nordri`.** Do not schedule app workloads on the
-control plane. `sudri`–`vestri` run Traefik, kube-prometheus-stack, Capacitor,
-and Zdk.
+control plane. `sudri`–`vestri` run Traefik, kube-prometheus-stack, and
+Capacitor.
 
 Revisit only if `kubectl top nodes` shows sustained worker pressure and CP RAM
 sits idle.
@@ -314,7 +314,7 @@ TrueNAS.
 
 ## 11. Hardware capability check
 
-**Status:** Install-time — physical verification at Stage 1 (not a design choice).
+**Status:** **Resolved** — Stage 1 physical verification complete.
 
 ### Context
 
@@ -322,7 +322,14 @@ Design assumes specific NIC roles, switch VLAN support, and AP SSID mapping.
 Wrong assumptions force redesign. MACs and port plan are already written down;
 this brief is “prove them on the metal.”
 
-### What to do (Stage 1, in order)
+### Decision
+
+Stage 1 verified the design assumptions: I217LM is WAN, i350-T2 port 1 is the
+CRS310 trunk, CRS310 does 802.1Q, U7 Lite SSIDs map to VLANs 20/40/50, TrueNAS
+and Turing Pi sit on VLAN 30. Recorded in [inventory.md](inventory.md) and
+[implementation-stages.md](implementation-stages.md) Stage 1.
+
+### What was done (Stage 1, in order)
 
 1. **Label** CRS310 ports 1–8 per [inventory.md](inventory.md) / vlan-plan.
 2. **Cable the LAN side first** (no ISP cutover yet): i350 port 1 → CRS310 ether1
@@ -409,7 +416,7 @@ UDP** rules per Nintendo troubleshooting guides before moving VLANs.
 ### Context
 
 Split-horizon DNS sends internal clients to `10.10.30.1` (Caddy on janus) for internal names.
-Published names (`img.zdk.no`, `ha.zdk.no`) may resolve to WAN IP from some
+Published names (`img.zdk.no`, `ha.zdk.no`, `code.zdk.no`) may resolve to WAN IP from some
 clients. Hairpin NAT lets LAN clients reach WAN IP:443 on the router's public
 address.
 
@@ -511,7 +518,7 @@ Phones/laptops on trusted VLAN cast to TV, Chromecast, Odyssey on IoT.
 
 ## 18. Future public apps
 
-**Status:** Per-app — Immich and Home Assistant documented below.
+**Status:** Per-app — Immich, Home Assistant, and Forgejo documented below.
 
 ### Context
 
@@ -536,6 +543,7 @@ guess a lab Host header.
 |-------------|----------|---------|------|
 | `img.zdk.no` | `immich.lab.zdk.no` | Immich `:30041` on TrueNAS | Immich-native |
 | `ha.zdk.no` | `ha.lab.zdk.no` | Home Assistant `:30103` | HA-native |
+| `code.zdk.no` | `code.lab.zdk.no` | Forgejo `:30142` on TrueNAS | Forgejo-native |
 
 Public and lab certs are **DNS-01** via Domeneshop (`dns01` snippet: public
 resolvers + 60s delay). `enableWanCaddy` is only for serving WAN 80/443.
@@ -588,11 +596,11 @@ family-safe filtering on the guest SSID.
 | CGNAT | **Resolved:** Not active; WAN INPUT to Caddy OK |
 | Hairpin NAT | **Resolved:** Off |
 | CrowdSec | **Resolved:** Not in v1; nftables rate-limit first |
-| mDNS | **Resolved:** Static IPs first; Avahi only if discovery fails |
-| Cast rules | **Resolved:** Wait for Stage 4–5 / HA |
+| mDNS | **Resolved:** Static IPs + Avahi 30↔40 |
+| Cast rules | **Resolved:** Per-device trusted → TV/Chromecast/Odyssey/Hue/Dirigera |
 | Guest DNS | **Resolved:** Public resolvers |
 | Headscale | **Resolved:** Janus, `127.0.0.1:8081`, Caddy `headscale.lab.zdk.no` (not :8080) |
-| ISP | **OBOS Nett**; PD at Stage 2; modem bridge at cutover |
+| ISP | **OBOS Nett**; no IPv6; modem bridged |
 
 After each decision is made, update [decisions.md](decisions.md) and remove the
 matching row from [plan.md § Remaining decisions](plan.md#remaining-decisions).

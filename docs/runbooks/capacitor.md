@@ -59,4 +59,4 @@ in `monitoring` or `default`.
 - Schedule Capacitor (or anything else) on nordri. CP taint stays.
 - Put Authelia in the cluster in front of Capacitor. Forward-auth is
   Caddy’s job.
-- Browse it from IoT / guest (Caddy INPUT is trusted + servers + later VPN).
+- Browse it from IoT / guest (Caddy INPUT is trusted + servers + VPN).

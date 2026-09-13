@@ -41,7 +41,7 @@ reset (`lab_only` abort), not an Authelia or HA page.
 
 `enableDnsUpdater` runs the [DNSUpdater](https://github.com/sknutsen/DNSUpdater)
 flake module (`dns-updater.service`). It keeps Domeneshop `A` records for
-`img`, `ha`, and `vpn` on the current public IPv4. Token/secret are sops
+`img`, `ha`, `code`, and `vpn` on the current public IPv4. Token/secret are sops
 `dnsupdater.domeneshopToken` / `Secret` → template `dnsupdater.env`
 (`TOKEN` / `SECRET`). Logs also go to Loki
 (`http://10.10.30.101:3100/loki/api/v1/push`).
@@ -55,7 +55,7 @@ systemctl status dns-updater.timer dns-updater.service --no-pager
 journalctl -u dns-updater -n 50 --no-pager
 ```
 
-Do not add `@` or `code` until those Caddy vhosts are uncommented.
+Apex `@` is not a homelab site — do not add it to DNSUpdater.
 
 ## Home Assistant
 

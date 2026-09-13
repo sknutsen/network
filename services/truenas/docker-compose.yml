@@ -46,9 +46,9 @@ services:
   #   image: codeberg.org/forgejo/forgejo:9
   #   restart: unless-stopped
   #   environment:
-  #     # Stage 5 internal. At Stage 7 switch ROOT_URL/SSH_DOMAIN to https://code.zdk.no
-  #     - FORGEJO__server__ROOT_URL=https://code.lab.zdk.no
-  #     - FORGEJO__server__SSH_DOMAIN=code.lab.zdk.no
+  #     # Reference only — live App uses ROOT_URL/SSH_DOMAIN https://code.zdk.no
+  #     - FORGEJO__server__ROOT_URL=https://code.zdk.no
+  #     - FORGEJO__server__SSH_DOMAIN=code.zdk.no
   #     - FORGEJO__server__SSH_PORT=30143
   #   volumes:
   #     - /mnt/tank/services/forgejo/data:/data

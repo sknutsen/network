@@ -99,4 +99,5 @@ kubectl kustomize k8s/clusters/homelab/infra/config
 kubectl kustomize k8s/clusters/homelab/apps
 ```
 
-`scripts/validate.sh` runs the same builds when `kubectl` or `kustomize` exists.
+`scripts/validate.sh` runs the same builds (CI always does; locally if
+`kubectl`, `kustomize`, or `nix` exists).

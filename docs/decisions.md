@@ -28,7 +28,7 @@ are canonical.
 | Layer             | Choice                                                         | Why                                                             |
 | ----------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
 | Router OS         | **NixOS** (flakes + nftables)                                  | Declarative, rollbacks, unified with RK1 nodes                  |
-| Router hardware   | **Dell OptiPlex 9020 MT** + **Intel i350-T2** (acquired)       | I217LM = WAN, i350 = LAN trunk — not router-on-a-stick          |
+| Router hardware   | **Dell OptiPlex 9020 MT** + **Intel i350-T2** (acquired)       | I217LM = WAN, i350 = LAN trunk — not router-on-a-stick; Stage 1 verified |
 | Router install    | **nixos-anywhere** + **disko**                                 | SSH from a workstation; declarative disk; Mac uses `--build-on remote` |
 | Switch            | **MikroTik CRS310-8G+2S+IN** + **2× UniFi Flex Mini** (acquired) | CRS310 is core L2; Flex Minis extend trusted/iot to office and living room |
 | WiFi AP           | **Ubiquiti U7 Lite** (1×, acquired)                            | WiFi 7; 2.5 GbE uplink; VLAN-capable SSIDs; ~115 m² coverage    |
@@ -47,7 +47,7 @@ are canonical.
 | Storage (K8s)     | **Longhorn** — default StorageClass, **replica 3**, NVMe at `/var/lib/longhorn` per RK1 | 2×500G + 2×2TB; replica-3 usable ~raw/3; single PVC ≤ smallest node; Velero/ZFS off-cluster |
 | Auth / SSO        | **Authelia** TrueNAS App (`10.10.30.20:9091`)                  | Caddy `forward_auth` for lab UIs; portal `auth.lab.zdk.no`; exceptions below |
 | Secrets           | **sops-nix + age**; key `/var/lib/sops-nix/key.txt` on janus   | One SOPS workflow; workstation age identity in `.sops.yaml`     |
-| VPN               | **WireGuard** (`51820`) + **Headscale** on janus               | Headscale **`127.0.0.1:8081`** behind Caddy (`headscale.lab.zdk.no`); **not** `:8080` (UniFi Inform) |
+| VPN               | **WireGuard** (`51820`) + **Headscale** on janus               | Headscale **`127.0.0.1:8081`** behind Caddy (`headscale.lab.zdk.no`); **not** `:8080` (UniFi Inform). Remorse away handshake still open |
 | WAN IDS           | **Not in v1** (CrowdSec deferred)                              | nftables rate-limit on 443 first; add CrowdSec if logs warrant  |
 | DDNS              | **DNSUpdater** flake → **Domeneshop**                          | Dynamic `A` for `img`, `ha`, `code`, `vpn`; sops `dnsupdater.*`; Loki `10.10.30.101` |
 | Monitoring        | **kube-prometheus-stack** + presence + unpoller + CRS310 SNMP + Blocky | Grafana Network; Alertmanager `alertmanager.lab.zdk.no`         |
@@ -55,15 +55,15 @@ are canonical.
 | Public services   | **`img.zdk.no`**, **`ha.zdk.no`**, **`code.zdk.no`**            | Immich, HA, Forgejo on TrueNAS via Caddy. No apex site          |
 | Forgejo Git (WAN) | **HTTPS only**                                                 | No WAN `:22`; LAN SSH `:30143` on trusted VLAN + VPN            |
 | Internal admin    | **`*.lab.zdk.no`**                                             | Split-horizon only; VPN/trusted VLAN; Authelia; never WAN       |
-| WAN IPv4          | **Dynamic public IP** (CGNAT not active)                       | **WAN INPUT to Caddy** 443/80 on janus (Stage 7) + WireGuard UDP |
+| WAN IPv4          | **Dynamic public IP** (CGNAT not active)                       | **WAN INPUT to Caddy** 443/80 on janus + WireGuard UDP |
 | WAN IPv6          | **PD ready; ISP offers none** (2026-09-05)                     | `enableIpv6` off; native /64 per VLAN when OBOS Nett adds IPv6; inbound v6 default deny |
 | ISP               | **OBOS Nett**                                                  | Dynamic public IPv4 `84.48.97.100/21`; no IPv6                 |
 | ISP modem         | **Bridge mode** — configure at router cutover                  | OptiPlex is sole router                                         |
 | Hairpin NAT       | **Off**                                                        | Unbound answers `img`/`ha`/`code.zdk.no` → `10.10.30.1`; apex `zdk.no` recurses to public DNS |
 | mDNS              | **Static IPs + Avahi 30↔40**                                   | Matter / Dirigera; ULA `fd10:10:10::/48`; never trusted/guest   |
 | Guest DNS         | **1.1.1.1 / 9.9.9.9**                                          | No Blocky on guest for v1                                       |
-| IoT lab DNS       | **Deny** `*.lab.zdk.no` after Blocky (Stage 5)                 | Whitelist only if a device needs a name                         |
-| Caddy LAN INPUT   | **trusted + servers + vpn** (`:80/:443`)                       | Not mgmt (infrastructure-only); not IoT/guest. WAN INPUT Stage 7 |
+| IoT lab DNS       | **Deny** `*.lab.zdk.no` (Blocky live)                          | Whitelist only if a device needs a name                         |
+| Caddy LAN INPUT   | **trusted + servers + vpn** (`:80/:443`)                       | Not mgmt (infrastructure-only); not IoT/guest. WAN INPUT open |
 | Home Assistant    | **TrueNAS App**, VLAN 30                                       | HA initiates to IoT; stays off IoT VLAN                         |
 | TrueNAS apps      | **HA, Immich, Authelia, Forgejo** as catalog Apps              | Live listeners `:30103` / `:30041` / `:9091` / `:30142`+`:30143`; do not also start those compose services |
 | TrueNAS compose   | **Blocky, Promtail** in `services/truenas/docker-compose.yml`  | Caddy is on janus; App-backed services stay out of compose |
@@ -79,7 +79,7 @@ are canonical.
 | `ha.zdk.no`              | Yes           | No       | Home Assistant; native login; same backend as `ha.lab` |
 | `auth.lab.zdk.no`        | **No**        | No       | Authelia portal (would loop) |
 | `code.lab.zdk.no`        | **No**        | No       | Forgejo-native auth (internal Git) |
-| `headscale.lab.zdk.no`   | **No**        | No       | Tailscale login-server; Stage 6 |
+| `headscale.lab.zdk.no`   | **No**        | No       | Tailscale login-server |
 | `unifi.lab.zdk.no`       | **No**        | No       | Caddy proxy to `:11443`; UniFi-native login |
 | `truenas.lab.zdk.no`     | **No**        | No       | TrueNAS-native auth; Caddy proxy (not direct IP) |
 | `ha.lab.zdk.no`          | **No**        | No       | HA-native; companion app |
@@ -91,7 +91,7 @@ are canonical.
 
 | Layer                                | Approach |
 | ------------------------------------ | -------- |
-| Public WAN (`img.zdk.no`, `ha.zdk.no`) | Caddy ACME **DNS-01** (Domeneshop). Public `A`/`AAAA` still required to *reach* the names. `enableWanCaddy` opens 80/443 for serving (not issuance) |
+| Public WAN (`img.zdk.no`, `ha.zdk.no`, `code.zdk.no`) | Caddy ACME **DNS-01** (Domeneshop). Public `A` still required to *reach* the names (no AAAA — ISP has no IPv6). `enableWanCaddy` opens 80/443 for serving (not issuance) |
 | Internal (`*.lab.zdk.no`)            | Same DNS-01 issuer. Unbound → `10.10.30.1`; no public A/AAAA. Caddy `lab_only` aborts non-`10.10.0.0/16` clients. ACME checks use `1.1.1.1`/`9.9.9.9` (not janus Unbound) |
 | Caddy → Traefik (east-west)          | HTTP on VLAN 30 — mTLS is a non-goal for v1 |
 | step-ca                              | **Not in v1** — Caddy ACME covers edge; revisit for mTLS/device certs if needed |

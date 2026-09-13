@@ -23,6 +23,8 @@ Declarative home network configuration and documentation.
 
 **Browser viewer:** from the repo root, `python3 scripts/generate-viewer.py --open`. That parses **all** markdown in the plan (docs, READMEs, remaining questions) and writes `docs/generated/index.html`. Markdown stays the source of truth.
 
+**CI:** GitHub Actions (`.github/workflows/validate.yml`) runs `./scripts/validate.sh` on `main` and pull requests — Caddy fmt, exporter tests, `nix flake check`, router/nodes eval, kustomize. Locally the same script skips missing tools.
+
 ## Target repo layout
 
 `nodes/` is a NixOS flake (k3s on). DNSUpdater is the flake module on janus, not `services/dnsupdater/`.
@@ -34,7 +36,7 @@ net/
 ├── router/        # janus NixOS modules
 ├── nodes/         # RK1 NixOS flake (nordri–vestri; k3s on)
 ├── switch/        # CRS310 RouterOS (L2 VLANs)
-├── services/      # truenas compose, Caddy, Authelia, Immich, DNS, Promtail
+├── services/      # truenas compose, Caddy, Authelia, HA/Immich/Forgejo READMEs, DNS, Promtail
 ├── k8s/           # Flux tree (infra HelmReleases)
 ├── secrets/       # .sops.yaml + encrypted router.yaml
 └── scripts/       # validate.sh, generate-viewer.py

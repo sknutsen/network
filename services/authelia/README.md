@@ -18,8 +18,8 @@ WAN. nftables drops forwarded `:9091`; do not open `https://10.10.30.20:9091`
 from other VLANs.
 
 Caddy `forward_auth` to this backend for other lab UIs except `auth` /
-`code.lab` / `ha.lab` / `immich.lab` / `truenas.lab` / `unifi.lab` / (later)
-`headscale.lab`. Public apps use native login.
+`code.lab` / `headscale.lab` / `ha.lab` / `immich.lab` / `truenas.lab` /
+`unifi.lab`. Public apps use native login.
 
 ## Login
 

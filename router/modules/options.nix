@@ -60,9 +60,9 @@
       type = lib.types.bool;
       default = false;
       description = ''
-        DNSUpdater → Domeneshop A records (img, ha, vpn). Token/secret
+        DNSUpdater → Domeneshop A records (img, ha, code, vpn). Token/secret
         from sops dnsupdater.*; Loki on 10.10.30.101. Oneshot timer
-        (boot + 5min). Add @ / code when those WAN vhosts ship.
+        (boot + 5min). Apex @ is not a homelab site.
       '';
     };
 
