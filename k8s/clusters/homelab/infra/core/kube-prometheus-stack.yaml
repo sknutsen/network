@@ -37,9 +37,13 @@ spec:
         enabled: true
         storageClassName: longhorn
         size: 5Gi
-      # Longhorn RWO: RollingUpdate cannot attach a second Grafana pod.
+      # Longhorn RWO: terminate the old pod first so the volume can attach.
+      # Recreate is rejected by Helm SSA (leftover rollingUpdate on the Deployment).
       deploymentStrategy:
-        type: Recreate
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: 0
+          maxUnavailable: 1
       grafana.ini:
         server:
           domain: grafana.lab.zdk.no

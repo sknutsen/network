@@ -1,6 +1,7 @@
 # App Deployment/Service live in github.com/sknutsen/Zdk.
 # Suspended until that repo ships a deploy path — then set spec.path and
 # suspend: false. Do not copy the app into net/.
+# Default branch is master; there is no main.
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
@@ -10,7 +11,8 @@ spec:
   interval: 10m
   url: https://github.com/sknutsen/Zdk
   ref:
-    branch: main
+    branch: master
+  suspend: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
