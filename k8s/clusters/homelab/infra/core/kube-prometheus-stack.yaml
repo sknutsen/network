@@ -37,6 +37,9 @@ spec:
         enabled: true
         storageClassName: longhorn
         size: 5Gi
+      # Longhorn RWO: RollingUpdate cannot attach a second Grafana pod.
+      deploymentStrategy:
+        type: Recreate
       grafana.ini:
         server:
           domain: grafana.lab.zdk.no
