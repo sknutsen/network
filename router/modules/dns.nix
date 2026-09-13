@@ -90,6 +90,7 @@ in
           ''"code.${C.domain}. A ${C.hosts.caddy}"''
           ''"grafana.${C.domain}. A ${C.hosts.caddy}"''
           ''"capacitor.${C.domain}. A ${C.hosts.caddy}"''
+          ''"alertmanager.${C.domain}. A ${C.hosts.caddy}"''
           # Exact names only: local-zone type static does not synthesize
           # answers from *.lab.zdk.no (foo.lab / grafana.lab NXDOMAIN).
           ''"${C.domain}. A ${C.hosts.caddy}"''
