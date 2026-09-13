@@ -94,8 +94,8 @@ Full matrix: [decisions.md § Exposure matrix](decisions.md#exposure-matrix).
 
 Stages 0–8 with checklists: **[implementation-stages.md](implementation-stages.md)**.
 
-Stages 0–5 and 7 are done. Stage 6 leftovers: Remorse away handshake and VPN
-path confirm. Stage 8 leftover: a security pass. CI runs
+Stages 0–5, 7, and 8 are done except UPS (deferred). Stage 6 leftovers:
+Remorse away handshake and VPN path confirm. CI runs
 `scripts/validate.sh` on `main` and pull requests.
 
 ## Remaining decisions
@@ -117,8 +117,8 @@ Remaining MAC reservations (Socrates, Peon, Switch) are leftovers, not a brief: 
 
 ## Target repo layout
 
-Stage 6 leftover: Remorse away handshake. Stage 8 leftover: security pass.
-Runbooks are in [runbooks/](runbooks/). k3s, Flux, Loki, Promtail, WAN
+Stage 6 leftover: Remorse away handshake. Runbooks are in
+[runbooks/](runbooks/). k3s, Flux, Loki, Promtail, WAN
 Caddy, WireGuard, and Headscale are live. DNSUpdater is the
 [DNSUpdater](https://github.com/sknutsen/DNSUpdater) flake module on janus
 (Domeneshop `img`/`ha`/`code`/`vpn`; sops token/secret; Loki).

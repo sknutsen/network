@@ -10,6 +10,7 @@
     ./unifi.nix
     ./monitoring.nix
     ./ssh.nix
+    ./hardening.nix
     ./dnsupdater.nix
     ./caddy.nix
   ];

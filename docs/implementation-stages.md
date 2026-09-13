@@ -178,8 +178,10 @@ exposure** happens here.
       Caddy fmt, exporter tests, router/nodes eval, kustomize)
 - [x] Runbooks: router restore, WG clients/rotation, Headscale, WAN Caddy,
       ACME, Capacitor, IoT DNS, network monitoring — [runbooks/](runbooks/)
-- [ ] Security pass: disable unused services (UPS test only after UPS is
-      procured — deferred)
+- [x] Security pass: unused services off (printing, Bluetooth, resolved,
+      command-not-found, NUT); Caddy `admin off`; WAN ICMP limited;
+      Traefik dashboard off; node SSH on VLAN 30 IP only. UPS / NUT
+      test deferred until a UPS is procured
 
 ## Ongoing — Repo scaffolding (parallel from day 0)
 
@@ -219,5 +221,4 @@ Still open:
 
 1. Stage 6 leftover: Remorse away handshake (`10.10.255.3`); confirm VPN →
    servers/mgmt/Caddy
-2. Stage 8 leftover: security pass
-3. Remaining MAC reservations (Socrates, Peon, Switch)
+2. Remaining MAC reservations (Socrates, Peon, Switch)

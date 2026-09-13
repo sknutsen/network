@@ -81,7 +81,8 @@ router/
     ├── unifi.nix           # UniFi OS Server (rootless Podman + systemd)
     ├── dnsupdater.nix      # Domeneshop DDNS (DNSUpdater flake + sops)
     ├── monitoring.nix      # node_exporter, presence, unpoller, snmp-exporter
-    └── ssh.nix
+    ├── ssh.nix
+    └── hardening.nix       # unused services off; resolved / NUT / SSH allowlist
 ```
 
 **Stage flags** in `hosts/optiplex/configuration.nix`: `enableBlocky` is **true** (Blocky at `10.10.30.21`). `enableWireGuard` is **true** (`wg0` `10.10.255.1`, WAN `51820/udp`). `enableHeadscale` is **true** (`127.0.0.1:8081`). `enableWanCaddy` is **true** (WAN 80/443 for `img.zdk.no`, `ha.zdk.no`, and `code.zdk.no`). `enableDnsUpdater` is **true** (Domeneshop `img` + `ha` + `code` + `vpn`; Loki; 5min timer). Lab and public TLS is ACME **DNS-01** (Domeneshop plugin + sops; `dns01` snippet in the Caddyfile). Caddyfile: `services/caddy/Caddyfile`.

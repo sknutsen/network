@@ -33,6 +33,7 @@ in {
       # nameservers" and Caddy has no cert (tlsv1 alert internal error).
       globalConfig = lib.concatStringsSep "\n" (
         lib.optional (cfg.caddyEmail != null) "email ${cfg.caddyEmail}"
+        ++ [ "admin off" ]
       );
       extraConfig = builtins.readFile caddyfile;
     };

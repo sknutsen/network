@@ -33,6 +33,8 @@ spec:
       defaultClass: true
       defaultClassReplicaCount: 3
       reclaimPolicy: Retain
+    ingress:
+      enabled: false
     longhornManager:
       tolerations:
         - key: node-role.kubernetes.io/control-plane

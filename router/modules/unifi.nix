@@ -270,7 +270,6 @@ in {
       pkgs.conmon
       pkgs.slirp4netns
       pkgs.passt
-      pkgs.iperf3
     ];
   };
 }

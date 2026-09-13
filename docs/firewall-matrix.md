@@ -65,6 +65,7 @@ Router-enforced nftables policy on NixOS. VLAN design: [vlan-plan.md](vlan-plan.
 | mgmt / servers / iot / guest / vpn | router | 22/tcp | **DENY** | SSH locked to trusted (no VPN SSH in v1) |
 | internet | any LAN | *other* | **DENY** | Default deny |
 | internet (v6) | any | * | **DENY** | Default deny; open per-service if needed |
+| internet | janus WAN | ICMP echo / dest-unreach / time-exceeded / param-problem | **ALLOW** | PMTU + ping. No timestamp / address-mask. LAN ICMP stays unrestricted |
 
 ## LAN INPUT on janus (recommended)
 

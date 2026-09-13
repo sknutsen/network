@@ -68,6 +68,7 @@ are canonical.
 | TrueNAS apps      | **HA, Immich, Authelia, Forgejo** as catalog Apps              | Live listeners `:30103` / `:30041` / `:9091` / `:30142`+`:30143`; do not also start those compose services |
 | TrueNAS compose   | **Blocky, Promtail** in `services/truenas/docker-compose.yml`  | Caddy is on janus; App-backed services stay out of compose |
 | Location          | **Norway**, ~60 m² flat                                        | 1 AP; EU/NO retailers where possible                            |
+| Security pass     | **Unused services off**; no NUT; Caddy `admin off`; WAN ICMP limited to echo+PMTU; Traefik dashboard off; node SSH bound to VLAN 30 IP | Stage 8. CrowdSec / HSTS / UPS still deferred. Root SSH keys stay for deploy. |
 
 ## Exposure matrix
 

@@ -7,6 +7,7 @@
     ./common.nix
     ./networking.nix
     ./ssh.nix
+    ./hardening.nix
     ./monitoring.nix
     ./longhorn.nix
     ./k3s.nix

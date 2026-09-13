@@ -105,9 +105,12 @@ in
               ""
           }
 
-          # ICMP (ping / PMTU)
-          ip protocol icmp accept
-          ip6 nexthdr icmpv6 accept
+          # LAN ICMP (ping / PMTU / NDP). WAN: echo + PMTU only — no
+          # timestamp / address-mask. Stealth ping is pointless with 80/443.
+          iifname != $WAN ip protocol icmp accept
+          iifname != $WAN ip6 nexthdr icmpv6 accept
+          iifname $WAN icmp type { echo-request, destination-unreachable, time-exceeded, parameter-problem } accept
+          iifname $WAN icmpv6 type { echo-request, destination-unreachable, packet-too-big, time-exceeded, parameter-problem, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert } accept
 
           # SSH — trusted VLAN only (no WAN, no mgmt, no VPN SSH in v1)
           iifname $TRUSTED tcp dport 22 accept

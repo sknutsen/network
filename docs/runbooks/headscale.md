@@ -16,8 +16,9 @@ Login-server is reachable from trusted / servers / classic WG
 ssh zdk@10.10.20.1
 sudo systemctl is-active headscale
 sudo ss -lntp | grep 8081
-# Headscale rejects HEAD (/ returns 405). Janus systemd-resolved also
-# cannot see Unbound names — use GET, and --resolve on the box.
+# Headscale rejects HEAD (/ returns 405). Janus has no systemd-resolved
+# (Unbound on 127.0.0.1). Use GET; --resolve if you are on the box and
+# do not want to go through Caddy.
 curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8081
 curl -sS -o /dev/null -w '%{http_code}\n' --resolve headscale.lab.zdk.no:443:10.10.30.1 \
   https://headscale.lab.zdk.no
