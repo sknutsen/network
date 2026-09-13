@@ -436,7 +436,7 @@ if a client bypasses internal DNS and resolves the WAN address.
 
 ### Context
 
-Once `img.zdk.no`, `ha.zdk.no`, and later `code.zdk.no` are WAN-facing, Caddy logs may show scan and
+Once `img.zdk.no`, `ha.zdk.no`, and `code.zdk.no` are WAN-facing, Caddy logs may show scan and
 brute-force noise. CrowdSec is a collaborative IDS with bouncers (e.g. Caddy
 plugin or firewall).
 

@@ -6,9 +6,8 @@
 # is split-horizon and cannot answer NS for zdk.no. lab_only refuses WAN
 # clients even if they guess the Host header.
 #
-# Public names (img.zdk.no, ha.zdk.no): same DNS-01 issuer (WAN 80 is
-# closed until enableWanCaddy). Apex zdk.no is not a homelab site.
-# code.zdk.no stays commented until Forgejo WAN is wanted.
+# Public names (img.zdk.no, ha.zdk.no, code.zdk.no): same DNS-01 issuer.
+# Apex zdk.no is not a homelab site.
 
 # Trusted, servers, VPN (10.10.255.0/24 ⊂ 10.10.0.0/16). Guest/IoT never
 # reach Caddy INPUT; this is for WAN clients hitting a lab Host header.

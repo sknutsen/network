@@ -19,7 +19,7 @@ Declarative home network configuration and documentation.
 | [router/OPEN-QUESTIONS.md](router/OPEN-QUESTIONS.md) | Unanswered first-boot leftovers |
 | [docs/reference/](docs/reference/) | Alternatives not chosen |
 
-**Public services:** `img.zdk.no` (Immich) and `ha.zdk.no` (Home Assistant) on TrueNAS via Caddy. `code.zdk.no` (Forgejo) stays internal until that WAN vhost is uncommented. Apex `zdk.no` is not a homelab site.
+**Public services:** `img.zdk.no` (Immich), `ha.zdk.no` (Home Assistant), and `code.zdk.no` (Forgejo) on TrueNAS via Caddy. Apex `zdk.no` is not a homelab site.
 
 **Browser viewer:** from the repo root, `python3 scripts/generate-viewer.py --open`. That parses **all** markdown in the plan (docs, READMEs, remaining questions) and writes `docs/generated/index.html`. Markdown stays the source of truth.
 

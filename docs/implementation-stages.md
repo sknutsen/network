@@ -153,11 +153,13 @@ exposure** happens here.
 
 **Forgejo (`code.zdk.no`) — can enable independently:**
 
-- [ ] Domeneshop: `A`/`AAAA` for `code`; add `code` to DNSUpdater records
-- [ ] Caddyfile: uncomment `code.zdk.no`; set Forgejo `ROOT_URL` to
-      `https://code.zdk.no`
-- [ ] Confirm no WAN `:22`; LAN SSH still works on trusted/VPN
-- [ ] External validation: `curl -I https://code.zdk.no`
+- [x] Domeneshop: `A` for `code` → `84.48.97.100`; DNSUpdater record `code`
+      (2026-09-13)
+- [x] Caddy `code.zdk.no` → `:30142` (LE cert). Forgejo `ROOT_URL` /
+      `SSH_DOMAIN` = `https://code.zdk.no`, `SSH_PORT=30143` (2026-09-13).
+- [x] No WAN `:22` / `:30143` (nftables). LAN SSH stays `:30143` on trusted.
+- [x] `https://code.zdk.no` HTTP 200 via Caddy (2026-09-13). Confirm from
+      LTE (WG off) the same way as img/ha.
 
 **Always at Stage 7:**
 
@@ -165,7 +167,7 @@ exposure** happens here.
       Caddy 80/443 only; SSH still trusted-only.
 - [x] nftables `wan_https4` on WAN 80/443 (25/s per source). CrowdSec
       deferred.
-- [x] SSL Labs: `img.zdk.no` and `ha.zdk.no` both **A** (2026-09-12). TLS 1.2/1.3, no HSTS (A+ would need it).
+- [x] SSL Labs: `img.zdk.no`, `ha.zdk.no` (2026-09-12) and `code.zdk.no` (2026-09-13) all **A**. TLS 1.2/1.3, no HSTS (A+ would need it).
 
 ## Stage 8 — Operationalize (depends: all above)
 

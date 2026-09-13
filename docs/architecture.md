@@ -138,7 +138,7 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 
 | Hostname | Backend | Auth |
 |----------|---------|------|
-| `code.zdk.no` | Forgejo `:30142` | Forgejo-native (vhost commented) |
+| `code.zdk.no` | Forgejo `:30142` | Forgejo-native |
 | `img.zdk.no` | Immich `:30041` | Immich-native |
 | `ha.zdk.no` | HA `:30103` | HA-native |
 | `auth.lab.zdk.no` | Authelia TrueNAS App `:9091` | None (portal) |
@@ -179,7 +179,7 @@ UniFi UI stays at `unifi.lab.zdk.no`. unpoller is the Grafana feed for APs/clien
 
 ## DDNS
 
-[DNSUpdater](https://github.com/sknutsen/DNSUpdater) flake module on janus (`services.dns-updater`) → Domeneshop. Updates published `A` records (`img`, `ha`, `vpn`). Apex `@` is not a homelab site. `code` stays off until that WAN vhost is uncommented. Token/secret via sops `dnsupdater.*`. Oneshot timer (boot + 5min). Logs to journald and Loki (`10.10.30.101:3100`).
+[DNSUpdater](https://github.com/sknutsen/DNSUpdater) flake module on janus (`services.dns-updater`) → Domeneshop. Updates published `A` records (`img`, `ha`, `code`, `vpn`). Apex `@` is not a homelab site. Token/secret via sops `dnsupdater.*`. Oneshot timer (boot + 5min). Logs to journald and Loki (`10.10.30.101:3100`).
 
 ## Target repo layout
 

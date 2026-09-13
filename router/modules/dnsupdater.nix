@@ -7,9 +7,8 @@
 in {
   # DNSUpdater flake module → Domeneshop A records for published names.
   # TOKEN/SECRET come from sops (never Nix options — those land in the store).
-  # vpn is the WireGuard Endpoint. Apex @ is not a homelab site. code stays
-  # off until that WAN vhost is uncommented. Oneshot + timer: 30s after boot,
-  # then every interval.
+  # vpn is the WireGuard Endpoint. Apex @ is not a homelab site.
+  # Oneshot + timer: 30s after boot, then every interval.
   config = lib.mkIf cfg.enableDnsUpdater {
     sops.secrets = {
       "dnsupdater/domeneshopToken" = {};

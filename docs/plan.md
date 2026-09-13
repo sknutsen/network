@@ -21,7 +21,7 @@ Declarative homelab: NixOS router, VLAN segmentation, TrueNAS edge, k3s on Turin
 
 - Self-hosted first — no Cloudflare, Tailscale SaaS, or tunnel vendors unless unavoidable.
 - Router is the policy point **and** always-on edge (Caddy, Unbound, UniFi, Headscale); config lives in Git.
-- VPN-first admin (WireGuard + Headscale); publish `img.zdk.no` and `ha.zdk.no` on WAN. `code.zdk.no` when Forgejo WAN is wanted. Apex `zdk.no` is not a homelab site. `*.lab.zdk.no` stays internal.
+- VPN-first admin (WireGuard + Headscale); publish `img.zdk.no`, `ha.zdk.no`, and `code.zdk.no` on WAN. Apex `zdk.no` is not a homelab site. `*.lab.zdk.no` stays internal.
 - `*.lab.zdk.no` is internal-only. Authelia on lab UIs except `auth` /
   `code.lab` / `headscale.lab` / `ha.lab` / `immich.lab` / `truenas.lab` /
   `unifi.lab`.
@@ -37,7 +37,7 @@ Full table: **[decisions.md](decisions.md)**.
 | Edge | Caddy on janus; HA, Immich, Authelia, Forgejo as TrueNAS Apps |
 | K8s | 4× RK1, NixOS, k3s, Flux, Traefik, Capacitor |
 | Monitoring | kube-prometheus-stack + presence + unpoller + CRS310 SNMP + Blocky; Alertmanager |
-| Public | `img.zdk.no` (Immich), `ha.zdk.no` (HA) — no Authelia; `code.zdk.no` later |
+| Public | `img.zdk.no` (Immich), `ha.zdk.no` (HA), `code.zdk.no` (Forgejo) — no Authelia |
 
 ## Architecture overview
 
@@ -83,7 +83,7 @@ Full matrix: [decisions.md § Exposure matrix](decisions.md#exposure-matrix).
 
 | Hostname | WAN | Authelia |
 |----------|-----|----------|
-| `code.zdk.no` | Later | No |
+| `code.zdk.no` | Yes | No |
 | `img.zdk.no` | Yes | No |
 | `ha.zdk.no` | Yes | No |
 | `auth` / `code.lab` / `headscale.lab` | Never | **No** |
@@ -96,7 +96,7 @@ Stages 0–8 with checklists: **[implementation-stages.md](implementation-stages
 
 - **Stage 5:** Internal HA / Immich / Authelia / Forgejo (TrueNAS Apps; LAN
   SSH `:30143`), Blocky, k8s stack — no WAN.
-- **Stage 7:** WAN is on for `img.zdk.no` and `ha.zdk.no`. Enable `code.zdk.no` when Forgejo WAN is wanted. Apex `zdk.no` is not a homelab site.
+- **Stage 7:** WAN is on for `img.zdk.no`, `ha.zdk.no`, and `code.zdk.no`. Apex `zdk.no` is not a homelab site.
 
 ## Remaining decisions
 

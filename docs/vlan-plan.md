@@ -168,7 +168,7 @@ flowchart TB
 | Name           | Internal answer       | WAN                                      |
 | -------------- | --------------------- | ---------------------------------------- |
 | `zdk.no`       | public DNS (no local-data)    | Not a homelab site                       |
-| `code.zdk.no`  | `10.10.30.1`                  | Public `A`/`AAAA` via DDNS (vhost later) |
+| `code.zdk.no`  | `10.10.30.1`                  | Public `A` via DDNS                      |
 | `img.zdk.no`   | `10.10.30.1`                  | Public `A`/`AAAA` via DDNS               |
 | `ha.zdk.no`    | `10.10.30.1`                  | Public `A`/`AAAA` via DDNS               |
 | `vpn.zdk.no`   | no local-data (public A)      | Public `A` via DDNS (WireGuard)      |
@@ -184,7 +184,7 @@ Authelia is **not** on `auth.lab.zdk.no` (portal), `code.lab.zdk.no` (Forgejo-na
 | Record         | Type         | Updated by DDNS                      |
 | -------------- | ------------ | ------------------------------------ |
 | `@` (`zdk.no`) | —            | **No** — not a homelab site; not in DNSUpdater |
-| `code`         | `A` / `AAAA` | When Forgejo WAN is enabled                |
+| `code`         | `A`          | Yes (DNSUpdater)                           |
 | `img`          | `A`          | Yes (DNSUpdater)                           |
 | `ha`           | `A`          | Yes (DNSUpdater)                           |
 | `vpn`          | `A`          | Yes (DNSUpdater; WireGuard Endpoint)       |

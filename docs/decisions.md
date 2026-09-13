@@ -49,10 +49,10 @@ are canonical.
 | Secrets           | **sops-nix + age**; key `/var/lib/sops-nix/key.txt` on janus   | One SOPS workflow; workstation age identity in `.sops.yaml`     |
 | VPN               | **WireGuard** (`51820`) + **Headscale** on janus               | Headscale **`127.0.0.1:8081`** behind Caddy (`headscale.lab.zdk.no`); **not** `:8080` (UniFi Inform) |
 | WAN IDS           | **Not in v1** (CrowdSec deferred)                              | nftables rate-limit on 443 first; add CrowdSec if logs warrant  |
-| DDNS              | **DNSUpdater** flake → **Domeneshop**                          | Dynamic `A` for `img`, `ha`, `vpn`; sops `dnsupdater.*`; Loki `10.10.30.101`; add `code` with that WAN vhost |
+| DDNS              | **DNSUpdater** flake → **Domeneshop**                          | Dynamic `A` for `img`, `ha`, `code`, `vpn`; sops `dnsupdater.*`; Loki `10.10.30.101` |
 | Monitoring        | **kube-prometheus-stack** + presence + unpoller + CRS310 SNMP + Blocky | Grafana Network; Alertmanager `alertmanager.lab.zdk.no`         |
 | Logging (edge)    | **Promtail** on TrueNAS → Loki; Caddy journald; DNSUpdater → Loki | HA/Immich/Authelia + Forgejo to Loki; DNSUpdater also pushes to `10.10.30.101:3100` |
-| Public services   | **`img.zdk.no`**, **`ha.zdk.no`**; later `code.zdk.no`          | Immich + HA on TrueNAS; Forgejo WAN when wanted. No apex site   |
+| Public services   | **`img.zdk.no`**, **`ha.zdk.no`**, **`code.zdk.no`**            | Immich, HA, Forgejo on TrueNAS via Caddy. No apex site          |
 | Forgejo Git (WAN) | **HTTPS only**                                                 | No WAN `:22`; LAN SSH `:30143` on trusted VLAN + VPN            |
 | Internal admin    | **`*.lab.zdk.no`**                                             | Split-horizon only; VPN/trusted VLAN; Authelia; never WAN       |
 | WAN IPv4          | **Dynamic public IP** (CGNAT not active)                       | **WAN INPUT to Caddy** 443/80 on janus (Stage 7) + WireGuard UDP |
@@ -74,7 +74,7 @@ are canonical.
 | Hostname                 | WAN           | Authelia | Notes |
 | ------------------------ | ------------- | -------- | ----- |
 | `zdk.no`                 | **No**        | No       | Not a homelab site; Unbound does not override the apex |
-| `code.zdk.no`            | Later         | No       | Forgejo; HTTPS git on WAN; vhost still commented |
+| `code.zdk.no`            | Yes           | No       | Forgejo; HTTPS git on WAN; native login |
 | `img.zdk.no`             | Yes           | No       | Immich; native login; same backend as `immich.lab` |
 | `ha.zdk.no`              | Yes           | No       | Home Assistant; native login; same backend as `ha.lab` |
 | `auth.lab.zdk.no`        | **No**        | No       | Authelia portal (would loop) |
