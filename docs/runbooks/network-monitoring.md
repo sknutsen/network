@@ -15,8 +15,10 @@ Create a **local** UniFi OS Server user (not SSO):
 - Password: the value in sops `unpoller/password`
 
 ```bash
-sops -d --extract '["unpoller"]["password"]' secrets/router.yaml
+sops -d --extract '["unpoller"]["password"]' secrets/router.yaml | tr -d '\n' | pbcopy
 ```
+
+`sops -d` prints a trailing newline. Do not paste that extra character into UniFi.
 
 Do not reuse the admin account. unpoller on janus talks to
 `https://127.0.0.1:11443` (self-signed, verify off).

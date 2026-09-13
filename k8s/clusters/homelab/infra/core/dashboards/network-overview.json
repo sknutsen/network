@@ -2041,7 +2041,7 @@
             "uid": "${DS_PROM}"
           },
           "editorMode": "code",
-          "expr": "unpoller_device_uptime{name=~\"(?i).*u7.*\"}",
+          "expr": "unpoller_device_uptime_seconds{name=~\"(?i).*u7.*\"}",
           "legendFormat": "__auto",
           "range": false,
           "instant": true,
@@ -2432,7 +2432,7 @@
             "uid": "${DS_PROM}"
           },
           "editorMode": "code",
-          "expr": "unpoller_client_rssi",
+          "expr": "unpoller_client_rssi_db",
           "legendFormat": "__auto",
           "range": false,
           "instant": true,
