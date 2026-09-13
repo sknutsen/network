@@ -4,9 +4,10 @@
 DNS-01. Hairpin NAT is **off** — do not test the public names via the WAN
 IP from inside the lab.
 
-Public: `img.zdk.no` (Immich), `ha.zdk.no` (HA). `code.zdk.no` / `zdk.no`
-stay commented. `*.lab.zdk.no` has no public `A`/`AAAA`; `lab_only` aborts
-WAN clients that guess the Host header.
+Public: `img.zdk.no` (Immich), `ha.zdk.no` (HA). `code.zdk.no` stays
+commented until Forgejo WAN is wanted. Apex `zdk.no` is not a homelab
+site. `*.lab.zdk.no` has no public `A`/`AAAA`; `lab_only` aborts WAN
+clients that guess the Host header.
 
 ## After janus rebuild
 
@@ -81,7 +82,7 @@ app uses that URL at home and away (Unbound splits `img.zdk.no` to Caddy).
 ## Do not
 
 - Publish `A`/`AAAA` for `*.lab.zdk.no`
-- Uncomment `code.zdk.no` / `zdk.no` in the Caddyfile
+- Uncomment `code.zdk.no` unless Forgejo WAN is intended
 - Open WAN SSH
 - Enable hairpin NAT to test from Remorse
 

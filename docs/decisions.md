@@ -49,19 +49,17 @@ are canonical.
 | Secrets           | **sops-nix + age**; key `/var/lib/sops-nix/key.txt` on janus   | One SOPS workflow; workstation age identity in `.sops.yaml`     |
 | VPN               | **WireGuard** (`51820`) + **Headscale** on janus               | Headscale **`127.0.0.1:8081`** behind Caddy (`headscale.lab.zdk.no`); **not** `:8080` (UniFi Inform) |
 | WAN IDS           | **Not in v1** (CrowdSec deferred)                              | nftables rate-limit on 443 first; add CrowdSec if logs warrant  |
-| DDNS              | **DNSUpdater** flake → **Domeneshop**                          | Dynamic `A` for `img`, `ha`, `vpn`; sops `dnsupdater.*`; Loki `10.10.30.101`; add `@`/`code` with those WAN vhosts |
+| DDNS              | **DNSUpdater** flake → **Domeneshop**                          | Dynamic `A` for `img`, `ha`, `vpn`; sops `dnsupdater.*`; Loki `10.10.30.101`; add `code` with that WAN vhost |
 | Monitoring        | **kube-prometheus-stack** + presence + unpoller + CRS310 SNMP + Blocky | Grafana Network; Alertmanager `alertmanager.lab.zdk.no`         |
 | Logging (edge)    | **Promtail** on TrueNAS → Loki; Caddy journald; DNSUpdater → Loki | HA/Immich/Authelia + Forgejo to Loki; DNSUpdater also pushes to `10.10.30.101:3100` |
-| Public services   | **`img.zdk.no`**, **`ha.zdk.no`**; later `zdk.no` + `code.zdk.no` | Immich + HA on TrueNAS; Zdk/Forgejo WAN when those apps are ready |
-| `zdk.no` app      | **[github.com/sknutsen/Zdk](https://github.com/sknutsen/Zdk)** | App code external                                               |
-| Zdk GitOps        | **Flux `GitRepository` + `Kustomization` → Zdk repo**          | Zdk repo owns Deployment/Service/image; `net/` `ingressroute.yaml` stub + Flux CR |
+| Public services   | **`img.zdk.no`**, **`ha.zdk.no`**; later `code.zdk.no`          | Immich + HA on TrueNAS; Forgejo WAN when wanted. No apex site   |
 | Forgejo Git (WAN) | **HTTPS only**                                                 | No WAN `:22`; LAN SSH `:30143` on trusted VLAN + VPN            |
 | Internal admin    | **`*.lab.zdk.no`**                                             | Split-horizon only; VPN/trusted VLAN; Authelia; never WAN       |
 | WAN IPv4          | **Dynamic public IP** (CGNAT not active)                       | **WAN INPUT to Caddy** 443/80 on janus (Stage 7) + WireGuard UDP |
 | WAN IPv6          | **PD ready; ISP offers none** (2026-09-05)                     | `enableIpv6` off; native /64 per VLAN when OBOS Nett adds IPv6; inbound v6 default deny |
 | ISP               | **OBOS Nett**                                                  | Dynamic public IPv4 `84.48.97.100/21`; no IPv6                 |
 | ISP modem         | **Bridge mode** — configure at router cutover                  | OptiPlex is sole router                                         |
-| Hairpin NAT       | **Off**                                                        | Unbound already answers `zdk.no` / `code.zdk.no` → `10.10.30.1`; revisit only if clients bypass internal DNS |
+| Hairpin NAT       | **Off**                                                        | Unbound answers `img`/`ha`/`code.zdk.no` → `10.10.30.1`; apex `zdk.no` recurses to public DNS |
 | mDNS              | **Static IPs + Avahi 30↔40**                                   | Matter / Dirigera; ULA `fd10:10:10::/48`; never trusted/guest   |
 | Guest DNS         | **1.1.1.1 / 9.9.9.9**                                          | No Blocky on guest for v1                                       |
 | IoT lab DNS       | **Deny** `*.lab.zdk.no` after Blocky (Stage 5)                 | Whitelist only if a device needs a name                         |
@@ -75,7 +73,7 @@ are canonical.
 
 | Hostname                 | WAN           | Authelia | Notes |
 | ------------------------ | ------------- | -------- | ----- |
-| `zdk.no`                 | Later         | No       | Public app; vhost still commented |
+| `zdk.no`                 | **No**        | No       | Not a homelab site; Unbound does not override the apex |
 | `code.zdk.no`            | Later         | No       | Forgejo; HTTPS git on WAN; vhost still commented |
 | `img.zdk.no`             | Yes           | No       | Immich; native login; same backend as `immich.lab` |
 | `ha.zdk.no`              | Yes           | No       | Home Assistant; native login; same backend as `ha.lab` |

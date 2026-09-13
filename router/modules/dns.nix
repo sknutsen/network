@@ -47,7 +47,6 @@ in
           ''"zdk.no." transparent''
         ];
         local-data = [
-          ''"zdk.no. A ${C.hosts.caddy}"''
           ''"code.zdk.no. A ${C.hosts.caddy}"''
           ''"img.zdk.no. A ${C.hosts.caddy}"''
           ''"ha.zdk.no. A ${C.hosts.caddy}"''

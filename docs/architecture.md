@@ -37,7 +37,6 @@ flowchart TB
     Traefik[Traefik LB 10.10.30.100]
     Obs[kube-prometheus-stack]
     Cap[Capacitor]
-    Zdk[Zdk app]
   end
 
   ISP --> Router
@@ -51,7 +50,6 @@ flowchart TB
   Caddy --> HA
   Caddy --> Immich
   Blocky --> Router
-  Traefik --> Zdk
   HA --> IOT
   InternetUsers[Internet] -->|img.zdk.no ha.zdk.no| Caddy
 ```
@@ -86,7 +84,6 @@ USW-NC (closet) uplinks on its port 4. USW-LR (living room) uplinks on port 1. S
 | HA, Immich, Authelia, Forgejo | TrueNAS `10.10.30.20` | TrueNAS Apps (`:30103`, `:30041`, `:9091`, `:30142` / SSH `:30143`) |
 | Blocky, Promtail | TrueNAS `10.10.30.20` | `services/truenas/docker-compose.yml` |
 | k3s, Traefik, Flux, Capacitor, monitoring | RK1 cluster | `nodes/` flake + `k8s/` Flux tree |
-| Zdk app | k8s (when ready) | Flux `GitRepository` + `Kustomization` → [Zdk repo](https://github.com/sknutsen/Zdk); `net/` stub at `k8s/clusters/homelab/apps/zdk/ingressroute.yaml` |
 
 ## External access
 
@@ -133,7 +130,7 @@ flowchart LR
 
 - Caddy terminates public TLS; Traefik serves HTTP internally (mTLS non-goal for v1).
 - All WAN traffic enters via Caddy only — no direct WAN → Traefik or k8s nodes.
-- Future public apps **may** use Authelia; `img.zdk.no`, `ha.zdk.no`, `zdk.no`, and `code.zdk.no` do not (native app login).
+- Future public apps **may** use Authelia; `img.zdk.no`, `ha.zdk.no`, and `code.zdk.no` do not (native app login).
 
 ## Public services
 
@@ -141,7 +138,6 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 
 | Hostname | Backend | Auth |
 |----------|---------|------|
-| `zdk.no` | Traefik `10.10.30.100:80` | None (vhost commented) |
 | `code.zdk.no` | Forgejo `:30142` | Forgejo-native (vhost commented) |
 | `img.zdk.no` | Immich `:30041` | Immich-native |
 | `ha.zdk.no` | HA `:30103` | HA-native |
@@ -183,7 +179,7 @@ UniFi UI stays at `unifi.lab.zdk.no`. unpoller is the Grafana feed for APs/clien
 
 ## DDNS
 
-[DNSUpdater](https://github.com/sknutsen/DNSUpdater) flake module on janus (`services.dns-updater`) → Domeneshop. Updates published `A` records (`img`, `ha`, `vpn`). `@` and `code` stay off until those WAN vhosts are uncommented. Token/secret via sops `dnsupdater.*`. Oneshot timer (boot + 5min). Logs to journald and Loki (`10.10.30.101:3100`).
+[DNSUpdater](https://github.com/sknutsen/DNSUpdater) flake module on janus (`services.dns-updater`) → Domeneshop. Updates published `A` records (`img`, `ha`, `vpn`). Apex `@` is not a homelab site. `code` stays off until that WAN vhost is uncommented. Token/secret via sops `dnsupdater.*`. Oneshot timer (boot + 5min). Logs to journald and Loki (`10.10.30.101:3100`).
 
 ## Target repo layout
 
@@ -197,7 +193,7 @@ net/
 ├── nodes/          # RK1 flake (k3s on)
 ├── switch/         # exists
 ├── services/       # exists (no dnsupdater dir — flake module on janus)
-├── k8s/            # Flux infra + Zdk stub
+├── k8s/            # Flux infra
 ├── secrets/        # encrypted router.yaml
 └── scripts/        # validate.sh, generate-viewer.py
 ```

@@ -20,7 +20,7 @@ Resolved** here, and remove the row from `plan.md` § Remaining decisions.
 | 5 | [k8s API VIP](#5-k8s-api-vip) | Resolved | — |
 | 6 | [Longhorn storage](#6-longhorn-storage) | Resolved | — |
 | 7 | [Control-plane taint](#7-control-plane-taint) | Resolved | — |
-| 8 | [Zdk repo boundary](#8-zdk-repo-boundary) | Resolved | — |
+| 8 | [Zdk repo boundary](#8-zdk-repo-boundary) | Superseded — will not deploy | — |
 | 9 | [Blocky host placement](#9-blocky-host-placement) | Resolved | — |
 | 10 | [CGNAT verification](#10-cgnat-verification) | Resolved | — |
 | 11 | [Hardware capability check](#11-hardware-capability-check) | Install-time — do at Stage 1 | Stage 1 |
@@ -258,32 +258,13 @@ sits idle.
 
 ## 8. Zdk repo boundary
 
-**Status:** **Resolved** — Flux `GitRepository` + `Kustomization` → Zdk repo
-(accepted default).
+**Status:** **Superseded** — apex `zdk.no` is not a homelab site (2026-09-13).
+Flux stub and Caddy vhost removed. Do not re-add.
 
 ### Context
 
-`net/` owns platform: router, VLANs, Caddy edge, Flux bootstrap, ingress stub.
-Zdk application code and container image live in an external repo. Stage 7 WAN
-for `zdk.no` depends on this boundary.
-
-### Decision
-
-| Repo | Owns |
-|------|------|
-| **[Zdk](https://github.com/sknutsen/Zdk)** | Deployment, Service, image CI, env ConfigMaps, app secrets (SOPS or ExternalSecrets) |
-| **`net/`** | `k8s/clusters/homelab/apps/zdk/ingressroute.yaml` (Traefik `IngressRoute` stub), Flux `GitRepository` + `Kustomization` CR, Caddy `zdk.no` → Traefik LB |
-
-Manifest path in Zdk repo: `deploy/` or `k8s/` — to be agreed when Zdk ships
-deploy spec.
-
-### Options considered
-
-| Option | Pros | Cons |
-|--------|------|------|
-| **Flux pulls Zdk repo** (`GitRepository` + `Kustomization`) ✓ | App team owns image tag and Deployment; platform repo stays thin | Two repos to coordinate; need image pull secret in k8s |
-| **Copy manifests into `net/k8s/.../apps/zdk/`** | Single-repo GitOps | Duplication; drift from app repo |
-| **Helm chart from OCI/registry** | Versioned releases | More packaging overhead for one app |
+Earlier plan: Flux `GitRepository` → [sknutsen/Zdk](https://github.com/sknutsen/Zdk)
+plus Caddy `zdk.no` → Traefik. That app will not be deployed on this cluster.
 
 ---
 
@@ -378,7 +359,7 @@ this brief is “prove them on the metal.”
 ### Context
 
 GiyoMoon NixOS mainline is the default RK1 OS. Turing's NPU/GPU needs a vendor
-BSP kernel — not required for k3s, Traefik, or Zdk.
+BSP kernel — not required for k3s or Traefik.
 
 ### Options
 
@@ -428,22 +409,23 @@ UDP** rules per Nintendo troubleshooting guides before moving VLANs.
 ### Context
 
 Split-horizon DNS sends internal clients to `10.10.30.1` (Caddy on janus) for internal names.
-Public names (`zdk.no`) may resolve to WAN IP from some clients. Hairpin NAT
-lets LAN clients reach WAN IP:443 on the router's public address.
+Published names (`img.zdk.no`, `ha.zdk.no`) may resolve to WAN IP from some
+clients. Hairpin NAT lets LAN clients reach WAN IP:443 on the router's public
+address.
 
 ### Options
 
 | Option | When |
 |--------|------|
 | **Disable (default)** | Internal DNS never returns public IP for services you test from LAN |
-| **Enable hairpin NAT** | `curl https://zdk.no` from LAN hits public IP and fails without loopback |
-| **Split-horizon for public names too** | LAN clients get `10.10.30.1` for `zdk.no` — reduces hairpin need |
+| **Enable hairpin NAT** | `curl https://img.zdk.no` from LAN hits public IP and fails without loopback |
+| **Split-horizon for public names too** | LAN clients get `10.10.30.1` for `img`/`ha`/`code` — reduces hairpin need |
 
 ### Decision
 
-**Off.** Split-horizon for the public names is **already implemented:** Unbound
-`local-data` answers `zdk.no` and `code.zdk.no` → `10.10.30.1` (Caddy). LAN
-`curl https://zdk.no` should hit Caddy without hairpin NAT. Enable hairpin only
+**Off.** Split-horizon for published homelab names: Unbound `local-data`
+answers `img.zdk.no`, `ha.zdk.no`, and `code.zdk.no` → `10.10.30.1` (Caddy).
+Apex `zdk.no` has no local-data (recurses to public DNS). Enable hairpin only
 if a client bypasses internal DNS and resolves the WAN address.
 
 ---
@@ -454,7 +436,7 @@ if a client bypasses internal DNS and resolves the WAN address.
 
 ### Context
 
-Once `zdk.no` and `code.zdk.no` are WAN-facing, Caddy logs may show scan and
+Once `img.zdk.no`, `ha.zdk.no`, and later `code.zdk.no` are WAN-facing, Caddy logs may show scan and
 brute-force noise. CrowdSec is a collaborative IDS with bouncers (e.g. Caddy
 plugin or firewall).
 
@@ -601,7 +583,7 @@ family-safe filtering on the guest SSID.
 | k8s API | **Resolved:** `10.10.30.11:6443`; reserve `.10` |
 | Longhorn | **Resolved:** Replica 3; NVMe at `/var/lib/longhorn` |
 | CP taint | **Resolved:** Keep on `nordri` |
-| Zdk | **Resolved:** Flux → external Zdk repo |
+| Zdk | **Superseded:** apex site will not be deployed |
 | Blocky | **Resolved:** TrueNAS Docker `10.10.30.21` |
 | CGNAT | **Resolved:** Not active; WAN INPUT to Caddy OK |
 | Hairpin NAT | **Resolved:** Off |

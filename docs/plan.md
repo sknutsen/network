@@ -21,7 +21,7 @@ Declarative homelab: NixOS router, VLAN segmentation, TrueNAS edge, k3s on Turin
 
 - Self-hosted first — no Cloudflare, Tailscale SaaS, or tunnel vendors unless unavoidable.
 - Router is the policy point **and** always-on edge (Caddy, Unbound, UniFi, Headscale); config lives in Git.
-- VPN-first admin (WireGuard + Headscale); publish `img.zdk.no` and `ha.zdk.no` on WAN. `zdk.no` / `code.zdk.no` when those apps are ready. `*.lab.zdk.no` stays internal.
+- VPN-first admin (WireGuard + Headscale); publish `img.zdk.no` and `ha.zdk.no` on WAN. `code.zdk.no` when Forgejo WAN is wanted. Apex `zdk.no` is not a homelab site. `*.lab.zdk.no` stays internal.
 - `*.lab.zdk.no` is internal-only. Authelia on lab UIs except `auth` /
   `code.lab` / `headscale.lab` / `ha.lab` / `immich.lab` / `truenas.lab` /
   `unifi.lab`.
@@ -37,7 +37,7 @@ Full table: **[decisions.md](decisions.md)**.
 | Edge | Caddy on janus; HA, Immich, Authelia, Forgejo as TrueNAS Apps |
 | K8s | 4× RK1, NixOS, k3s, Flux, Traefik, Capacitor |
 | Monitoring | kube-prometheus-stack + presence + unpoller + CRS310 SNMP + Blocky; Alertmanager |
-| Public | `img.zdk.no` (Immich), `ha.zdk.no` (HA) — no Authelia; `zdk.no` / `code.zdk.no` later |
+| Public | `img.zdk.no` (Immich), `ha.zdk.no` (HA) — no Authelia; `code.zdk.no` later |
 
 ## Architecture overview
 
@@ -72,7 +72,7 @@ IPs, DHCP, DNS, mDNS: [vlan-plan.md](vlan-plan.md). Firewall: [firewall-matrix.m
 |-------|----------|
 | **Router** (janus) | nftables, dnsmasq, Unbound, Caddy, WireGuard, Headscale, DNSUpdater, UniFi OS Server, node_exporter, presence, unpoller, snmp-exporter |
 | **TrueNAS** `10.10.30.20` | HA, Immich, Authelia, Forgejo (Apps); Blocky, Promtail |
-| **k8s** | k3s, Traefik, Flux, Capacitor, kube-prometheus-stack, Zdk (when ready) |
+| **k8s** | k3s, Traefik, Flux, Capacitor, kube-prometheus-stack |
 | **Zpi** `10.10.30.15` | Audio casting to speakers |
 
 Public services: [architecture.md § Public services](architecture.md#public-services).
@@ -83,7 +83,6 @@ Full matrix: [decisions.md § Exposure matrix](decisions.md#exposure-matrix).
 
 | Hostname | WAN | Authelia |
 |----------|-----|----------|
-| `zdk.no` | Later | No |
 | `code.zdk.no` | Later | No |
 | `img.zdk.no` | Yes | No |
 | `ha.zdk.no` | Yes | No |
@@ -97,7 +96,7 @@ Stages 0–8 with checklists: **[implementation-stages.md](implementation-stages
 
 - **Stage 5:** Internal HA / Immich / Authelia / Forgejo (TrueNAS Apps; LAN
   SSH `:30143`), Blocky, k8s stack — no WAN.
-- **Stage 7:** WAN is on for `img.zdk.no` and `ha.zdk.no`. Enable `code.zdk.no` / `zdk.no` when those apps are ready.
+- **Stage 7:** WAN is on for `img.zdk.no` and `ha.zdk.no`. Enable `code.zdk.no` when Forgejo WAN is wanted. Apex `zdk.no` is not a homelab site.
 
 ## Remaining decisions
 
@@ -133,7 +132,7 @@ net/
 ├── nodes/                       # RK1 NixOS flake (k3s on; sops token)
 ├── switch/                      # exists
 ├── services/                    # exists (truenas, caddy, authelia, dns, promtail, HA/Immich/Forgejo READMEs)
-├── k8s/clusters/homelab/        # Flux infra + Zdk stub
+├── k8s/clusters/homelab/        # Flux infra
 ├── secrets/                     # .sops.yaml + encrypted router.yaml
 └── scripts/                     # validate.sh, generate-viewer.py
 ```

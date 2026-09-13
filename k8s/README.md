@@ -17,7 +17,7 @@ k8s/clusters/homelab/
 ├── apps.yaml             # Flux Kustomization → apps
 ├── infra/core/           # HelmRepos + HelmReleases + Capacitor OCI
 ├── infra/config/
-└── apps/zdk/             # IngressRoute stub + suspended Zdk GitRepository
+└── apps/                 # empty — no in-cluster app deploy
 ```
 
 `flux bootstrap` writes `gotk-components.yaml` / `gotk-sync.yaml` under
@@ -64,7 +64,6 @@ kube-prometheus-stack → Capacitor → `infra-config` → `apps`.
 | kube-prometheus-stack | Helm `88.6.0` | Prometheus, Grafana, Alertmanager |
 | Loki | Helm `7.3.0` (sibling) | stack chart does not ship Loki; push `10.10.30.101:3100` |
 | Capacitor | OCI `ghcr.io/gimlet-io/capacitor-manifests` | in-cluster UI; Caddy `capacitor.lab.zdk.no` |
-| Zdk | IngressRoute + suspended GitRepository | app manifests stay in the Zdk repo |
 
 Loki is a **sibling** HelmRelease, not part of kube-prometheus-stack. Promtail
 on TrueNAS pushes to `.101:3100` — no Authelia.
@@ -86,14 +85,6 @@ Caddy already sends `Host` to Traefik `.100`. Traefik routes:
 | `grafana.lab.zdk.no` | `kube-prometheus-stack-grafana:80` (Caddy Authelia; Grafana form off) |
 | `alertmanager.lab.zdk.no` | `kube-prometheus-stack-alertmanager:9093` (Caddy Authelia) |
 | `capacitor.lab.zdk.no` | `capacitor.flux-system:9000` (Caddy Authelia) |
-| `zdk.no` | `zdk.default:80` (502 until the Zdk repo ships) |
-
-## Zdk
-
-`apps/zdk/gitrepository.yaml` is **suspended** until
-[sknutsen/Zdk](https://github.com/sknutsen/Zdk) publishes a deploy path.
-Unsuspend and set `spec.path` when that exists. Do not copy Deployments into
-`net/`.
 
 ## ARM64
 

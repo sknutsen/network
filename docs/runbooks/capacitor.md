@@ -55,7 +55,7 @@ in `monitoring` or `default`.
 
 ## Do not
 
-- Unsuspend the Zdk `GitRepository` to “test” Capacitor.
+- Add an unrelated Flux `GitRepository` to “test” Capacitor.
 - Schedule Capacitor (or anything else) on nordri. CP taint stays.
 - Put Authelia in the cluster in front of Capacitor. Forward-auth is
   Caddy’s job.

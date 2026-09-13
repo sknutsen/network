@@ -110,8 +110,7 @@ DNAT to `.21`).
       HelmRelease. Grafana login is Authelia (`Remote-User`); no Grafana form.
 - [x] Capacitor at `capacitor.lab.zdk.no` via Caddy + Authelia (`allow-capacitor`
       netpol for Traefik)
-- [x] Zdk ingress stub only — GitRepository **suspended**; no app deploy until
-      Zdk repo ships
+- [x] No apex `zdk.no` app — Flux stub removed (2026-09-13)
 
 **TLS (v1):** Caddy ACME **DNS-01 (Domeneshop)** for lab **and** public names.
 Custom Caddy with `github.com/caddy-dns/domainnameshop` + sops API credentials.
@@ -159,12 +158,6 @@ exposure** happens here.
       `https://code.zdk.no`
 - [ ] Confirm no WAN `:22`; LAN SSH still works on trusted/VPN
 - [ ] External validation: `curl -I https://code.zdk.no`
-
-**`zdk.no` — when Zdk repo ships deploy spec:**
-
-- [ ] Domeneshop: `A`/`AAAA` for `@`; add `@` to DNSUpdater records
-- [ ] Flux deploy from Zdk repo; Traefik IngressRoute
-- [ ] External validation: `curl -I https://zdk.no`
 
 **Always at Stage 7:**
 
