@@ -34,6 +34,10 @@ in {
         domainName = "zdk.no";
         records = [
           {
+            recordName = "code";
+            type = "A";
+          }
+          {
             recordName = "img";
             type = "A";
           }

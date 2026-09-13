@@ -166,9 +166,8 @@ alertmanager.lab.zdk.no {
 	encode gzip
 }
 
-# --- Stage 7 leftover: uncomment when Forgejo WAN is wanted ---
-# code.zdk.no {
-# 	import dns01
-# 	reverse_proxy 10.10.30.20:30142
-# 	encode gzip
-# }
+code.zdk.no {
+	import dns01
+	reverse_proxy 10.10.30.20:30142
+	encode gzip
+}
