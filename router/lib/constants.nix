@@ -152,6 +152,9 @@
   # Devices on IoT initiate here; not HTTP, not Caddy.
   matter = {
     port = 5540;
+    # Dirigera EUI-64 LLA from macs.tradfri (68:ec:8a:02:69:43). vlan40
+    # accepts SNAC RAs from this router only — not a default via IKEA.
+    dirigeraLla = "fe80::6aec:8aff:fe02:6943";
   };
 
   unifi = {
