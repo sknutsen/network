@@ -126,6 +126,14 @@ in
               DHCPv6Client = false;
               RouteDenyList = "::/0 ${C.ula.lab}";
             };
+            # Dirigera never sent RAs here; mDNS AAAA is fd2b:6e13:70fa:1::/64.
+            routes = [
+              {
+                Destination = C.matter.threadPrefix;
+                Gateway = C.matter.dirigeraUla;
+                GatewayOnLink = true;
+              }
+            ];
           }
           // lib.optionalAttrs cfg.enableIpv6 {
             # SubnetId 0x10/0x20/… matches vlan-plan nibble carving.

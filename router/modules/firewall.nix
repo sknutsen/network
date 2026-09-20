@@ -74,6 +74,7 @@ in
       define NET_SERVERS6 = ${C.vlans.servers.network6}
 
       define TRUENAS = ${C.hosts.truenas}
+      define TRUENAS6 = ${C.hosts6.truenas}
       define BLOCKY = ${C.hosts.blocky}
       define CRS310 = ${C.hosts.crs310}
       ${
@@ -203,10 +204,12 @@ in
           # --- IoT isolation ---
           iifname $IOT ip daddr $RFC1918 jump iot_to_rfc1918
           # Matter: devices must open UDP to the controller (Dirigera share /
-          # reboot). ICMPv6 is PMTU. Not the HA UI (that is Caddy INPUT).
+          # reboot). CHIP may use :5540 or a high port (python-matter-server
+          # advertised :60731). ICMPv6 is PMTU + ping. Not the HA UI.
           iifname $IOT ip6 daddr $NET_SERVERS6 udp dport ${toString C.matter.port} accept
           iifname $IOT ip6 daddr $NET_SERVERS6 tcp dport ${toString C.matter.port} accept
-          iifname $IOT ip6 daddr $NET_SERVERS6 icmpv6 type { echo-request, destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
+          iifname $IOT ip6 daddr $TRUENAS6 udp accept
+          iifname $IOT ip6 daddr $NET_SERVERS6 icmpv6 type { echo-request, echo-reply, destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
           iifname $IOT ip6 daddr $NET_LAB6 drop
           ${iotBlocky6Forward}
           ${iotWanDnsDrop}

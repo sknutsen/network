@@ -100,7 +100,9 @@
   };
 
   # VLAN 30 ULA — same last hextet as IPv4 (mnemonic). Nodes flake mirrors this.
+  # TrueNAS is EUI-64 from macs.truenas (Matter mDNS was fe80::ce28:aaff:fe42:c29d).
   hosts6 = {
+    truenas = "fd10:10:10:30:ce28:aaff:fe42:c29d";
     nordri = "fd10:10:10:30::11";
     sudri = "fd10:10:10:30::12";
     austri = "fd10:10:10:30::13";
@@ -152,6 +154,11 @@
   # Devices on IoT initiate here; not HTTP, not Caddy.
   matter = {
     port = 5540;
+    # Dirigera Thread / SNAC prefix from _matter._tcp AAAA (not lab ULA).
+    # Hub does not send RAs on vlan40; janus needs this static route.
+    threadPrefix = "fd2b:6e13:70fa:1::/64";
+    # Dirigera EUI-64 ULA from macs.tradfri (68:ec:8a:02:69:43).
+    dirigeraUla = "fd10:10:10:40:6aec:8aff:fe02:6943";
   };
 
   unifi = {
