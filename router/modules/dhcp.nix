@@ -52,7 +52,9 @@ let
         if name == "iot" then
           iotDns
         else if name == "guest" then
-          "1.1.1.1,9.9.9.9"
+          # Stub on the guest gateway: jellyfin.lab + public forwarders.
+          # Do not also push 1.1.1.1 — clients that race miss the household name.
+          gw C.vlans.guest.ipv4
         else
           gw C.vlans.${name}.ipv4;
       kind = if name == "iot" && cfg.enableBlocky then "dhcp-option-force" else "dhcp-option";

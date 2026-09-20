@@ -23,8 +23,9 @@ Declarative homelab: NixOS router, VLAN segmentation, TrueNAS edge, k3s on Turin
 - Router is the policy point **and** always-on edge (Caddy, Unbound, UniFi, Headscale); config lives in Git.
 - VPN-first admin (WireGuard + Headscale); publish `img.zdk.no`, `ha.zdk.no`, and `code.zdk.no` on WAN. Apex `zdk.no` is not a homelab site. `*.lab.zdk.no` stays internal.
 - `*.lab.zdk.no` is internal-only. Authelia on lab UIs except `auth` /
-  `code.lab` / `headscale.lab` / `ha.lab` / `immich.lab` / `truenas.lab` /
-  `unifi.lab`.
+  `code.lab` / `headscale.lab` / `ha.lab` / `immich.lab` / `jellyfin.lab` /
+  `truenas.lab` / `unifi.lab`. `jellyfin.lab` is household (guest + TV),
+  not WAN.
 
 ## Decisions (summary)
 
@@ -34,7 +35,7 @@ Full table: **[decisions.md](decisions.md)**.
 |-------|--------|
 | Router | NixOS on Dell OptiPlex 9020 MT + i350-T2 (acquired); UniFi OS Server (functional) |
 | Switch / WiFi | CRS310 + 2× USW Flex Mini + U7 Lite + PoE injector (all acquired); UPS deferred |
-| Edge | Caddy on janus; HA, Immich, Authelia, Forgejo as TrueNAS Apps |
+| Edge | Caddy on janus; HA, Immich, Authelia, Forgejo, Jellyfin as TrueNAS Apps |
 | K8s | 4× RK1, NixOS, k3s, Flux, Traefik, Capacitor |
 | Monitoring | kube-prometheus-stack + presence + unpoller + CRS310 SNMP + Blocky; Alertmanager |
 | Public | `img.zdk.no` (Immich), `ha.zdk.no` (HA), `code.zdk.no` (Forgejo) — no Authelia |
@@ -71,7 +72,7 @@ IPs, DHCP, DNS, mDNS: [vlan-plan.md](vlan-plan.md). Firewall: [firewall-matrix.m
 | Where | Services |
 |-------|----------|
 | **Router** (janus) | nftables, dnsmasq, Unbound, Caddy, WireGuard, Headscale, DNSUpdater, UniFi OS Server, node_exporter, presence, unpoller, snmp-exporter |
-| **TrueNAS** `10.10.30.20` | HA, Immich, Authelia, Forgejo (Apps); Blocky, Promtail |
+| **TrueNAS** `10.10.30.20` | HA, Immich, Authelia, Forgejo, Jellyfin (Apps); Blocky, Promtail |
 | **k8s** | k3s, Traefik, Flux, Capacitor, kube-prometheus-stack |
 | **Zpi** `10.10.30.15` | Audio casting to speakers |
 
@@ -86,7 +87,7 @@ Full matrix: [decisions.md § Exposure matrix](decisions.md#exposure-matrix).
 | `code.zdk.no` | Yes | No |
 | `img.zdk.no` | Yes | No |
 | `ha.zdk.no` | Yes | No |
-| `auth` / `code.lab` / `headscale.lab` | Never | **No** |
+| `auth` / `code.lab` / `headscale.lab` / `jellyfin.lab` | Never | **No** |
 | Other `*.lab.zdk.no` | **Never** | Yes |
 | Future public apps | Per-app | Optional |
 

@@ -14,6 +14,10 @@ ports:
   http: 4000
 
 blocking:
+  # Same group as the lab denylist so the household allow wins.
+  allowlists:
+    lab:
+      - /app/iot-lab-allow.txt
   denylists:
     ads:
       - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts

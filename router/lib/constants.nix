@@ -144,6 +144,16 @@
     sshPort = 30143;
   };
 
+  jellyfin = {
+    uiPort = 8096;
+  };
+
+  # Matter operational / commissioning (Python Matter Server / HA).
+  # Devices on IoT initiate here; not HTTP, not Caddy.
+  matter = {
+    port = 5540;
+  };
+
   unifi = {
     # UniFi OS Server on this host (Podman / vendor installer)
     uiPort = 11443;

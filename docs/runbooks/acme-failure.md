@@ -42,8 +42,9 @@ determine authoritative nameservers” and browsers see
 ## What you should see when it works
 
 - `*.lab.zdk.no` has **no** public A/AAAA. Issuance still succeeds (DNS-01).
-- Caddy `lab_only` aborts non-`10.10.0.0/16` clients on lab Host headers.
-  That is not an ACME failure.
+- Caddy `lab_only` aborts clients outside trusted/servers/VPN on admin
+  lab Host headers. `household` is only `jellyfin.lab.zdk.no`. That is
+  not an ACME failure.
 - Public names (`img.zdk.no`, `ha.zdk.no`, `code.zdk.no`) use the same
   DNS-01 issuer. `enableWanCaddy` is already on; certs do not depend on
   WAN 80/443.

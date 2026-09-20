@@ -7,7 +7,7 @@ design: [vlan-plan.md](vlan-plan.md).
 
 | Name        | Hardware        | OS            | Static IP                                                                                 | Connection                                    | Role                                                                                                                                |
 | ----------- | --------------- | ------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| **TrueNAS** | NAS             | TrueNAS SCALE | `10.10.30.20` (+ `.21` alias for Blocky); MAC `cc:28:aa:42:c2:9d`                         | Wired (port 4)                                | HA, Immich, Authelia, Forgejo (TrueNAS Apps); Blocky; **UI:** `https://truenas.lab.zdk.no` (Caddy), not direct IP from trusted/mgmt |
+| **TrueNAS** | NAS             | TrueNAS SCALE | `10.10.30.20` (+ `.21` alias for Blocky); MAC `cc:28:aa:42:c2:9d`                         | Wired (port 4)                                | HA, Immich, Authelia, Forgejo, Jellyfin (TrueNAS Apps); Blocky; **UI:** `https://truenas.lab.zdk.no` (Caddy), not direct IP from trusted/mgmt |
 | **nordri**  | RK1 slot 1 | NixOS (GiyoMoon → flake) | `10.10.30.11` / `fd10:10:10:30::11` | `end0` `ba:ef:57:8b:58:5e`; Kingston SNV2S500G | k3s control plane (taint kept; API `:6443`) |
 | **sudri**   | RK1 slot 2 | NixOS (GiyoMoon → flake) | `10.10.30.12` / `fd10:10:10:30::12` | `end0` `1e:86:1c:db:07:c1`; Kingston SNV2S500G | k3s worker |
 | **austri**  | RK1 slot 3 | NixOS (GiyoMoon → flake) | `10.10.30.13` / `fd10:10:10:30::13` | `end0` `ce:a3:67:c6:1d:a4`; Samsung 970 EVO Plus 2TB | k3s worker |
@@ -49,7 +49,7 @@ bulbs/sensors do not need IPs.
 
 | Name                | Hardware          | Static IP     | MAC                 | Connection                 | Notes                                  |
 | ------------------- | ----------------- | ------------- | ------------------- | -------------------------- | -------------------------------------- |
-| **Samsung TV**      | Smart TV (Tizen)  | `10.10.40.10` | `bc:45:5b:92:63:70` | WiFi `Hai-Fi Wai-Fi (IoT)` | HA; casting target                     |
+| **Samsung TV**      | Smart TV (Tizen)  | `10.10.40.10` | `bc:45:5b:92:63:70` | WiFi `Hai-Fi Wai-Fi (IoT)` | HA; casting; Jellyfin (`jellyfin.lab.zdk.no`) |
 | **Rusken**          | Roborock vacuum   | `10.10.40.11` | `b0:4a:39:a2:e9:20` | WiFi `Hai-Fi Wai-Fi (IoT)` | HA                                     |
 | **Philips Hue hub** | Hue Bridge        | `10.10.40.12` | `ec:b5:fa:12:d3:7c` | Wired (USW-LR, access 40)  | HA → hub; bulbs via Zigbee             |
 | **IKEA Trådfri**    | Dirigera/Gateway  | `10.10.40.13` | `68:ec:8a:02:69:43` | Wired (USW-LR, access 40)  | HA → hub; bulbs via Zigbee/Thread      |
@@ -61,8 +61,8 @@ bulbs/sensors do not need IPs.
 
 ## Guest (VLAN 50) — SSID `Hai-Fi Wai-Fi (Guest)`
 
-No reservations. Client isolation ON. DHCP DNS is public resolvers (1.1.1.1 /
-9.9.9.9).
+No reservations. Client isolation ON. DHCP DNS is the stub on `10.10.50.1`
+(`jellyfin.lab.zdk.no` plus public forwarders).
 
 ## Home Assistant integrations
 
