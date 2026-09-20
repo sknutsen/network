@@ -47,6 +47,17 @@
 	}
 }
 
+# Samsung Tizen / Jellyfin TV: Let's Encrypt ECDSA (YE2 → Root YE) is not
+# in the TV trust store. RSA intermediates still chain to ISRG Root X1.
+(dns01_rsa) {
+	tls {
+		dns domainnameshop {env.DOMAINNAMESHOP_API_TOKEN} {env.DOMAINNAMESHOP_API_SECRET}
+		resolvers 1.1.1.1 9.9.9.9
+		propagation_delay 60s
+		key_type rsa2048
+	}
+}
+
 (authelia) {
 	forward_auth 10.10.30.20:9091 {
 		uri /api/authz/forward-auth
@@ -67,7 +78,7 @@
 # Jellyfin: long-lived video, range requests, websockets. No Authelia —
 # TV / mobile clients use native login. HTTP on the TrueNAS App port.
 (jellyfin_proxy) {
-	reverse_proxy 10.10.30.20:8096 {
+	reverse_proxy 10.10.30.20:30013 {
 		header_up X-Real-IP {remote_host}
 		flush_interval -1
 		transport http {
@@ -119,7 +130,7 @@ immich.lab.zdk.no {
 # Household — not WAN. Same URL for trusted, guest, and the TV.
 jellyfin.lab.zdk.no {
 	import household
-	import dns01
+	import dns01_rsa
 	import jellyfin_proxy
 }
 

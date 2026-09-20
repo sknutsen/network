@@ -147,7 +147,7 @@
   };
 
   jellyfin = {
-    uiPort = 8096;
+    uiPort = 30013;
   };
 
   # Matter operational / commissioning (Python Matter Server / HA).

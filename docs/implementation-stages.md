@@ -75,7 +75,7 @@ DNAT to `.21`).
 - [x] **Forgejo** — TrueNAS App on `10.10.30.20:30142` (UI) / `:30143`
       (SSH); `code.lab.zdk.no`, no Authelia. Do not also start compose
       Forgejo on those ports.
-- [ ] **Jellyfin** — TrueNAS App on `10.10.30.20:8096`
+- [ ] **Jellyfin** — TrueNAS App on `10.10.30.20:30013`
       (`jellyfin.lab.zdk.no`, household: trusted + guest + TV). Rebuild
       janus; reload Blocky with `iot-lab-allow.txt`. Not WAN.
 - [x] **Blocky** — TrueNAS Custom App on `10.10.30.21:53` (alias on `eno1`)

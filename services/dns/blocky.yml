@@ -13,8 +13,19 @@ ports:
   dns: 53
   http: 4000
 
+# IoT clients (incl. the TV) should hit Caddy on the VLAN gateway. UniFi
+# isolation often blocks 10.10.30.1 the same way guest cannot; guest DNS
+# already maps jellyfin to 10.10.50.1. customDNS is answered before the
+# lab denylist, so this does not depend on allowlists loading.
+customDNS:
+  customTTL: 1h
+  mapping:
+    jellyfin.lab.zdk.no: 10.10.40.1
+    ha.lab.zdk.no: 10.10.40.1
+
 blocking:
-  # Same group as the lab denylist so the household allow wins.
+  # Same group as the lab denylist so the household allow wins if a name
+  # is not in customDNS (Unbound still has 10.10.30.1).
   allowlists:
     lab:
       - /app/iot-lab-allow.txt

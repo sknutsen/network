@@ -1,6 +1,6 @@
 # Deploy on TrueNAS (10.10.30.20). Datasets under tank/services/.
 # Caddy runs on janus (NixOS), not here. Publish backend ports on this
-# host IP only — nftables drops forwarded 30142/9091/30041/30103/8096 so
+# host IP only — nftables drops forwarded 30142/9091/30041/30103/30013 so
 # clients cannot skip Caddy. Janus Caddy uses OUTPUT (not forward).
 #
 # Blocky binds 10.10.30.21 — add a /32 alias on the TrueNAS VLAN 30 NIC

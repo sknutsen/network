@@ -33,6 +33,7 @@ determine authoritative nameservers” and browsers see
 | Symptom | Fix |
 | ------- | --- |
 | `could not determine authoritative nameservers` | Resolvers pointed at Unbound. Keep the `dns01` snippet; rebuild if the Caddyfile was edited by hand on the box. |
+| New vhost `tlsv1 alert internal error`, other names fine | Caddy `admin off` (Stage 8). NixOS `caddy reload` cannot reach `:2019`, so the running process keeps the old config. `enableReload = false` makes rebuilds restart Caddy. If you already rebuilt: `sudo systemctl restart caddy` and wait for DNS-01 (~60s). |
 | `authentication failed` / HTTP 401 from Domeneshop | Rotate `caddy.domeneshopToken` / `Secret` in `secrets/router.yaml`. Same API user as DNSUpdater is fine. Then `nixos-rebuild switch`. |
 | Stuck on TXT / timeout after ~60s | Domeneshop lag. Wait and `systemctl restart caddy`. Do not shorten `propagation_delay` below 60s without evidence. |
 | sops / empty env | Restore janus `/var/lib/sops-nix/key.txt` ([router-restore.md](router-restore.md)). |

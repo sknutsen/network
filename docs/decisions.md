@@ -67,7 +67,7 @@ are canonical.
 | Caddy LAN INPUT   | **trusted + servers + vpn + guest + IoT** (`:80/:443`)         | Not mgmt. Host matchers: `lab_only` / `household` / `ha_lan` / `not_untrusted` |
 | Home Assistant    | **TrueNAS App**, VLAN 30                                       | Stays off IoT VLAN. UI via Caddy from trusted/VPN/IoT; Matter `:5540` IoT→HA |
 | Matter            | **IoT → TrueNAS/VLAN30 ULA `:5540`** + Avahi 30↔40             | Dirigera multi-admin. Not HA `:30103`. Brief 21                 |
-| TrueNAS apps      | **HA, Immich, Authelia, Forgejo, Jellyfin** as catalog Apps    | Live listeners `:30103` / `:30041` / `:9091` / `:30142`+`:30143` / `:8096`; do not also start those compose services |
+| TrueNAS apps      | **HA, Immich, Authelia, Forgejo, Jellyfin** as catalog Apps    | Live listeners `:30103` / `:30041` / `:9091` / `:30142`+`:30143` / `:30013`; do not also start those compose services |
 | TrueNAS compose   | **Blocky, Promtail** in `services/truenas/docker-compose.yml`  | Caddy is on janus; App-backed services stay out of compose |
 | Location          | **Norway**, ~60 m² flat                                        | 1 AP; EU/NO retailers where possible                            |
 | Security pass     | **Unused services off**; no NUT; Caddy `admin off`; WAN ICMP limited to echo+PMTU; Traefik dashboard off; node SSH bound to VLAN 30 IP | Stage 8. CrowdSec / HSTS / UPS still deferred. Root SSH keys stay for deploy. |

@@ -60,7 +60,8 @@ dig @8.8.8.8 grafana.lab.zdk.no A
 # 3b. Household / HA exceptions (after Blocky reload with iot-lab-allow.txt)
 dig @8.8.8.8 jellyfin.lab.zdk.no A +short
 dig @8.8.8.8 ha.lab.zdk.no A +short
-# Expect 10.10.30.1. NXDOMAIN = allow list not mounted / not reloaded.
+# Expect 10.10.40.1 (IoT gateway — Caddy; UniFi isolation). NXDOMAIN =
+# allow list / customDNS not in the live Blocky config.yml (redeploy).
 # ha.zdk.no is not on the lab denylist; it should already be 10.10.30.1.
 
 # 4. Gateway dest is also intercepted (not Unbound)
@@ -104,7 +105,7 @@ ssh zdk@10.10.20.1
 sed -n '/VLAN 40/,/VLAN 50/p' /etc/dnsmasq-homelab.conf
 sudo nft list chain ip nat prerouting
 dig @10.10.30.21 grafana.lab.zdk.no A   # NXDOMAIN
-dig @10.10.30.21 jellyfin.lab.zdk.no A  # 10.10.30.1
-dig @10.10.30.21 ha.lab.zdk.no A        # 10.10.30.1
+dig @10.10.30.21 jellyfin.lab.zdk.no A  # 10.10.40.1
+dig @10.10.30.21 ha.lab.zdk.no A        # 10.10.40.1
 ss -ulnp | grep ':53'                   # no 10.10.40.1
 ```

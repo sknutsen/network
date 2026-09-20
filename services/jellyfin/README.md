@@ -1,6 +1,6 @@
 # Jellyfin
 
-Media server. Live deploy is a **TrueNAS App** on `10.10.30.20:8096`.
+Media server. Live deploy is a **TrueNAS App** on `10.10.30.20:30013`.
 Caddy on janus terminates TLS. Do not also start Jellyfin in
 `services/truenas/docker-compose.yml`.
 
@@ -12,7 +12,8 @@ Caddy on janus terminates TLS. Do not also start Jellyfin in
 
 One URL for every client. Not on WAN (unlike Immich / HA / Forgejo). Guest
 resolves the name to `10.10.50.1` (Caddy on the guest gateway — survives
-UniFi client isolation). The TV resolves it to `10.10.30.1` via Blocky.
+UniFi client isolation). The TV resolves it to `10.10.40.1` via Blocky
+(Caddy on the IoT gateway — same isolation reason as guest).
 Neither sees the rest of `*.lab.zdk.no`. Caddy `household` aborts other
 source IPs.
 
@@ -20,8 +21,8 @@ Do not put Authelia in front — the TV app and mobile clients would break.
 
 ## Port
 
-Caddy → `10.10.30.20:8096` (TrueNAS App HTTP). nftables drops forwarded
-`:8096` so clients cannot skip Caddy.
+Caddy → `10.10.30.20:30013` (TrueNAS App HTTP). nftables drops forwarded
+`:30013` so clients cannot skip Caddy.
 
 ## Jellyfin networking
 

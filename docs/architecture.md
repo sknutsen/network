@@ -83,7 +83,7 @@ USW-NC (closet) uplinks on its port 4. USW-LR (living room) uplinks on port 1. S
 |---------|------|--------|
 | Firewall, DHCP, Unbound, Caddy, WireGuard, Headscale (`127.0.0.1:8081`), DNSUpdater | NixOS router (janus) | `router/` flake + `services/caddy/Caddyfile` |
 | UniFi OS Server | NixOS router (janus) | **Functional** — vendor binaries + `unifi.nix` (rootless Podman, systemd `uosserver`); data `/var/lib/unifi-os-server` |
-| HA, Immich, Authelia, Forgejo, Jellyfin | TrueNAS `10.10.30.20` | TrueNAS Apps (`:30103`, `:30041`, `:9091`, `:30142` / SSH `:30143`, `:8096`) |
+| HA, Immich, Authelia, Forgejo, Jellyfin | TrueNAS `10.10.30.20` | TrueNAS Apps (`:30103`, `:30041`, `:9091`, `:30142` / SSH `:30143`, `:30013`) |
 | Blocky, Promtail | TrueNAS `10.10.30.20` | `services/truenas/docker-compose.yml` |
 | k3s, Traefik, Flux, Capacitor, monitoring | RK1 cluster | `nodes/` flake + `k8s/` Flux tree |
 
@@ -149,7 +149,7 @@ See [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Canonical C
 | `code.lab.zdk.no` | Forgejo `:30142` | Forgejo-native |
 | `ha.lab.zdk.no` | HA `:30103` | HA-native (trusted + VPN + IoT; Matter is `:5540`, not this) |
 | `immich.lab.zdk.no` | Immich `:30041` | Immich-native |
-| `jellyfin.lab.zdk.no` | Jellyfin `:8096` | Jellyfin-native (household: trusted + guest + TV) |
+| `jellyfin.lab.zdk.no` | Jellyfin `:30013` | Jellyfin-native (household: trusted + guest + TV) |
 | `headscale.lab.zdk.no` | `127.0.0.1:8081` | Headscale-native |
 | `unifi.lab.zdk.no` | UniFi `:11443` | UniFi-native (Caddy proxy) |
 | `capacitor.lab.zdk.no` | Capacitor Service | Authelia |

@@ -546,7 +546,7 @@ guess a lab Host header.
 | `img.zdk.no` | `immich.lab.zdk.no` | Immich `:30041` on TrueNAS | Immich-native |
 | `ha.zdk.no` | `ha.lab.zdk.no` | Home Assistant `:30103` | HA-native |
 | `code.zdk.no` | `code.lab.zdk.no` | Forgejo `:30142` on TrueNAS | Forgejo-native |
-| — | `jellyfin.lab.zdk.no` | Jellyfin `:8096` on TrueNAS | Household, not WAN (brief 20) |
+| — | `jellyfin.lab.zdk.no` | Jellyfin `:30013` on TrueNAS | Household, not WAN (brief 20) |
 
 Public and lab certs are **DNS-01** via Domeneshop (`dns01` snippet: public
 resolvers + 60s delay). `enableWanCaddy` is only for serving WAN 80/443.
