@@ -98,7 +98,9 @@ in
             ];
             networkConfig = {
               ConfigureWithoutCarrier = true;
-              IPv6AcceptRA = false;
+              # IoT: learn Dirigera SNAC /64 (ALPSTUGA etc.). Other VLANs
+              # stay RA-off — janus is the only router there.
+              IPv6AcceptRA = name == "iot";
               IPv6SendRA = true;
             }
             // lib.optionalAttrs cfg.enableIpv6 {
@@ -110,6 +112,19 @@ in
                 Assign = false;
               }
             ];
+          }
+          // lib.optionalAttrs (name == "iot") {
+            ipv6AcceptRAConfig = {
+              UseGateway = false;
+              UseDNS = false;
+              UseDomains = false;
+              UseAutonomousPrefix = false;
+              UseOnLinkPrefix = false;
+              UseRoutePrefix = true;
+              DHCPv6Client = false;
+              RouterAllowList = C.matter.dirigeraLla;
+              RouteDenyList = "::/0 ${C.ula.lab}";
+            };
           }
           // lib.optionalAttrs cfg.enableIpv6 {
             # SubnetId 0x10/0x20/… matches vlan-plan nibble carving.
