@@ -21,19 +21,20 @@ Router-enforced nftables policy on NixOS. VLAN design: [vlan-plan.md](vlan-plan.
 |---|--------|-------------|---------------|--------|-------|
 | 1 | iot (40) | RFC1918 (any) | all | **DENY** | Prevents lateral movement |
 | 2 | servers `10.10.30.20` | iot (40) | tcp/udp | **ALLOW** | Home Assistant → devices |
-| 3 | iot (40) | servers | all new | **DENY** | Return traffic: ALLOW established,related |
+| 3 | iot (40) | servers | all new | **DENY** | Return traffic: ALLOW established,related. Exception: Matter `:5540` to TrueNAS / VLAN 30 ULA (3a) |
+| 3a | iot (40) | TrueNAS `10.10.30.20` + VLAN 30 ULA | 5540/udp+tcp; ICMPv6 to servers ULA | **ALLOW** | Matter controller. Not HA `:30103` |
 | 4 | iot (40) | internet | tcp/udp | **ALLOW** | Classic DNS intercepted (6b); DoH `:443` still possible |
 | 5 | iot (40) | `10.10.30.21` | 53, 853 | **ALLOW** | Blocky DNS (forward, including after DNAT) |
 | 6 | iot (40) | other RFC1918 DNS | 53, 853 | **DENY** | Force Blocky path on LAN |
 | 6a | iot (40) | router (any local IP) | 53, 853 | **DENY** after `enableBlocky`; **ALLOW** 53 before | Backup: prerouting DNAT usually rewrites these first. DHCP `:67` always |
 | 6b | iot (40) | any dest DNS (v4) | 53, 853 | **DNAT** to Blocky `10.10.30.21` after `enableBlocky` | Hardcoded `8.8.8.8` etc. Conntrack restores the source IP on replies. **DoH `:443` cannot be redirected** |
 | 6c | iot (40) | any dest DNS (v6) | 53, 853 | **DNAT** to `blockyIpv6` when `enableIpv6` + `enableBlocky` + GUA set | Same as 6b. If GUA is unset, IPv6 DNS to WAN is **dropped** (clients fall back to v4 intercept). No IPv6 masquerade |
-| 7 | guest (50) | RFC1918 | all | **DENY** | Guest isolation |
-| 8 | guest (50) | internet | tcp/udp | **ALLOW** | Public DNS (1.1.1.1 / 9.9.9.9) |
+| 7 | guest (50) | RFC1918 | all | **DENY** | Guest isolation (Caddy on janus is INPUT, not this row) |
+| 8 | guest (50) | internet | tcp/udp | **ALLOW** | Other WAN; DNS is the guest stub, not public resolvers directly |
 | 9 | trusted (20) | servers (30) | tcp/udp | **ALLOW** | Admin UIs; HA/Authelia/Forgejo HTTP on TrueNAS **dropped** (11a) |
 | 10 | trusted (20) | iot cast + hub targets | see below | **ALLOW** | TV / Chromecast / Odyssey / Hue / Dirigera (`firewall.nix`). Not the rest of VLAN 40 |
 | 11 | trusted (20) | `10.10.30.20` | 30143/tcp | **ALLOW** | Forgejo SSH (LAN); not `:22` (TrueNAS SSH) |
-| 11a | any forward | `10.10.30.20` | 30142, 9091, 30041, 30103/tcp | **DENY** | Caddy on janus (OUTPUT) is the only client |
+| 11a | any forward | `10.10.30.20` | 30142, 9091, 30041, 30103, 8096/tcp | **DENY** | Caddy on janus (OUTPUT) is the only client |
 | 12 | vpn (`10.10.255.0/24`) | trusted + servers + mgmt | tcp/udp | **ALLOW** | WireGuard peers |
 | 13 | servers (30) | internet | tcp/udp | **ALLOW** | |
 | 14 | mgmt (10) | servers (30) | as needed | **ALLOW** | Flash/provision from mgmt; BMC shares node L2 |
@@ -74,7 +75,10 @@ trusted, servers (jump/k8s), or VPN — not from VLAN 10.
 
 | Source | Destination | Ports | Action | Notes |
 |--------|-------------|-------|--------|-------|
-| trusted + servers (+ wg0) | janus | 80, 443/tcp | **ALLOW** | Caddy lab vhosts. **Not mgmt, IoT, or guest** |
+| trusted + servers (+ wg0) | janus | 80, 443/tcp | **ALLOW** | Caddy lab vhosts (`lab_only`). **Not mgmt** |
+| guest (50) | janus | 80, 443/tcp | **ALLOW** | `jellyfin.lab` only (`household`). Other Host headers abort |
+| iot (40) | janus | 80, 443/tcp | **ALLOW** | `ha.lab` / `ha.zdk` (`ha_lan`); TV also `jellyfin.lab`. `img`/`code` abort (`not_untrusted`) |
+| guest (50) | janus `10.10.50.1` | 53/udp+tcp | **ALLOW** | Guest DNS stub (household name + public forward) |
 | WAN | janus | 80, 443/tcp | **ALLOW** Stage 7 | **WAN INPUT to Caddy** (`enableWanCaddy`) |
 | trusted + servers + mgmt (+ wg0) | janus | 11443/tcp | **ALLOW** | UniFi UI. Mgmt included so you can use the AP’s native VLAN |
 | mgmt (AP + Flex Minis) + trusted + servers | `10.10.10.1` | 8080/tcp, 3478/udp, 10001/udp | **ALLOW** | UniFi Inform / STUN / discovery. **Do not put Headscale on :8080** |
@@ -89,7 +93,7 @@ trusted, servers (jump/k8s), or VPN — not from VLAN 10.
 |--------|-------------|-------|--------|-------|
 | janus (Caddy) | `10.10.30.100` (Traefik LB) | 80/tcp | **ALLOW** | Caddy → k8s (OUTPUT) |
 | janus (Caddy) | `10.10.30.20` | 443/tcp | **ALLOW** | TrueNAS UI proxy (OUTPUT) |
-| janus (Caddy) | `10.10.30.20` | 30142, 9091, 30041, 30103/tcp | **ALLOW** | OUTPUT, not forward |
+| janus (Caddy) | `10.10.30.20` | 30142, 9091, 30041, 30103, 8096/tcp | **ALLOW** | OUTPUT, not forward |
 | iot, guest | `10.10.30.20` | all | **DENY** | |
 | iot, guest | k8s nodes / API | all | **DENY** | |
 | trusted + vpn | k8s API `10.10.30.11:6443` | 6443/tcp | **ALLOW** | kubectl from trusted |
@@ -101,11 +105,21 @@ trusted, servers (jump/k8s), or VPN — not from VLAN 10.
 |------|--------|
 | HA (`10.10.30.20`) → IoT device IPs | **ALLOW** tcp/udp |
 | servers VLAN → IoT IPv6 ULA | **ALLOW** — Matter / Dirigera (`fd10:10:10::/48`) |
-| IoT → HA UI `:30103` | **DENY** |
-| Trusted + VPN → HA `:30103` | **DENY** — use `https://ha.lab.zdk.no` or `https://ha.zdk.no` (Caddy, HA-native auth) |
-| Trusted + VPN → janus `:443` | **ALLOW** |
+| IoT → HA UI `:30103` | **DENY** — use `https://ha.lab.zdk.no` or `https://ha.zdk.no` |
+| Trusted + VPN → HA `:30103` | **DENY** — same Caddy names |
+| Trusted + VPN + IoT → janus `:443` | **ALLOW** — IoT Host headers: HA only (`ha_lan`); not img/code |
 | WAN → `ha.zdk.no` | **ALLOW** — Caddy on janus (`enableWanCaddy`); HA-native auth |
-| IoT → HA (new sessions) | **DENY**; return: established,related |
+| IoT → TrueNAS / VLAN 30 ULA `:5540` | **ALLOW** — Matter (v4 + v6). ICMPv6 PMTU to servers ULA |
+| IoT → HA (other new sessions) | **DENY**; return: established,related |
+
+## Jellyfin (canonical rules)
+
+| Rule | Action |
+|------|--------|
+| Trusted + VPN + guest + TV → Jellyfin `:8096` | **DENY** — use `https://jellyfin.lab.zdk.no` (Caddy, Jellyfin-native) |
+| Guest / TV → janus `:443` | **ALLOW** — Caddy `household`; other lab Host headers abort |
+| WAN → Jellyfin | **DENY** — no public name |
+| Rest of IoT → janus `:443` | **DENY** |
 
 ## Immich (canonical rules)
 

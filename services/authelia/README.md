@@ -13,13 +13,13 @@ would bind the same host port.
 |----------|-----|------|
 | `https://auth.lab.zdk.no` | No (split-horizon) | Portal (no `forward_auth` — would loop) |
 
-Browse from trusted / servers / VPN (`10.10.0.0/16`). Caddy `lab_only` aborts
-WAN. nftables drops forwarded `:9091`; do not open `https://10.10.30.20:9091`
-from other VLANs.
+Browse from trusted / servers / VPN. Caddy `lab_only` aborts WAN, guest,
+and IoT. nftables drops forwarded `:9091`; do not open
+`https://10.10.30.20:9091` from other VLANs.
 
 Caddy `forward_auth` to this backend for other lab UIs except `auth` /
-`code.lab` / `headscale.lab` / `ha.lab` / `immich.lab` / `truenas.lab` /
-`unifi.lab`. Public apps use native login.
+`code.lab` / `headscale.lab` / `ha.lab` / `immich.lab` / `jellyfin.lab` /
+`truenas.lab` / `unifi.lab`. Public apps and Jellyfin use native login.
 
 ## Login
 

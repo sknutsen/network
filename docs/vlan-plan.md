@@ -27,7 +27,7 @@ IP addressing, DHCP pools, IPv6 layout, and DNS policy. Firewall rules:
 | `10.10.30.13`      | austri       | k3s worker; `end0` `ce:a3:67:c6:1d:a4`                              |
 | `10.10.30.14`      | vestri       | k3s worker; `end0` `b6:51:50:02:89:03`                              |
 | `10.10.30.15`      | zpi          | Audio casting (RPi 5); eth `d8:3a:dd:cf:e1:75`; Wi-Fi `d8:3a:dd:cf:e1:78` (no reservation) |
-| `10.10.30.20`      | truenas      | HA, Immich, Authelia, Forgejo (TrueNAS Apps); Blocky                |
+| `10.10.30.20`      | truenas      | HA, Immich, Authelia, Forgejo, Jellyfin (TrueNAS Apps); Blocky      |
 | `10.10.30.21`      | blocky       | IoT DNS filter (TrueNAS Docker)                                     |
 | `10.10.30.100`     | traefik-lb   | Traefik LoadBalancer (MetalLB)                                      |
 | `10.10.30.101`     | loki         | Loki push API (MetalLB) — Promtail on TrueNAS; **no Authelia**      |
@@ -57,7 +57,8 @@ as IPv4). Gateway `fd10:10:10:30::1`. No IPv6 default route — ISP has none.
 | 50 guest   | `.100–.250` | 1 h                      |
 
 **DHCP options:** push Unbound (`10.10.x.1`) as DNS; domain `lab.zdk.no` (search).
-**Exceptions:** guest → `1.1.1.1` / `9.9.9.9`. IoT → Blocky `10.10.30.21`
+**Exceptions:** guest → stub on `10.10.50.1` (`jellyfin.lab.zdk.no` plus
+public forwarders). IoT → Blocky `10.10.30.21`
 (`homelab.router.enableBlocky`) and **no** `domain-search`. Off: IoT uses
 Unbound on `10.10.40.1` (bring-up only).
 
@@ -152,7 +153,8 @@ flowchart TB
   Servers[Servers VLAN 30] --> Unbound
   IoT[IoT VLAN 40] --> Blocky[Blocky 10.10.30.21]
   Blocky --> Unbound
-  Guest[Guest VLAN 50] --> PublicDNS[1.1.1.1 / 9.9.9.9]
+  Guest[Guest VLAN 50] --> GuestStub[Guest stub 10.10.50.1]
+  GuestStub --> PublicDNS[1.1.1.1 / 9.9.9.9]
   Unbound --> Internet[Upstream DNS]
 ```
 
@@ -162,8 +164,8 @@ on `.21`. `enableBlocky` is **true**.
 | Zone             | Resolver         | Policy                                                          |
 | ---------------- | ---------------- | --------------------------------------------------------------- |
 | Trusted, servers | Unbound (router) | Full split-horizon `*.lab.zdk.no`                               |
-| IoT              | Blocky → Unbound | Blocklists; **deny** `*.lab.zdk.no` (whitelist exceptions only) |
-| Guest            | Public resolvers | No internal names; restricted DNS possible later                |
+| IoT              | Blocky → Unbound | Blocklists; **deny** `*.lab.zdk.no` except `jellyfin.lab` + `ha.lab` |
+| Guest            | Stub on `10.10.50.1` | `jellyfin.lab.zdk.no` → `10.10.50.1` (Caddy on the guest GW); everything else to 1.1.1.1 / 9.9.9.9 |
 
 ### Split-horizon (Unbound)
 
@@ -177,9 +179,9 @@ on `.21`. `enableBlocky` is **true**.
 | `*.lab.zdk.no` | Host records, else Caddy on janus | **No public records**                |
 | `lab.zdk.no`   | `10.10.30.1`                  | **No public record** (not WAN-reachable) |
 
-Unbound `lab.zdk.no` is a **static** zone (no recursion to the internet). Exact `local-data` wins (`nordri`, `pingu`, `janus`, `headscale`, `immich`, …). `truenas.lab.zdk.no` and `unifi.lab.zdk.no` are Caddy (`10.10.30.1`), not the backend IPs — TrueNAS’s host firewall is same-subnet only. One-label names not listed (`grafana.lab.zdk.no`, `capacitor.lab.zdk.no`) hit a wildcard → Caddy on janus for HTTPS. Lab and public names use Caddy ACME **DNS-01** (Domeneshop); the `dns01` snippet queries `1.1.1.1`/`9.9.9.9` so certmagic does not ask this Unbound for NS of `zdk.no`. `domain-insecure` covers `lab.zdk.no` **and** `zdk.no` so local A records do not SERVFAIL if Domeneshop signs the public zone.
+Unbound `lab.zdk.no` is a **static** zone (no recursion to the internet). Exact `local-data` wins (`nordri`, `pingu`, `janus`, `headscale`, `immich`, `jellyfin`, …). `truenas.lab.zdk.no` and `unifi.lab.zdk.no` are Caddy (`10.10.30.1`), not the backend IPs — TrueNAS’s host firewall is same-subnet only. One-label names not listed (`grafana.lab.zdk.no`, `capacitor.lab.zdk.no`) hit a wildcard → Caddy on janus for HTTPS. Lab and public names use Caddy ACME **DNS-01** (Domeneshop); the `dns01` snippet queries `1.1.1.1`/`9.9.9.9` so certmagic does not ask this Unbound for NS of `zdk.no`. `domain-insecure` covers `lab.zdk.no` **and** `zdk.no` so local A records do not SERVFAIL if Domeneshop signs the public zone.
 
-Authelia is **not** on `auth.lab.zdk.no` (portal), `code.lab.zdk.no` (Forgejo-native), `headscale.lab.zdk.no` (Tailscale login-server), `ha.lab.zdk.no` (HA-native), `immich.lab.zdk.no` (Immich-native), `truenas.lab.zdk.no` (TrueNAS-native), or `unifi.lab.zdk.no` (UniFi-native).
+Authelia is **not** on `auth.lab.zdk.no` (portal), `code.lab.zdk.no` (Forgejo-native), `headscale.lab.zdk.no` (Tailscale login-server), `ha.lab.zdk.no` (HA-native), `immich.lab.zdk.no` (Immich-native), `jellyfin.lab.zdk.no` (Jellyfin-native; household), `truenas.lab.zdk.no` (TrueNAS-native), or `unifi.lab.zdk.no` (UniFi-native).
 
 ### Public DNS (Domeneshop + DNSUpdater)
 
@@ -238,7 +240,8 @@ switch is L2: tagged IPv6 for clients still passes. Do not give the switch a
 GUA until you have a reason to manage it over v6.
 
 **Security:** WAN inbound v6 default deny. IoT/guest: no new sessions to lab
-ULA. Servers → IoT v6 allowed (Matter). No ULA reflection to trusted/guest.
+ULA except IoT → VLAN 30 ULA **Matter `:5540`** (+ ICMPv6 PMTU). Servers →
+IoT v6 allowed. No ULA reflection to trusted/guest.
 
 **Layout:** Native /64 per VLAN from delegated prefix (resolved). ISP currently
 gives no prefix — see [decision briefs](decision-briefs.md#1-ipv6-prefix-size).

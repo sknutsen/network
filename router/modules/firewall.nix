@@ -71,6 +71,7 @@ in
       define NET_VPN = ${C.vpn.network}
       define NET_LAB = 10.10.0.0/16
       define NET_LAB6 = ${C.ula.lab}
+      define NET_SERVERS6 = ${C.vlans.servers.network6}
 
       define TRUENAS = ${C.hosts.truenas}
       define BLOCKY = ${C.hosts.blocky}
@@ -115,11 +116,12 @@ in
           # SSH — trusted VLAN only (no WAN, no mgmt, no VPN SSH in v1)
           iifname $TRUSTED tcp dport 22 accept
 
-          # Caddy on this host. LAN: trusted + servers (+ wg0). Not mgmt
-          # (infrastructure-only). WAN 80/443 only with enableWanCaddy (Stage 7).
+          # Caddy on this host. LAN: trusted + servers + guest + IoT (+ wg0).
+          # Host headers decide what they get: lab_only / household / ha_lan /
+          # not_untrusted. Not mgmt. WAN 80/443 only with enableWanCaddy.
           ${
             if cfg.enableCaddy then
-              ''iifname { $TRUSTED, $SERVERS } tcp dport { 80, 443 } accept''
+              ''iifname { $TRUSTED, $SERVERS, $GUEST, $IOT } tcp dport { 80, 443 } accept''
             else
               ""
           }
@@ -146,13 +148,17 @@ in
               ""
           }
 
-          # DNS / DHCP on LAN. Guest: DHCP only (public resolvers on WAN).
+          # DNS / DHCP on LAN. Guest: DHCP + stub DNS on the gateway
+          # (household name; rest forwarded to 1.1.1.1 / 9.9.9.9).
           # IoT: DHCP always. DNS to Unbound only until enableBlocky.
           # After cutover, prerouting DNAT sends IoT :53/:853 to Blocky
           # (including queries aimed at the gateway); INPUT drop is backup.
           iifname { $MGMT, $TRUSTED, $SERVERS } udp dport { 53, 67 } accept
           iifname { $MGMT, $TRUSTED, $SERVERS } tcp dport 53 accept
           iifname { $IOT, $GUEST } udp dport 67 accept
+          # Guest DNS stub on 10.10.50.1 (household name + public forwarders).
+          iifname $GUEST udp dport 53 accept
+          iifname $GUEST tcp dport 53 accept
           ${iotDnsInput}
 
           # Avahi on this host (reflector vlan30 ↔ vlan40 only)
@@ -192,6 +198,11 @@ in
 
           # --- IoT isolation ---
           iifname $IOT ip daddr $RFC1918 jump iot_to_rfc1918
+          # Matter: devices must open UDP to the controller (Dirigera share /
+          # reboot). ICMPv6 is PMTU. Not the HA UI (that is Caddy INPUT).
+          iifname $IOT ip6 daddr $NET_SERVERS6 udp dport ${toString C.matter.port} accept
+          iifname $IOT ip6 daddr $NET_SERVERS6 tcp dport ${toString C.matter.port} accept
+          iifname $IOT ip6 daddr $NET_SERVERS6 icmpv6 type { echo-request, destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
           iifname $IOT ip6 daddr $NET_LAB6 drop
           ${iotBlocky6Forward}
           ${iotWanDnsDrop}
@@ -203,7 +214,7 @@ in
 
           # --- Trusted ---
           # App HTTP on TrueNAS is Caddy-only (this host OUTPUT, not forward).
-          ip daddr $TRUENAS tcp dport { ${toString C.forgejo.uiPort}, 9091, 30041, 30103 } drop
+          ip daddr $TRUENAS tcp dport { ${toString C.forgejo.uiPort}, 9091, 30041, 30103, ${toString C.jellyfin.uiPort} } drop
           iifname $TRUSTED oifname $SERVERS accept
           iifname $TRUSTED ip daddr $CRS310 accept
           iifname $TRUSTED oifname $WAN accept
@@ -238,7 +249,10 @@ in
           # Deny other DNS to force Blocky (or Unbound-on-gateway via INPUT)
           udp dport { 53, 853 } drop
           tcp dport { 53, 853 } drop
-          # Deny rest of RFC1918 (incl. HA initiate-from-IoT)
+          # Matter controller on TrueNAS — not :30103 (Caddy-only).
+          ip daddr $TRUENAS udp dport ${toString C.matter.port} accept
+          ip daddr $TRUENAS tcp dport ${toString C.matter.port} accept
+          # Deny rest of RFC1918 (incl. HA UI initiate-from-IoT)
           drop
         }
 

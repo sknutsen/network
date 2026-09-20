@@ -1,0 +1,3 @@
+# Household / IoT names devices may resolve. Everything else in *.lab.zdk.no stays denied.
+jellyfin.lab.zdk.no
+ha.lab.zdk.no

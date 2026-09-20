@@ -66,7 +66,8 @@ DNAT to `.21`).
 **TrueNAS (internal only — no WAN exposure yet):**
 
 - [x] Static IP `10.10.30.20` (dnsmasq reservation `cc:28:aa:42:c2:9d`)
-- [x] **Home Assistant** — TrueNAS App on `10.10.30.20:30103` (`ha.lab.zdk.no`)
+- [x] **Home Assistant** — TrueNAS App on `10.10.30.20:30103` (`ha.lab.zdk.no`).
+      IoT: Caddy `ha_lan` + Matter `:5540` (brief 21). Do not move HA to VLAN 40.
 - [x] **Immich** — TrueNAS App on `10.10.30.20:30041` (`immich.lab.zdk.no`)
 - [x] **Authelia** — TrueNAS App on `10.10.30.20:9091`; portal
       `https://auth.lab.zdk.no` ([README](../services/authelia/README.md)). Do
@@ -74,6 +75,9 @@ DNAT to `.21`).
 - [x] **Forgejo** — TrueNAS App on `10.10.30.20:30142` (UI) / `:30143`
       (SSH); `code.lab.zdk.no`, no Authelia. Do not also start compose
       Forgejo on those ports.
+- [ ] **Jellyfin** — TrueNAS App on `10.10.30.20:8096`
+      (`jellyfin.lab.zdk.no`, household: trusted + guest + TV). Rebuild
+      janus; reload Blocky with `iot-lab-allow.txt`. Not WAN.
 - [x] **Blocky** — TrueNAS Custom App on `10.10.30.21:53` (alias on `eno1`)
 - [x] Confirm Blocky answers on `.21`; `enableBlocky = true` (DHCP, DNAT, no
       IoT domain-search). `blockyIpv6` stays null until ISP IPv6.
@@ -83,7 +87,8 @@ DNAT to `.21`).
       (Blocky, not Unbound). Lease **1 h**. Procedure:
       [runbooks/iot-dns.md](runbooks/iot-dns.md).
 - [x] Caddy on janus: Authelia on lab UIs except `auth` / `code.lab` /
-      `headscale.lab` / `ha.lab` / `immich.lab` / `truenas.lab` / `unifi.lab`.
+      `headscale.lab` / `ha.lab` / `immich.lab` / `jellyfin.lab` /
+      `truenas.lab` / `unifi.lab`.
       UI is `https://truenas.lab.zdk.no` (not the raw IP — TrueNAS host
       firewall is same-subnet only).
 - [x] DNS-01: Domeneshop plugin on Caddy (`withPlugins`) + sops

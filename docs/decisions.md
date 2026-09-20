@@ -61,11 +61,13 @@ are canonical.
 | ISP modem         | **Bridge mode** — configure at router cutover                  | OptiPlex is sole router                                         |
 | Hairpin NAT       | **Off**                                                        | Unbound answers `img`/`ha`/`code.zdk.no` → `10.10.30.1`; apex `zdk.no` recurses to public DNS |
 | mDNS              | **Static IPs + Avahi 30↔40**                                   | Matter / Dirigera; ULA `fd10:10:10::/48`; never trusted/guest   |
-| Guest DNS         | **1.1.1.1 / 9.9.9.9**                                          | No Blocky on guest for v1                                       |
-| IoT lab DNS       | **Deny** `*.lab.zdk.no` (Blocky live)                          | Whitelist only if a device needs a name                         |
-| Caddy LAN INPUT   | **trusted + servers + vpn** (`:80/:443`)                       | Not mgmt (infrastructure-only); not IoT/guest. WAN INPUT open |
-| Home Assistant    | **TrueNAS App**, VLAN 30                                       | HA initiates to IoT; stays off IoT VLAN                         |
-| TrueNAS apps      | **HA, Immich, Authelia, Forgejo** as catalog Apps              | Live listeners `:30103` / `:30041` / `:9091` / `:30142`+`:30143`; do not also start those compose services |
+| Guest DNS         | **Stub on `10.10.50.1`** (public forwarders + household names) | Not full Unbound (no lab zone leak); not WAN hairpin            |
+| IoT lab DNS       | **Deny** `*.lab.zdk.no` (Blocky live)                          | Allow `jellyfin.lab` + `ha.lab` (`iot-lab-allow.txt`)            |
+| Household names   | **Same `*.lab.zdk.no` URL**; access via policy, not a 2nd zone | Jellyfin: guest + TV. HA: IoT. New zone only if more services   |
+| Caddy LAN INPUT   | **trusted + servers + vpn + guest + IoT** (`:80/:443`)         | Not mgmt. Host matchers: `lab_only` / `household` / `ha_lan` / `not_untrusted` |
+| Home Assistant    | **TrueNAS App**, VLAN 30                                       | Stays off IoT VLAN. UI via Caddy from trusted/VPN/IoT; Matter `:5540` IoT→HA |
+| Matter            | **IoT → TrueNAS/VLAN30 ULA `:5540`** + Avahi 30↔40             | Dirigera multi-admin. Not HA `:30103`. Brief 21                 |
+| TrueNAS apps      | **HA, Immich, Authelia, Forgejo, Jellyfin** as catalog Apps    | Live listeners `:30103` / `:30041` / `:9091` / `:30142`+`:30143` / `:8096`; do not also start those compose services |
 | TrueNAS compose   | **Blocky, Promtail** in `services/truenas/docker-compose.yml`  | Caddy is on janus; App-backed services stay out of compose |
 | Location          | **Norway**, ~60 m² flat                                        | 1 AP; EU/NO retailers where possible                            |
 | Security pass     | **Unused services off**; no NUT; Caddy `admin off`; WAN ICMP limited to echo+PMTU; Traefik dashboard off; node SSH bound to VLAN 30 IP | Stage 8. CrowdSec / HSTS / UPS still deferred. Root SSH keys stay for deploy. |
@@ -83,8 +85,9 @@ are canonical.
 | `headscale.lab.zdk.no`   | **No**        | No       | Tailscale login-server |
 | `unifi.lab.zdk.no`       | **No**        | No       | Caddy proxy to `:11443`; UniFi-native login |
 | `truenas.lab.zdk.no`     | **No**        | No       | TrueNAS-native auth; Caddy proxy (not direct IP) |
-| `ha.lab.zdk.no`          | **No**        | No       | HA-native; companion app |
+| `ha.lab.zdk.no`          | **No**        | No       | HA-native; trusted + VPN + IoT (`ha_lan`) |
 | `immich.lab.zdk.no`      | **No**        | No       | Immich-native; mobile app |
+| `jellyfin.lab.zdk.no`    | **No**        | No       | Household: trusted + guest + TV (`10.10.40.10`); Jellyfin-native |
 | Other `*.lab.zdk.no`     | **No**        | Yes      | grafana, capacitor, … |
 | Future public apps       | Per-app       | Optional | Document a row here before WAN cutover |
 
@@ -93,7 +96,7 @@ are canonical.
 | Layer                                | Approach |
 | ------------------------------------ | -------- |
 | Public WAN (`img.zdk.no`, `ha.zdk.no`, `code.zdk.no`) | Caddy ACME **DNS-01** (Domeneshop). Public `A` still required to *reach* the names (no AAAA — ISP has no IPv6). `enableWanCaddy` opens 80/443 for serving (not issuance) |
-| Internal (`*.lab.zdk.no`)            | Same DNS-01 issuer. Unbound → `10.10.30.1`; no public A/AAAA. Caddy `lab_only` aborts non-`10.10.0.0/16` clients. ACME checks use `1.1.1.1`/`9.9.9.9` (not janus Unbound) |
+| Internal (`*.lab.zdk.no`)            | Same DNS-01 issuer. Unbound → `10.10.30.1`; no public A/AAAA. Caddy `lab_only` is trusted+servers+VPN. `household` adds guest + TV for Jellyfin. ACME checks use `1.1.1.1`/`9.9.9.9` (not janus Unbound) |
 | Caddy → Traefik (east-west)          | HTTP on VLAN 30 — mTLS is a non-goal for v1 |
 | step-ca                              | **Not in v1** — Caddy ACME covers edge; revisit for mTLS/device certs if needed |
 

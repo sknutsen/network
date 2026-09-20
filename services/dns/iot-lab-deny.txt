@@ -1,4 +1,4 @@
-# IoT must not resolve internal names (vlan-plan). Whitelist a FQDN here only
-# if a device needs one specific lab name.
+# IoT must not resolve internal names (vlan-plan). Household exceptions live
+# in iot-lab-allow.txt (same Blocky group; allow wins).
 *.lab.zdk.no
 lab.zdk.no

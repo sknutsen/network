@@ -31,7 +31,9 @@ Resolved** here, and remove the row from `plan.md` § Remaining decisions.
 | 16 | [mDNS / Avahi reflector](#16-mdns--avahi-reflector) | Resolved — servers↔IoT Avahi | — |
 | 17 | [Trusted → IoT cast rules](#17-trusted--iot-cast-rules) | Resolved — per-device allows | — |
 | 18 | [Future public apps](#18-future-public-apps) | Per-app — Immich, HA, Forgejo documented | Each new WAN service |
-| 19 | [Guest DNS via Blocky](#19-guest-dns-via-blocky) | Resolved — public resolvers | Post Stage 4 if wanted |
+| 19 | [Guest DNS via Blocky](#19-guest-dns-via-blocky) | Resolved — stub + public forward | — |
+| 20 | [Household / untrusted-zone names](#20-household--untrusted-zone-names) | Resolved — one lab URL + policy | — |
+| 21 | [HA / Matter from IoT](#21-ha--matter-from-iot) | Resolved — `:5540` + HA UI on IoT | — |
 
 ---
 
@@ -544,6 +546,7 @@ guess a lab Host header.
 | `img.zdk.no` | `immich.lab.zdk.no` | Immich `:30041` on TrueNAS | Immich-native |
 | `ha.zdk.no` | `ha.lab.zdk.no` | Home Assistant `:30103` | HA-native |
 | `code.zdk.no` | `code.lab.zdk.no` | Forgejo `:30142` on TrueNAS | Forgejo-native |
+| — | `jellyfin.lab.zdk.no` | Jellyfin `:8096` on TrueNAS | Household, not WAN (brief 20) |
 
 Public and lab certs are **DNS-01** via Domeneshop (`dns01` snippet: public
 resolvers + 60s delay). `enableWanCaddy` is only for serving WAN 80/443.
@@ -558,7 +561,7 @@ WAN cutover.
 
 ## 19. Guest DNS via Blocky
 
-**Status:** **Resolved** — public resolvers for v1.
+**Status:** **Resolved** — stub on `10.10.50.1`; public forwarders; not Blocky.
 
 ### Context
 
@@ -576,8 +579,84 @@ filtering for guests.
 
 ### Decision
 
-**Keep 1.1.1.1 / 9.9.9.9 for v1.** Revisit if you want guest query logging or
-family-safe filtering on the guest SSID.
+**Keep public resolvers as the guest upstream.** DHCP now points at a stub
+on `10.10.50.1` so guests can resolve `jellyfin.lab.zdk.no` without getting
+the full lab zone (brief 20). Still not Blocky — no guest query logging.
+
+---
+
+## 20. Household / untrusted-zone names
+
+**Status:** **Resolved** — one `*.lab.zdk.no` URL; access is policy, not a
+second domain.
+
+### Context
+
+`*.lab.zdk.no` is the admin zone: split-horizon, IoT-denied, guest-invisible,
+never WAN. Guest uses a resolver that must not enumerate lab names. Hairpin
+NAT is off, so a public `jellyfin.zdk.no` would not work from the guest SSID
+without publishing on WAN *and* enabling hairpin.
+
+Jellyfin should be reachable from trusted, guest, and the Samsung TV
+(`10.10.40.10`) — not the internet.
+
+### Options
+
+| Option | Pros | Cons |
+|--------|------|------|
+| **`jellyfin.zdk.no` on WAN** (Immich/HA pattern) | Guest uses public DNS | WAN attack surface; hairpin required on LAN; TV still needs a path to Caddy |
+| **New zone `media.zdk.no`** | Clean Blocky allow (`*.media`); guest stub is one suffix | Extra ACME name; two URLs if lab name also exists; overkill for one app |
+| **Same `jellyfin.lab.zdk.no` + policy** | One URL / one cert for TV, guests, and trusted | Blocky allow + guest stub + Caddy INPUT + tighten `lab_only` |
+
+### Decision
+
+**Keep `https://jellyfin.lab.zdk.no` as the only name.** Do not register a
+second domain and do not publish a public A.
+
+- Caddy `household` matcher: trusted + servers + VPN + guest + TV.
+- `lab_only` tightened to trusted + servers + VPN so guest/TV cannot
+  Host-header to admin UIs.
+- Guest DNS stub on `10.10.50.1` answers that one name with the guest
+  gateway (UniFi isolation) and forwards the rest.
+- Blocky `iot-lab-allow.txt` for household names; Caddy INPUT `:443` from
+  guest + IoT, with Host matchers (brief 21 widened IoT from TV-only).
+
+Revisit a `media.zdk.no` (or similar) zone if a second household service
+appears — then Blocky can allow the suffix instead of more `*.lab` holes.
+
+---
+
+## 21. HA / Matter from IoT
+
+**Status:** **Resolved** — Matter `:5540` IoT→HA; HA UI via Caddy from IoT;
+HA stays on VLAN 30.
+
+### Context
+
+IKEA devices already on Dirigera need a second Matter fabric (Home
+Assistant), not the HA web UI sitting on the IoT SSID. Matter is IPv6 UDP
+`:5540`. IoT → lab ULA was a blanket drop, so devices could not reopen a
+session after a share or reboot. The companion app on a phone that joined
+IoT Wi-Fi also could not reach Caddy (INPUT was trusted/guest/TV only).
+
+### Options
+
+| Option | Pros | Cons |
+|--------|------|------|
+| **Move HA to IoT** | Same L2 as devices | Rejected — HA is a server; IoT would see the whole API unfiltered |
+| **HA UI on IoT only** (Caddy `ha.lab`) | Phone on IoT can commission | Devices still cannot speak Matter; opens HTTPS to every IoT client |
+| **Matter `:5540` only** | Correct data plane; no extra UI | Companion-on-IoT still fails |
+| **`:5540` + HA hostnames on IoT** | Devices + phone; img/code stay aborted | IoT can hit the HA login (already on WAN via `ha.zdk.no`) |
+
+### Decision
+
+**Keep HA on TrueNAS.** Allow IoT → TrueNAS IPv4 and VLAN 30 ULA **`:5540`**
+(+ ICMPv6 PMTU). Avahi 30↔40 stays. Caddy INPUT from all of IoT; `ha_lan`
+allows `ha.lab.zdk.no`; `ha.zdk.no` is already public; `not_untrusted`
+aborts guest/IoT on `img.zdk.no` / `code.zdk.no`. Blocky allows `ha.lab`.
+
+Preferred IKEA flow: phone on **trusted** (Dirigera already allowed). Matter
+session is `:5540`, not `:30103`.
 
 ---
 
@@ -598,7 +677,9 @@ family-safe filtering on the guest SSID.
 | CrowdSec | **Resolved:** Not in v1; nftables rate-limit first |
 | mDNS | **Resolved:** Static IPs + Avahi 30↔40 |
 | Cast rules | **Resolved:** Per-device trusted → TV/Chromecast/Odyssey/Hue/Dirigera |
-| Guest DNS | **Resolved:** Public resolvers |
+| Guest DNS | **Resolved:** Stub on `10.10.50.1` + public forward |
+| Household names | **Resolved:** Same lab URL; policy exceptions (brief 20) |
+| HA / Matter from IoT | **Resolved:** `:5540` + HA UI on IoT; HA stays VLAN 30 (brief 21) |
 | Headscale | **Resolved:** Janus, `127.0.0.1:8081`, Caddy `headscale.lab.zdk.no` (not :8080) |
 | ISP | **OBOS Nett**; no IPv6; modem bridged |
 

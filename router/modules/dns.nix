@@ -1,8 +1,9 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.homelab.router;
   C = import ../lib/constants.nix;
   gw = cidr: lib.head (lib.splitString "/" cidr);
+  guestGw = gw C.vlans.guest.ipv4;
 in
 {
   # Split-horizon recursive resolver. Listens on VLAN gateways (not guest).
@@ -85,6 +86,7 @@ in
           ''"headscale.${C.domain}. A ${C.hosts.caddy}"''
           ''"ha.${C.domain}. A ${C.hosts.caddy}"''
           ''"immich.${C.domain}. A ${C.hosts.caddy}"''
+          ''"jellyfin.${C.domain}. A ${C.hosts.caddy}"''
           ''"auth.${C.domain}. A ${C.hosts.caddy}"''
           ''"code.${C.domain}. A ${C.hosts.caddy}"''
           ''"grafana.${C.domain}. A ${C.hosts.caddy}"''
@@ -105,6 +107,36 @@ in
           ];
         }
       ];
+    };
+  };
+
+  # Guest stays off the full lab zone. This stub answers the household
+  # name (Caddy on the guest gateway — UniFi client isolation often
+  # allows only the GW) and forwards everything else to public resolvers.
+  environment.etc."guest-dns.conf".text = ''
+    port=53
+    listen-address=${guestGw}
+    bind-interfaces
+    no-resolv
+    no-hosts
+    server=1.1.1.1
+    server=9.9.9.9
+    address=/jellyfin.${C.domain}/${guestGw}
+    cache-size=200
+    user=nobody
+    group=nogroup
+  '';
+
+  systemd.services.guest-dns = {
+    description = "Guest DNS stub (household names + public forwarders)";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.dnsmasq}/bin/dnsmasq --keep-in-foreground --conf-file=/etc/guest-dns.conf";
+      Restart = "always";
+      RestartSec = "2s";
     };
   };
 }

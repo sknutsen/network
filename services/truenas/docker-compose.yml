@@ -1,7 +1,7 @@
 # Deploy on TrueNAS (10.10.30.20). Datasets under tank/services/.
 # Caddy runs on janus (NixOS), not here. Publish backend ports on this
-# host IP only — nftables drops forwarded 30142/9091/30041/30103 so clients
-# cannot skip Caddy. Janus Caddy uses OUTPUT (not forward).
+# host IP only — nftables drops forwarded 30142/9091/30041/30103/8096 so
+# clients cannot skip Caddy. Janus Caddy uses OUTPUT (not forward).
 #
 # Blocky binds 10.10.30.21 — add a /32 alias on the TrueNAS VLAN 30 NIC
 # (gateway 10.10.30.1) before starting this stack.
@@ -140,6 +140,7 @@ services:
     volumes:
       - ../dns/blocky.yml:/app/config.yml:ro
       - ../dns/iot-lab-deny.txt:/app/iot-lab-deny.txt:ro
+      - ../dns/iot-lab-allow.txt:/app/iot-lab-allow.txt:ro
     networks:
       - edge
 

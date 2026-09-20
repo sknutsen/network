@@ -36,7 +36,7 @@ net/
 ├── router/        # janus NixOS modules
 ├── nodes/         # RK1 NixOS flake (nordri–vestri; k3s on)
 ├── switch/        # CRS310 RouterOS (L2 VLANs)
-├── services/      # truenas compose, Caddy, Authelia, HA/Immich/Forgejo READMEs, DNS, Promtail
+├── services/      # truenas compose, Caddy, Authelia, HA/Immich/Forgejo/Jellyfin READMEs, DNS, Promtail
 ├── k8s/           # Flux tree (infra HelmReleases)
 ├── secrets/       # .sops.yaml + encrypted router.yaml
 └── scripts/       # validate.sh, generate-viewer.py
