@@ -208,7 +208,7 @@ in
           # advertised :60731). ICMPv6 is PMTU + ping. Not the HA UI.
           iifname $IOT ip6 daddr $NET_SERVERS6 udp dport ${toString C.matter.port} accept
           iifname $IOT ip6 daddr $NET_SERVERS6 tcp dport ${toString C.matter.port} accept
-          iifname $IOT ip6 daddr $TRUENAS6 udp accept
+          iifname $IOT ip6 daddr $TRUENAS6 meta l4proto udp accept
           iifname $IOT ip6 daddr $NET_SERVERS6 icmpv6 type { echo-request, echo-reply, destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
           iifname $IOT ip6 daddr $NET_LAB6 drop
           ${iotBlocky6Forward}
