@@ -108,6 +108,10 @@ in
 
           # LAN ICMP (ping / PMTU / NDP). WAN: echo + PMTU only — no
           # timestamp / address-mask. Stealth ping is pointless with 80/443.
+          # vlan40 accepts SNAC RAs; pin those to Dirigera's MAC (its LLA
+          # is privacy-randomized and changes).
+          iifname $IOT icmpv6 type nd-router-advert ether saddr ${C.macs.tradfri} accept
+          iifname $IOT icmpv6 type nd-router-advert drop
           iifname != $WAN ip protocol icmp accept
           iifname != $WAN ip6 nexthdr icmpv6 accept
           iifname $WAN icmp type { echo-request, destination-unreachable, time-exceeded, parameter-problem } accept

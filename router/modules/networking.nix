@@ -115,6 +115,8 @@ in
           }
           // lib.optionalAttrs (name == "iot") {
             ipv6AcceptRAConfig = {
+              # Dirigera uses a privacy LLA (not EUI-64); do not pin
+              # RouterAllowList. INPUT drops other IoT RAs by MAC.
               UseGateway = false;
               UseDNS = false;
               UseDomains = false;
@@ -122,7 +124,6 @@ in
               UseOnLinkPrefix = false;
               UseRoutePrefix = true;
               DHCPv6Client = false;
-              RouterAllowList = C.matter.dirigeraLla;
               RouteDenyList = "::/0 ${C.ula.lab}";
             };
           }
