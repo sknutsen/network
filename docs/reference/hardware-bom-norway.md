@@ -46,7 +46,7 @@ Core networking gear is **procured**. Remaining optional items are out of scope 
 
 ## UPS (deferred)
 
-Not required for the current plan. Procure later for graceful shutdown / power dips; Stage 8 UPS test is optional until then.
+Not installed. Procure later for graceful shutdown / power dips. NUT stays off until then — [todo.md](../todo.md).
 
 ## WiFi: Ubiquiti U7 Lite (acquired)
 

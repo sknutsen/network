@@ -73,7 +73,7 @@
     enableK3s = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Stage 5 — start k3s. Leave off until static IPs and tokens exist.";
+      description = "Start k3s. Tokens come from sops on the node.";
     };
 
     enableLonghornPrep = lib.mkOption {

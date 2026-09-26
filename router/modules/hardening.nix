@@ -1,4 +1,4 @@
-# Stage 8 security pass — unused services stay off. NUT/UPS is deferred.
+# Unused services stay off. NUT stays off until a UPS exists (docs/todo.md).
 {
   documentation.man.enable = false;
   documentation.nixos.enable = false;

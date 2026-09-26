@@ -1,15 +1,16 @@
 # Decisions
 
-Canonical decision log for the homelab network. Rationale lives in the **Why**
-column; alternatives in `docs/reference/`. Options and history:
-`docs/decision-briefs.md` (stable brief IDs). Remaining unanswered items:
-`docs/plan.md` § Remaining decisions and `router/OPEN-QUESTIONS.md`.
+Canonical decision log for the homelab network. The deployed modules are
+the network; this table is the choice behind them. Rationale lives in the
+**Why** column; alternatives in `docs/reference/`. Options and history:
+`docs/decision-briefs.md` (stable brief IDs). Open follow-ups:
+`docs/todo.md`.
 
-**For agents:** When the user answers a question, (1) add or update the row
-here, (2) set the matching brief to **Resolved** (keep options as history),
-(3) delete it from `plan.md` § Remaining decisions. Do not keep resolved rows
-on the remaining list. Do not invent a second numbering scheme — brief IDs
-are canonical.
+**For agents:** Read the host and the module that already implements it.
+When a choice changes, update the row here and set the matching brief to
+**Resolved** (keep options as history). Delete the item from `docs/todo.md`
+when the host matches. Do not keep a second remaining-decisions list, and
+do not resume implementation stages. Brief IDs are canonical.
 
 ## Principles
 
@@ -28,11 +29,11 @@ are canonical.
 | Layer             | Choice                                                         | Why                                                             |
 | ----------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
 | Router OS         | **NixOS** (flakes + nftables)                                  | Declarative, rollbacks, unified with RK1 nodes                  |
-| Router hardware   | **Dell OptiPlex 9020 MT** + **Intel i350-T2** (acquired)       | I217LM = WAN, i350 = LAN trunk — not router-on-a-stick; Stage 1 verified |
+| Router hardware   | **Dell OptiPlex 9020 MT** + **Intel i350-T2** (acquired)       | I217LM = WAN, i350 = LAN trunk — not router-on-a-stick          |
 | Router install    | **nixos-anywhere** + **disko**                                 | SSH from a workstation; declarative disk; Mac uses `--build-on remote` |
 | Switch            | **MikroTik CRS310-8G+2S+IN** + **2× UniFi Flex Mini** (acquired) | CRS310 is core L2; Flex Minis extend trusted/iot to office and living room |
 | WiFi AP           | **Ubiquiti U7 Lite** (1×, acquired)                            | WiFi 7; 2.5 GbE uplink; VLAN-capable SSIDs; ~115 m² coverage    |
-| UPS               | **Deferred** — not required for v1                             | Procure later; optional Stage 8 power test                      |
+| UPS               | **Deferred** — not required for v1                             | No hardware yet; NUT stays off — [todo.md](todo.md)             |
 | UniFi             | **UniFi OS Server on OptiPlex only** (functional); data `/var/lib/unifi-os-server` | Vendor binaries + flake units (`unifi.nix`, rootless Podman); UI `:11443`, inform `:8080` at `10.10.10.1`; `unifi.lab.zdk.no` → Caddy `.30.1`; **not** on TrueNAS |
 | DHCP              | **dnsmasq** on router                                          | Simple per-VLAN pools; NixOS-native                             |
 | DNS (internal)    | **Unbound** on router                                          | Split-horizon, recursive resolver                               |
@@ -44,10 +45,10 @@ are canonical.
 | K8s control plane | **`nordri` sole CP** at `10.10.30.11:6443`; **CP taint kept**; `.10` reserved | Workloads on `sudri`–`vestri`; no kube-vip until second CP |
 | RK1 node OS       | **NixOS** (GiyoMoon mainline)                                  | Unified ops with router; escape hatches documented only         |
 | RK1 NixOS deploy  | **deploy-rs** (`nodes#`, `remoteBuild`)                        | Multi-node + magic rollback; Mac evaluates, node builds; janus still `nixos-rebuild` |
-| Storage (K8s)     | **Longhorn** — default StorageClass, **replica 3**, NVMe at `/var/lib/longhorn` per RK1 | 2×500G + 2×2TB; replica-3 usable ~raw/3; single PVC ≤ smallest node; Velero/ZFS off-cluster |
+| Storage (K8s)     | **Longhorn** — default StorageClass, **replica 3**, NVMe at `/var/lib/longhorn` per RK1 | 2×500G + 2×2TB; replica-3 usable ~raw/3; single PVC ≤ smallest node. Off-cluster backup is not deployed — [todo.md](todo.md) |
 | Auth / SSO        | **Authelia** TrueNAS App (`10.10.30.20:9091`)                  | Caddy `forward_auth` for lab UIs; portal `auth.lab.zdk.no`; exceptions below |
 | Secrets           | **sops-nix + age**; key `/var/lib/sops-nix/key.txt` on janus   | One SOPS workflow; workstation age identity in `.sops.yaml`     |
-| VPN               | **WireGuard** (`51820`) + **Headscale** on janus               | Headscale **`127.0.0.1:8081`** behind Caddy (`headscale.lab.zdk.no`); **not** `:8080` (UniFi Inform). Remorse away handshake still open |
+| VPN               | **WireGuard** (`51820`) + **Headscale** on janus               | Headscale **`127.0.0.1:8081`** behind Caddy (`headscale.lab.zdk.no`); **not** `:8080` (UniFi Inform). Remorse peer is configured; off-lab handshake is [todo.md](todo.md) |
 | WAN IDS           | **Not in v1** (CrowdSec deferred)                              | nftables rate-limit on 443 first; add CrowdSec if logs warrant  |
 | DDNS              | **DNSUpdater** flake → **Domeneshop**                          | Dynamic `A` for `img`, `ha`, `code`, `vpn`; sops `dnsupdater.*`; Loki `10.10.30.101` |
 | Monitoring        | **kube-prometheus-stack** + presence + unpoller + CRS310 SNMP + Blocky | Grafana Network; Alertmanager `alertmanager.lab.zdk.no`         |
@@ -70,7 +71,7 @@ are canonical.
 | TrueNAS apps      | **HA, Immich, Authelia, Forgejo, Jellyfin** as catalog Apps    | Live listeners `:30103` / `:30041` / `:9091` / `:30142`+`:30143` / `:30013`; do not also start those compose services |
 | TrueNAS compose   | **Blocky, Promtail** in `services/truenas/docker-compose.yml`  | Caddy is on janus; App-backed services stay out of compose |
 | Location          | **Norway**, ~60 m² flat                                        | 1 AP; EU/NO retailers where possible                            |
-| Security pass     | **Unused services off**; no NUT; Caddy `admin off`; WAN ICMP limited to echo+PMTU; Traefik dashboard off; node SSH bound to VLAN 30 IP | Stage 8. CrowdSec / HSTS / UPS still deferred. Root SSH keys stay for deploy. |
+| Security pass     | **Unused services off**; no NUT; Caddy `admin off`; WAN ICMP limited to echo+PMTU; Traefik dashboard off; node SSH bound to VLAN 30 IP | CrowdSec and HSTS stay out. UPS is [todo.md](todo.md). Root SSH keys stay for deploy. |
 
 ## Exposure matrix
 

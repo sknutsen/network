@@ -1,4 +1,4 @@
-# Stage 8 security pass — unused services stay off. Router is the PEP.
+# Unused services stay off. The router is the policy point.
 {
   config,
   ...

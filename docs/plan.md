@@ -1,31 +1,35 @@
-# Home network plan
+# Home network
 
-Declarative homelab: NixOS router, VLAN segmentation, TrueNAS edge, k3s on Turing RK1, minimal public exposure.
+Declarative homelab as it runs: NixOS router, VLAN segmentation, TrueNAS, k3s on Turing RK1, minimal public exposure.
 
-## Documentation map
+The configs are the network. `router/`, `nodes/`, `switch/`, `services/`, `k8s/`, and `secrets/` are what is deployed. The docs in this directory describe that tree. When they disagree, the config wins; update the doc to match.
 
-| Doc | Purpose |
-|-----|---------|
-| [decisions.md](decisions.md) | **Canonical decision log** |
+Open follow-ups are [todo.md](todo.md). Do not resume the old stage checklist. [implementation-stages.md](implementation-stages.md) only points at the living docs. NPU/GPU kernel work stays in [plans/rk1-bsp-fork.md](plans/rk1-bsp-fork.md) and is not on the todo.
+
+## Documentation
+
+| Doc | What it describes |
+|-----|-------------------|
+| [architecture.md](architecture.md) | Diagrams, traffic flows, service map |
+| [decisions.md](decisions.md) | Choices in effect |
+| [decision-briefs.md](decision-briefs.md) | Options and history (brief IDs are canonical) |
 | [vlan-plan.md](vlan-plan.md) | VLANs, IPs, DHCP, DNS, IPv6 |
 | [firewall-matrix.md](firewall-matrix.md) | nftables policy |
 | [inventory.md](inventory.md) | Devices, ports, reservations |
-| [architecture.md](architecture.md) | Diagrams, traffic flows, service map |
-| [implementation-stages.md](implementation-stages.md) | Stage 0–8 checklists |
-| [decision-briefs.md](decision-briefs.md) | Design options and history (**brief IDs are canonical**) |
-| [../router/OPEN-QUESTIONS.md](../router/OPEN-QUESTIONS.md) | Unanswered first-boot leftovers only |
+| [todo.md](todo.md) | Open follow-ups on the live hosts |
+| [implementation-stages.md](implementation-stages.md) | Retired rollout; not a backlog |
+| [runbooks/](runbooks/) | Procedures for the live hosts |
 | [reference/](reference/) | Alternatives not chosen |
 | [plans/rk1-bsp-fork.md](plans/rk1-bsp-fork.md) | Deferred NPU/GPU kernel work |
+
+Changing a host means editing the module or manifest that already implements it, then the doc that describes it. A new choice goes in [decisions.md](decisions.md). A finished follow-up is deleted from [todo.md](todo.md).
 
 ## Principles
 
 - Self-hosted first — no Cloudflare, Tailscale SaaS, or tunnel vendors unless unavoidable.
 - Router is the policy point **and** always-on edge (Caddy, Unbound, UniFi, Headscale); config lives in Git.
 - VPN-first admin (WireGuard + Headscale); publish `img.zdk.no`, `ha.zdk.no`, and `code.zdk.no` on WAN. Apex `zdk.no` is not a homelab site. `*.lab.zdk.no` stays internal.
-- `*.lab.zdk.no` is internal-only. Authelia on lab UIs except `auth` /
-  `code.lab` / `headscale.lab` / `ha.lab` / `immich.lab` / `jellyfin.lab` /
-  `truenas.lab` / `unifi.lab`. `jellyfin.lab` is household (guest + TV),
-  not WAN.
+- `*.lab.zdk.no` is internal-only. Authelia on lab UIs except `auth` / `code.lab` / `headscale.lab` / `ha.lab` / `immich.lab` / `jellyfin.lab` / `truenas.lab` / `unifi.lab`. `jellyfin.lab` is household (guest + TV), not WAN.
 
 ## Decisions (summary)
 
@@ -34,7 +38,7 @@ Full table: **[decisions.md](decisions.md)**.
 | Layer | Choice |
 |-------|--------|
 | Router | NixOS on Dell OptiPlex 9020 MT + i350-T2 (acquired); UniFi OS Server (functional) |
-| Switch / WiFi | CRS310 + 2× USW Flex Mini + U7 Lite + PoE injector (all acquired); UPS deferred |
+| Switch / WiFi | CRS310 + 2× USW Flex Mini + U7 Lite + PoE injector (all acquired); UPS deferred — [todo.md](todo.md) |
 | Edge | Caddy on janus; HA, Immich, Authelia, Forgejo, Jellyfin as TrueNAS Apps |
 | K8s | 4× RK1, NixOS, k3s, Flux, Traefik, Capacitor |
 | Monitoring | kube-prometheus-stack + presence + unpoller + CRS310 SNMP + Blocky; Alertmanager |
@@ -80,7 +84,7 @@ Public services: [architecture.md § Public services](architecture.md#public-ser
 
 ## Public vs internal exposure
 
-Full matrix: [decisions.md § Exposure matrix](decisions.md#exposure-matrix).
+Full matrix: [decisions.md § Exposure matrix](decisions.md#exposure-matrix). Another public name follows brief 18 in [decision-briefs.md](decision-briefs.md) and a new row in that matrix before WAN cutover.
 
 | Hostname | WAN | Authelia |
 |----------|-----|----------|
@@ -91,47 +95,18 @@ Full matrix: [decisions.md § Exposure matrix](decisions.md#exposure-matrix).
 | Other `*.lab.zdk.no` | **Never** | Yes |
 | Future public apps | Per-app | Optional |
 
-## Implementation
+## Repo layout
 
-Stages 0–8 with checklists: **[implementation-stages.md](implementation-stages.md)**.
-
-Stages 0–5, 7, and 8 are done except UPS (deferred). Stage 6 leftovers:
-Remorse away handshake and VPN path confirm. CI runs
-`scripts/validate.sh` on `main` and pull requests.
-
-## Remaining decisions
-
-Canonical log: **[decisions.md](decisions.md)**. Options and history:
-**[decision-briefs.md](decision-briefs.md)**. IDs below **are the brief IDs**.
-
-**For agents:** When the user answers an item, write it in `decisions.md`, set
-the brief to **Resolved**, and **delete the row here**. Do not keep resolved
-choices on this list. Do not invent a parallel numbering scheme.
-
-| Brief # | Topic | Status |
-|---------|-------|--------|
-| 12 | RK1 BSP / NPU fork | Deferred — [plans/rk1-bsp-fork.md](plans/rk1-bsp-fork.md) |
-| 13 | Nintendo Switch local play | Deferred until local play is tested |
-| 18 | Future public apps | Per-app checklist in the brief |
-
-Remaining MAC reservations (Socrates, Peon, Switch) are leftovers, not a brief: [OPEN-QUESTIONS.md](../router/OPEN-QUESTIONS.md). RK1 NICs are reserved.
-
-## Target repo layout
-
-Stage 6 leftover: Remorse away handshake. Runbooks are in
-[runbooks/](runbooks/). k3s, Flux, Loki, Promtail, WAN
-Caddy, WireGuard, and Headscale are live. DNSUpdater is the
-[DNSUpdater](https://github.com/sknutsen/DNSUpdater) flake module on janus
-(Domeneshop `img`/`ha`/`code`/`vpn`; sops token/secret; Loki).
+Runbooks are in [runbooks/](runbooks/). k3s, Flux, Loki, Promtail, WAN Caddy, WireGuard, and Headscale are live. DNSUpdater is the [DNSUpdater](https://github.com/sknutsen/DNSUpdater) flake module on janus (Domeneshop `img`/`ha`/`code`/`vpn`; sops token/secret; Loki).
 
 ```
 net/
-├── flake.nix                    # NixOS configs (optiplex / janus) — exists
-├── docs/                        # exists (incl. runbooks/)
-├── router/                      # exists
+├── flake.nix                    # NixOS configs (optiplex / janus)
+├── docs/                        # this directory (incl. runbooks/)
+├── router/                      # janus NixOS modules
 ├── nodes/                       # RK1 NixOS flake (k3s on; sops token)
-├── switch/                      # exists
-├── services/                    # exists (truenas, caddy, authelia, dns, promtail, HA/Immich/Forgejo READMEs)
+├── switch/                      # CRS310
+├── services/                    # truenas, caddy, authelia, dns, promtail, HA/Immich/Forgejo/Jellyfin READMEs
 ├── k8s/clusters/homelab/        # Flux infra
 ├── secrets/                     # .sops.yaml + encrypted router.yaml
 └── scripts/                     # validate.sh, generate-viewer.py
@@ -151,7 +126,7 @@ net/
 
 ## Browser viewer
 
-Markdown in this directory is the source of truth. Build a standalone HTML page (no HTTP server):
+Markdown in this directory is the source of truth for the docs. Build a standalone HTML page (no HTTP server):
 
 ```bash
 python3 scripts/generate-viewer.py --open

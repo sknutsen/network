@@ -135,7 +135,7 @@ No 802.1Q. Every port is VLAN 20 because USW-NC port 5 is access 20. **pingu** (
 | **i350-T2** port 1 | `a0:36:9f:33:ae:96` | `lan0`   | 802.1Q trunk → CRS310         |
 | **i350-T2** port 2 | `a0:36:9f:33:ae:97` | `spare0` | Unused (link forced down)     |
 
-Port↔MAC for i350 confirmed at Stage 1 (`ethtool -p lan0`).
+Port↔MAC for i350 confirmed (`ethtool -p lan0`).
 
 **Rejected alternative:** Router-on-a-stick (single NIC for WAN + trunk). See
 [decisions.md](decisions.md).
@@ -196,7 +196,7 @@ Authelia is **not** on `auth.lab.zdk.no` (portal), `code.lab.zdk.no` (Forgejo-na
 
 ## IPv6 (prefix delegation)
 
-Stage 2 capture (2026-09-05): **OBOS Nett does not offer IPv6**. janus `wan0`
+Captured 2026-09-05: **OBOS Nett does not offer IPv6**. janus `wan0`
 has public IPv4 `84.48.97.100/21` only; no RA, no DHCPv6-PD, no GUA (link-local
 only). [OBOS: no IPv6 today](https://www.obos.no/boligselskap/nett/beboer/internett/fast-ip).
 Keep `enableIpv6 = false` for WAN. Lab **ULA** `fd10:10:10::/48` is on every

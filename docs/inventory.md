@@ -126,5 +126,5 @@ Still unknown: Socrates, Peon, Nintendo Switch.
 **Zpi:** Servers VLAN for audio casting; move to trusted if it becomes a daily
 driver.
 
-**Nintendo Switch:** IoT zone; local multiplayer rules deferred — see
-[firewall-matrix.md](firewall-matrix.md).
+**Nintendo Switch:** IoT zone; local multiplayer is not allowed yet — see
+[firewall-matrix.md](firewall-matrix.md) and [todo.md](todo.md).

@@ -1,4 +1,4 @@
-# Intent from docs/firewall-matrix.md — Stage 4 minus IoT DNS cutover (enableBlocky).
+# Intent from docs/firewall-matrix.md. IoT DNS follows enableBlocky.
 { config, lib, ... }:
 let
   cfg = config.homelab.router;
@@ -145,7 +145,7 @@ in
           }
           ${
             if cfg.enableCaddy && cfg.enableWanCaddy then
-              ''# Stage 7 — WAN Caddy. Per-source SYN limit; established
+              ''# WAN Caddy. Per-source SYN limit; established
           # already accepted above. Over-limit hits the chain drop.
           # CrowdSec deferred (decision-briefs §15).
           iifname $WAN tcp dport { 80, 443 } ct state new meter wan_https4 { ip saddr limit rate 25/second burst 50 packets } accept''
@@ -155,9 +155,9 @@ in
 
           # DNS / DHCP on LAN. Guest: DHCP + stub DNS on the gateway
           # (household name; rest forwarded to 1.1.1.1 / 9.9.9.9).
-          # IoT: DHCP always. DNS to Unbound only until enableBlocky.
-          # After cutover, prerouting DNAT sends IoT :53/:853 to Blocky
-          # (including queries aimed at the gateway); INPUT drop is backup.
+          # IoT: DHCP always. With enableBlocky, prerouting DNAT sends
+          # IoT :53/:853 to Blocky (including queries aimed at the gateway);
+          # INPUT drop is backup.
           iifname { $MGMT, $TRUSTED, $SERVERS } udp dport { 53, 67 } accept
           iifname { $MGMT, $TRUSTED, $SERVERS } tcp dport 53 accept
           iifname { $IOT, $GUEST } udp dport 67 accept
@@ -181,7 +181,7 @@ in
               ""
           }
 
-          # WireGuard WAN (Stage 6)
+          # WireGuard on WAN
           ${
             if cfg.enableWireGuard then
               ''iifname $WAN udp dport ${toString C.vpn.listenPort} accept''
@@ -237,7 +237,7 @@ in
           # --- Mgmt ---
           iifname $MGMT oifname { $SERVERS, $WAN } accept
 
-          # --- VPN (Stage 6) ---
+          # --- VPN (wg0) ---
           # Split-tunnel only: lab VLANs, not IoT/guest, not WAN exit.
           ${
             if cfg.enableWireGuard then
@@ -250,7 +250,7 @@ in
         }
 
         chain iot_to_rfc1918 {
-          # Blocky DNS only (Stage 4+). Harmless no-op until 10.10.30.21 exists.
+          # Blocky DNS only (10.10.30.21).
           ip daddr $BLOCKY udp dport { 53, 853 } accept
           ip daddr $BLOCKY tcp dport { 53, 853 } accept
           # Deny other DNS to force Blocky (or Unbound-on-gateway via INPUT)
@@ -277,7 +277,7 @@ in
         chain prerouting {
           type nat hook prerouting priority dstnat; policy accept;
           ${iotDnsDnat}
-          # Stage 7: WAN 80/443 is INPUT to local Caddy (enableWanCaddy), not DNAT.
+          # WAN 80/443 is INPUT to local Caddy (enableWanCaddy), not DNAT.
         }
       }
 

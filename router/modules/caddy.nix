@@ -32,7 +32,7 @@ in {
       # certmagic on 127.0.0.53 then fails "could not determine authoritative
       # nameservers" and Caddy has no cert (tlsv1 alert internal error).
       #
-      # admin off is Stage 8. NixOS defaults to `caddy reload` via the admin
+      # admin is off. NixOS defaults to `caddy reload` via the admin
       # API on :2019; that fails with connection refused, so new vhosts never
       # load (tlsv1 alert internal error). Restart on Caddyfile change instead.
       enableReload = false;

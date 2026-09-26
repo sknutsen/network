@@ -1,4 +1,4 @@
-# WAN Caddy (Stage 7)
+# WAN Caddy
 
 `enableWanCaddy` opens WAN **80/443** to Caddy on janus. Certs are already
 DNS-01. Hairpin NAT is **off** — do not test the public names via the WAN
