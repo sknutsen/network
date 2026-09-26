@@ -21,10 +21,10 @@ in {
     hostname = "janus";
     wanInterface = "wan0"; # I217LM 34:17:eb:96:84:20
     lanTrunkInterface = "lan0"; # i350-T2 port 1 a0:36:9f:33:ae:96
-    enableIpv6 = false; # OBOS Nett has no IPv6 (Stage 2). Flip when they offer PD; leave blockyIpv6 null until GUA known.
+    enableIpv6 = false; # OBOS Nett has no IPv6. Flip when they offer PD; leave blockyIpv6 null until GUA known.
     blockyIpv6 = null; # set after PD, e.g. "<servers-/64>::21"
-    enableWireGuard = true; # Stage 6 — wg0
-    enableHeadscale = true; # Stage 6 — 127.0.0.1:8081, Caddy vhost
+    enableWireGuard = true; # wg0
+    enableHeadscale = true; # 127.0.0.1:8081, Caddy vhost
     enableDnsUpdater = true; # Domeneshop A for img + ha + code + vpn (sops TOKEN/SECRET)
     enableUnifi = true;
     enableCaddy = true;

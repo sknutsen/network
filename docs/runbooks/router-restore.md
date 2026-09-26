@@ -73,6 +73,6 @@ identity listed in `secrets/.sops.yaml`, and
 
 - Point Inform at `10.10.30.1`.
 - Copy the **cluster** age key onto janus (RK1s + Flux only).
-- Enable `enableWanCaddy` as part of a restore. That is Stage 7.
+- Turn `enableWanCaddy` off. It is already true in `configuration.nix` and belongs on a restored janus (WAN 80/443 to Caddy for `img` / `ha` / `code`).
 - Start compose Authelia / Forgejo on TrueNAS to “replace” Caddy. They
   collide with the Apps.

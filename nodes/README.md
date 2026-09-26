@@ -24,7 +24,7 @@ nodes/
 └── bsp/                      # deferred vendor kernel — do not select
 ```
 
-**Stage flags:** `enableK3s` is true. `kernelProfile` stays `"mainline"`.
+**Current settings:** `enableK3s` is true. `kernelProfile` stays `"mainline"`.
 `diskLayout` stays `"giyomoon-image"`. `interface` is `end0` (GiyoMoon
 25.11). `diskDevice` is the NVMe by-id (unused until a disko reimage).
 
@@ -95,7 +95,7 @@ nix eval './nodes#nixosConfigurations.nordri.config.networking.hostName'
 nix eval './nodes#deploy.nodes.nordri.hostname'
 ```
 
-## Stage 5 — k3s
+## k3s
 
 Live: nordri is the sole control plane (`https://10.10.30.11:6443`, CP
 taint kept). sudri / austri / vestri are agents. Token is
@@ -129,17 +129,6 @@ kubectl get nodes -o wide
 `mkHost { hostname = "nordri"; kernelProfile = "mainline"; }` (default).
 Selecting `"bsp"` fails an assertion until `nodes/bsp/` is filled in.
 Do not mix mainline and BSP nodes in one cluster.
-
-## Leftovers
-
-| Item | Status |
-|------|--------|
-| NIC name | Done — `end0` on all four |
-| RK1 MACs | Done — reserved in router dnsmasq |
-| NVMe by-id | Done — `diskDevice` set; still `giyomoon-image` |
-| IPv6 ULA | Done — no WAN default route |
-| k3s token / `cluster.yaml` | Done — encrypted `nodes/secrets/cluster.yaml` |
-| sops-nix on nodes | Done — `/var/lib/sops-nix/key.txt` (cluster age key) |
 
 Escape hatches (Ubuntu / Talos) if NixOS blocks progress:
 [docs/reference/escape-hatches-ubuntu-talos.md](../docs/reference/escape-hatches-ubuntu-talos.md).

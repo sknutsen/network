@@ -4,7 +4,7 @@ let
   C = import ../lib/constants.nix;
 in
 {
-  # Stage 6 — classic WireGuard (wg0) and Headscale are independent.
+  # Classic WireGuard (wg0) and Headscale are independent.
   # Headscale is a Tailscale login-server, not a replacement for wg0.
   config = lib.mkMerge [
     (lib.mkIf cfg.enableWireGuard {

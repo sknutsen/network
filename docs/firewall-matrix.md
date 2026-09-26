@@ -41,7 +41,7 @@ Router-enforced nftables policy on NixOS. VLAN design: [vlan-plan.md](vlan-plan.
 | 15 | any internal | wan | all | **ALLOW** | NAT outbound |
 | 16 | trusted (20) | CRS310 `10.10.10.2` | all | **ALLOW** | SSH/Winbox from office. BMC is on VLAN 30 (rule 9). Not USW/AP |
 
-### Trusted → IoT targets (Stage 4)
+### Trusted → IoT targets
 
 | Target | IP | Ports (typical) |
 |--------|-----|-----------------|
@@ -79,10 +79,10 @@ trusted, servers (jump/k8s), or VPN — not from VLAN 10.
 | guest (50) | janus | 80, 443/tcp | **ALLOW** | `jellyfin.lab` only (`household`). Other Host headers abort |
 | iot (40) | janus | 80, 443/tcp | **ALLOW** | `ha.lab` / `ha.zdk` (`ha_lan`); TV also `jellyfin.lab`. `img`/`code` abort (`not_untrusted`) |
 | guest (50) | janus `10.10.50.1` | 53/udp+tcp | **ALLOW** | Guest DNS stub (household name + public forward) |
-| WAN | janus | 80, 443/tcp | **ALLOW** Stage 7 | **WAN INPUT to Caddy** (`enableWanCaddy`) |
+| WAN | janus | 80, 443/tcp | **ALLOW** | **WAN INPUT to Caddy** (`enableWanCaddy`) |
 | trusted + servers + mgmt (+ wg0) | janus | 11443/tcp | **ALLOW** | UniFi UI. Mgmt included so you can use the AP’s native VLAN |
 | mgmt (AP + Flex Minis) + trusted + servers | `10.10.10.1` | 8080/tcp, 3478/udp, 10001/udp | **ALLOW** | UniFi Inform / STUN / discovery. **Do not put Headscale on :8080** |
-| wg0 | janus | 53/udp+tcp | **ALLOW** Stage 6 | Split-horizon Unbound for VPN clients |
+| wg0 | janus | 53/udp+tcp | **ALLOW** | Split-horizon Unbound for VPN clients |
 | servers + iot | janus | 5353/udp | **ALLOW** | Avahi reflector (30↔40 only) |
 | localhost | Headscale | 8081/tcp | — | Caddy reverse_proxy only; no extra INPUT |
 | servers | janus | 9100, 9101, 9130, 9116/tcp | **ALLOW** | node_exporter, presence, unpoller, snmp-exporter. Not trusted/mgmt/VPN/WAN |

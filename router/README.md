@@ -7,7 +7,7 @@ NixOS modules for the homelab edge router. The flake is at the **repo root**
 - [docs/firewall-matrix.md](../docs/firewall-matrix.md)
 - [docs/decisions.md](../docs/decisions.md)
 
-Remaining first-boot leftovers: **[OPEN-QUESTIONS.md](OPEN-QUESTIONS.md)**. Resolved answers: [docs/decisions.md](../docs/decisions.md).
+Choices: [docs/decisions.md](../docs/decisions.md). Open follow-ups: [docs/todo.md](../docs/todo.md).
 
 ## Install (nixos-anywhere)
 
@@ -77,7 +77,7 @@ router/
     ├── dns.nix             # Unbound split-horizon
     ├── firewall.nix        # nftables from firewall-matrix
     ├── caddy.nix           # Caddy; Caddyfile in services/caddy/
-    ├── vpn.nix             # WireGuard + Headscale (Stage 6 flags)
+    ├── vpn.nix             # WireGuard + Headscale
     ├── unifi.nix           # UniFi OS Server (rootless Podman + systemd)
     ├── dnsupdater.nix      # Domeneshop DDNS (DNSUpdater flake + sops)
     ├── monitoring.nix      # node_exporter, presence, unpoller, snmp-exporter
@@ -85,9 +85,9 @@ router/
     └── hardening.nix       # unused services off; resolved / NUT / SSH allowlist
 ```
 
-**Stage flags** in `hosts/optiplex/configuration.nix`: `enableBlocky` is **true** (Blocky at `10.10.30.21`). `enableWireGuard` is **true** (`wg0` `10.10.255.1`, WAN `51820/udp`). `enableHeadscale` is **true** (`127.0.0.1:8081`). `enableWanCaddy` is **true** (WAN 80/443 for `img.zdk.no`, `ha.zdk.no`, and `code.zdk.no`). `enableDnsUpdater` is **true** (Domeneshop `img` + `ha` + `code` + `vpn`; Loki; 5min timer). Lab and public TLS is ACME **DNS-01** (Domeneshop plugin + sops; `dns01` snippet in the Caddyfile). Caddyfile: `services/caddy/Caddyfile`.
+**Current settings** in `hosts/optiplex/configuration.nix`: `enableBlocky` is **true** (Blocky at `10.10.30.21`). `enableWireGuard` is **true** (`wg0` `10.10.255.1`, WAN `51820/udp`). `enableHeadscale` is **true** (`127.0.0.1:8081`). `enableWanCaddy` is **true** (WAN 80/443 for `img.zdk.no`, `ha.zdk.no`, and `code.zdk.no`). `enableDnsUpdater` is **true** (Domeneshop `img` + `ha` + `code` + `vpn`; Loki; 5min timer). Lab and public TLS is ACME **DNS-01** (Domeneshop plugin + sops; `dns01` snippet in the Caddyfile). Caddyfile: `services/caddy/Caddyfile`.
 
-## Build / deploy (once hardware knobs are set)
+## Rebuild
 
 ```bash
 # From repo root (Linux builder or on janus):
@@ -121,7 +121,7 @@ headers only. Not mgmt.
 resurrect the TrueNAS Network Application. The updater unit stays disabled so
 `nixos-rebuild` does not fail when the binary exits 1.
 
-Stage 3 done: U7 Lite + Flex Minis adopted; SSIDs and ports per vlan-plan
+U7 Lite and Flex Minis are adopted. SSIDs and ports follow vlan-plan
 (`Hai-Fi Wai-Fi` / `(IoT)` / `(Guest)`).
 
 **If binaries are missing** (reinstall): run the vendor installer as root

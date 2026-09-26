@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Build a standalone HTML viewer from the markdown docs.
 
-Markdown in the repo is the source of truth. This script parses the docs,
-READMEs, and remaining open questions and writes a self-contained HTML page
+Markdown in the repo is the source of truth. This script parses the docs
+and READMEs and writes a self-contained HTML page
 that can be opened as a file — no HTTP server, and no second copy of the
 markdown kept in git.
 
@@ -25,14 +25,16 @@ OUT_DEFAULT = ROOT / "docs" / "generated" / "index.html"
 
 DOCS: list[tuple[str, Path, str, str]] = [
     # key, path, label, group
-    ("plan", ROOT / "docs/plan.md", "Plan", "Overview"),
+    ("plan", ROOT / "docs/plan.md", "Overview", "Overview"),
     ("architecture", ROOT / "docs/architecture.md", "Architecture", "Overview"),
     ("decisions", ROOT / "docs/decisions.md", "Decisions", "Overview"),
     ("briefs", ROOT / "docs/decision-briefs.md", "Decision briefs", "Overview"),
+    ("todo", ROOT / "docs/todo.md", "Todo", "Overview"),
+    ("stages", ROOT / "docs/implementation-stages.md", "Build record", "Overview"),
+    ("openQuestions", ROOT / "router/OPEN-QUESTIONS.md", "First-boot questions", "Overview"),
     ("vlan", ROOT / "docs/vlan-plan.md", "VLAN plan", "Network"),
     ("firewall", ROOT / "docs/firewall-matrix.md", "Firewall", "Network"),
     ("inventory", ROOT / "docs/inventory.md", "Inventory", "Network"),
-    ("stages", ROOT / "docs/implementation-stages.md", "Stages", "Build"),
     ("rbIndex", ROOT / "docs/runbooks/README.md", "Runbooks", "Runbooks"),
     ("rbIot", ROOT / "docs/runbooks/iot-dns.md", "IoT DNS", "Runbooks"),
     ("rbRouter", ROOT / "docs/runbooks/router-restore.md", "Router restore", "Runbooks"),
@@ -43,11 +45,10 @@ DOCS: list[tuple[str, Path, str, str]] = [
     ("rbAcme", ROOT / "docs/runbooks/acme-failure.md", "ACME failure", "Runbooks"),
     ("rbCap", ROOT / "docs/runbooks/capacitor.md", "Capacitor", "Runbooks"),
     ("rbNet", ROOT / "docs/runbooks/network-monitoring.md", "Network monitoring", "Runbooks"),
-    ("openQuestions", ROOT / "router/OPEN-QUESTIONS.md", "Remaining questions", "Build"),
-    ("routerReadme", ROOT / "router/README.md", "Router README", "Build"),
-    ("switchReadme", ROOT / "switch/README.md", "Switch README", "Build"),
-    ("nodesReadme", ROOT / "nodes/README.md", "Nodes README", "Build"),
-    ("k8sReadme", ROOT / "k8s/README.md", "k8s README", "Build"),
+    ("routerReadme", ROOT / "router/README.md", "Router README", "Hosts"),
+    ("switchReadme", ROOT / "switch/README.md", "Switch README", "Hosts"),
+    ("nodesReadme", ROOT / "nodes/README.md", "Nodes README", "Hosts"),
+    ("k8sReadme", ROOT / "k8s/README.md", "k8s README", "Hosts"),
     ("bsp", ROOT / "docs/plans/rk1-bsp-fork.md", "RK1 BSP fork", "Deferred"),
     ("refAuth", ROOT / "docs/reference/auth-authelia-vs-authentik.md", "Auth", "Reference"),
     ("refSecrets", ROOT / "docs/reference/secrets-sops-vs-agenix.md", "Secrets", "Reference"),
@@ -60,6 +61,7 @@ DOCS: list[tuple[str, Path, str, str]] = [
     ("forgejo", ROOT / "services/forgejo/README.md", "Forgejo", "Services"),
     ("homeassistant", ROOT / "services/homeassistant/README.md", "Home Assistant", "Services"),
     ("immich", ROOT / "services/immich/README.md", "Immich", "Services"),
+    ("jellyfin", ROOT / "services/jellyfin/README.md", "Jellyfin", "Services"),
     ("authelia", ROOT / "services/authelia/README.md", "Authelia", "Services"),
 ]
 

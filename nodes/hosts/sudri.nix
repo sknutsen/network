@@ -10,7 +10,7 @@
     diskLayout = "giyomoon-image";
     diskDevice = "/dev/disk/by-id/nvme-KINGSTON_SNV2S500G_50026B76866B5691";
     enableIpv6 = true; # lab ULA; no WAN v6
-    enableK3s = true; # Stage 5
+    enableK3s = true;
     enableLonghornPrep = true;
   };
 }

@@ -23,7 +23,8 @@
       type = lib.types.bool;
       default = false;
       description = ''
-        Enable WAN DHCPv6-PD and per-VLAN /64s (Stage 2, OBOS Nett).
+        Enable WAN DHCPv6-PD and per-VLAN /64s. Off while OBOS Nett
+        offers no IPv6.
         IoT IPv6 DNS DNAT also requires blockyIpv6 (Blocky GUA on VLAN 30).
       '';
     };
@@ -44,14 +45,14 @@
     enableWireGuard = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Stage 6 — WireGuard server on WAN.";
+      description = "WireGuard server on WAN (wg0).";
     };
 
     enableHeadscale = lib.mkOption {
       type = lib.types.bool;
       default = false;
       description = ''
-        Stage 6 — Headscale on 127.0.0.1:8081 behind Caddy
+        Headscale on 127.0.0.1:8081 behind Caddy
         headscale.lab.zdk.no. UniFi Inform keeps :8080. No Authelia.
       '';
     };
@@ -81,24 +82,23 @@
     enableWanCaddy = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Stage 7 — accept WAN TCP 80/443 to local Caddy (no DNAT to TrueNAS).";
+      description = "Accept WAN TCP 80/443 to local Caddy (no DNAT to TrueNAS).";
     };
 
     caddyEmail = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
-      description = "ACME account email. Set before first DNS-01 issuance (Stage 5 lab certs; Stage 7 public).";
+      description = "ACME account email for DNS-01 (lab and public names).";
     };
 
     enableBlocky = lib.mkOption {
       type = lib.types.bool;
       default = false;
       description = ''
-        Stage 4 — IoT DHCP DNS via Blocky (10.10.30.21); DNAT IoT :53/:853
+        IoT DHCP DNS via Blocky (10.10.30.21); DNAT IoT :53/:853
         to Blocky (hardcoded resolvers); drop IoT DNS to the router; omit
-        IoT domain-search. Off: IoT uses Unbound on the VLAN 40 gateway
-        so DNS works before Blocky is deployed. Blocky itself runs on
-        TrueNAS, not this host.
+        IoT domain-search. Off: IoT uses Unbound on the VLAN 40 gateway.
+        Blocky itself runs on TrueNAS, not this host.
       '';
     };
   };

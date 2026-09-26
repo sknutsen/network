@@ -1,15 +1,17 @@
 # Decision briefs
 
-Design options and history. **Brief IDs in this file are canonical** — use
-them in `plan.md` § Remaining decisions. Canonical choices:
-[decisions.md](decisions.md).
+Design options and history. **Brief IDs in this file are canonical.**
+Live choices: [decisions.md](decisions.md). Open follow-ups:
+[todo.md](todo.md).
 
 Resolved briefs stay here as rationale (a **Decision** section). Unresolved
-briefs still end with a recommendation. First-boot leftovers only:
-[router/OPEN-QUESTIONS.md](../router/OPEN-QUESTIONS.md).
+briefs still end with a recommendation.
 
-**For agents:** Closing a brief means update `decisions.md`, set **Status:
-Resolved** here, and remove the row from `plan.md` § Remaining decisions.
+**For agents:** This file is history, not a work queue. Closing a brief
+means update `decisions.md` and set **Status: Resolved** here. Delete the
+matching row from `todo.md` when the host matches. Do not resume
+implementation stages. The RK1 BSP fork stays in
+[plans/rk1-bsp-fork.md](plans/rk1-bsp-fork.md).
 
 | # | Brief | Status | Decide by |
 |---|-------|--------|-----------|
@@ -23,7 +25,7 @@ Resolved** here, and remove the row from `plan.md` § Remaining decisions.
 | 8 | [Zdk repo boundary](#8-zdk-repo-boundary) | Superseded — will not deploy | — |
 | 9 | [Blocky host placement](#9-blocky-host-placement) | Resolved | — |
 | 10 | [CGNAT verification](#10-cgnat-verification) | Resolved | — |
-| 11 | [Hardware capability check](#11-hardware-capability-check) | Resolved — Stage 1 verified | — |
+| 11 | [Hardware capability check](#11-hardware-capability-check) | Resolved | — |
 | 12 | [RK1 BSP / NPU fork](#12-rk1-bsp--npu-fork) | Deferred | When NPU/GPU needed |
 | 13 | [Nintendo Switch local play](#13-nintendo-switch-local-play) | Deferred | If local play fails |
 | 14 | [Hairpin NAT](#14-hairpin-nat) | Resolved — off | — |
@@ -39,7 +41,7 @@ Resolved** here, and remove the row from `plan.md` § Remaining decisions.
 
 ## 1. IPv6 prefix size
 
-**Status:** **Resolved** — OBOS Nett offers no IPv6 (Stage 2, 2026-09-05).
+**Status:** **Resolved** — OBOS Nett offers no IPv6 (2026-09-05).
 
 ### Context
 
@@ -221,11 +223,13 @@ smallest node (~430 GB after OS). Extra space on austri/vestri is Longhorn slack
 | **Replica count 1** | Maximum capacity | No redundancy — unacceptable for Prometheus/Loki without external backup |
 | **Different StorageClass per tier** | `longhorn-3` for critical; `longhorn-1` for cache | More manifest complexity |
 
-### Stage 5 checklist
+### On the cluster
 
-1. Mount NVMe at `/var/lib/longhorn` on all four RK1s.
-2. Deploy Longhorn; set `defaultReplicaCount: 3`.
-3. Configure Velero or ZFS snapshots on TrueNAS for off-cluster backup.
+NVMe is mounted at `/var/lib/longhorn` on all four RK1s. Longhorn is the
+default StorageClass with replica count 3.
+
+Off-cluster backup (Velero or TrueNAS ZFS snapshots) is the recorded choice
+and is not in the tree. Follow-up: [todo.md](todo.md).
 
 ---
 
@@ -309,55 +313,50 @@ behind CGNAT: [reference/cgnat-options.md](reference/cgnat-options.md).
 
 ### Decision
 
-No further action. Stage 7 opens WAN INPUT to Caddy on janus — not DNAT to
+No further action. WAN INPUT to Caddy on janus is open — not DNAT to
 TrueNAS.
 
 ---
 
 ## 11. Hardware capability check
 
-**Status:** **Resolved** — Stage 1 physical verification complete.
+**Status:** **Resolved** — physical layout matches [inventory.md](inventory.md).
 
 ### Context
 
-Design assumes specific NIC roles, switch VLAN support, and AP SSID mapping.
-Wrong assumptions force redesign. MACs and port plan are already written down;
-this brief is “prove them on the metal.”
+Design assumed specific NIC roles, switch VLAN support, and AP SSID mapping.
+That check is closed. The live layout is [inventory.md](inventory.md).
 
 ### Decision
 
-Stage 1 verified the design assumptions: I217LM is WAN, i350-T2 port 1 is the
-CRS310 trunk, CRS310 does 802.1Q, U7 Lite SSIDs map to VLANs 20/40/50, TrueNAS
-and Turing Pi sit on VLAN 30. Recorded in [inventory.md](inventory.md) and
-[implementation-stages.md](implementation-stages.md) Stage 1.
+Verified on the metal: I217LM is WAN, i350-T2 port 1 is the CRS310 trunk,
+CRS310 does 802.1Q, U7 Lite SSIDs map to VLANs 20/40/50, TrueNAS and Turing
+Pi sit on VLAN 30. Recorded in [inventory.md](inventory.md).
 
-### What was done (Stage 1, in order)
+### What was verified
 
-1. **Label** CRS310 ports 1–8 per [inventory.md](inventory.md) / vlan-plan.
-2. **Cable the LAN side first** (no ISP cutover yet): i350 port 1 → CRS310 ether1
-   trunk; AP + PoE injector → ether2; TrueNAS → ether4; Turing Pi (one RJ45) → ether3.
-   Leave ether5 empty — the board’s second RJ45 is the same L2 as the first.
-3. **After NixOS first boot**, confirm names match MACs:
-   `ip link` shows `wan0` / `lan0` / `spare0`; `ethtool -p lan0` blinks i350
-   **port 1** (or unplug test). Spare stays down.
-4. **Import** [switch/crs310.rsc](../switch/crs310.rsc); check mgmt `10.10.10.2`
-   and that a tagged client on ether1 lands in the right VLAN.
-5. **Bridge the OBOS Nett modem** at router cutover, then plug it into `wan0`.
-   Confirm public IPv4 DHCP on `wan0` (whatismyip matches the WAN address).
-6. **UniFi / AP** — UniFi OS Server is **functional** on the router. Adopt U7
-   Lite; SSIDs → VLANs 20/40/50. Confirm a phone on each SSID gets the matching
-   `10.10.x.0/24`.
-7. Document any deviation in [inventory.md](inventory.md).
+Already done. The current cabling and names are in
+[inventory.md](inventory.md) and [vlan-plan.md](vlan-plan.md).
 
-### Verify
+1. CRS310 ports 1–8 labeled per inventory.
+2. LAN cabled before the ISP cutover: i350 port 1 → CRS310 ether1 trunk; AP +
+   PoE injector → ether2; TrueNAS → ether4; Turing Pi (one RJ45) → ether3.
+   Ether5 stays empty — the board’s second RJ45 is the same L2 as the first.
+3. After first boot, `wan0` / `lan0` / `spare0` matched the MACs.
+   `ethtool -p lan0` blinks i350 port 1. Spare stays down.
+4. [switch/crs310.rsc](../switch/crs310.rsc) imported; mgmt `10.10.10.2`.
+5. OBOS Nett modem bridged; public IPv4 DHCP on `wan0`.
+6. UniFi OS Server on the router; U7 Lite adopted; SSIDs on VLANs 20/40/50.
 
-| Component | Requirement | How |
-|-----------|-------------|-----|
-| OptiPlex 9020 MT | I217LM = WAN; i350-T2 port 1 = 802.1Q trunk | `ip link`, `ethtool -p lan0` |
-| CRS310 | 802.1Q VLAN, trunk + access ports per vlan-plan | Import `.rsc`; ping `10.10.10.2` |
-| U7 Lite | SSIDs mapped to VLANs 20/40/50 | UniFi OS Server; DHCP subnet check |
-| Turing Pi 2.5 | One RJ45 on VLAN 30 access (BMC + nodes share onboard switch) | Link on port 3 only |
-| TrueNAS | NIC on VLAN 30 access | Static `10.10.30.20` |
+### Result
+
+| Component | What holds |
+|-----------|------------|
+| OptiPlex 9020 MT | I217LM is WAN (`wan0`); i350-T2 port 1 is the 802.1Q trunk (`lan0`) |
+| CRS310 | 802.1Q trunk and access ports per vlan-plan; mgmt `10.10.10.2` |
+| U7 Lite | SSIDs on VLANs 20/40/50 |
+| Turing Pi 2.5 | One RJ45 on VLAN 30 (BMC and nodes share the onboard switch) |
+| TrueNAS | VLAN 30 access, static `10.10.30.20` |
 
 ---
 
@@ -380,14 +379,14 @@ BSP kernel — not required for k3s or Traefik.
 
 ### Recommendation
 
-**Defer BSP fork** until a workload explicitly needs NPU/GPU. Initial cluster
-on GiyoMoon mainline per [decisions.md](decisions.md).
+**Defer BSP fork** until a workload explicitly needs NPU/GPU. The cluster
+stays on GiyoMoon mainline per [decisions.md](decisions.md).
 
 ---
 
 ## 13. Nintendo Switch local play
 
-**Status:** Deferred — [inventory.md](inventory.md), [firewall-matrix.md](firewall-matrix.md).
+**Status:** Deferred — test before changing `firewall.nix`. Follow-up: [todo.md](todo.md).
 
 ### Context
 
@@ -451,9 +450,9 @@ plugin or firewall).
 
 ### Decision
 
-**Skip CrowdSec at Stage 7 launch.** Use **nftables rate limits** on WAN 443 as
-the first line of defense. Deploy CrowdSec + Caddy bouncer only if access logs
-show sustained 403/401 brute force after the first month of WAN exposure.
+**CrowdSec is not deployed.** WAN 443 uses **nftables rate limits**. Add
+CrowdSec + a Caddy bouncer only if access logs show sustained 403/401 brute
+force.
 
 ### Options considered
 
@@ -494,7 +493,7 @@ Never reflect to guest or trusted.
 
 ## 17. Trusted → IoT cast rules
 
-**Status:** **Resolved** — trusted → TV / Chromecast / Odyssey (Stage 4).
+**Status:** **Resolved** — trusted → TV / Chromecast / Odyssey.
 
 ### Context
 
@@ -565,7 +564,7 @@ WAN cutover.
 
 ### Context
 
-Guest VLAN DNS currently goes to **1.1.1.1 / 9.9.9.9** ([plan.md](plan.md)).
+Guest VLAN DNS had been **1.1.1.1 / 9.9.9.9**.
 Blocky could offer logging, malware blocklists, or captive-portal-friendly
 filtering for guests.
 
@@ -683,5 +682,5 @@ session is `:5540`, not `:30103`.
 | Headscale | **Resolved:** Janus, `127.0.0.1:8081`, Caddy `headscale.lab.zdk.no` (not :8080) |
 | ISP | **OBOS Nett**; no IPv6; modem bridged |
 
-After each decision is made, update [decisions.md](decisions.md) and remove the
-matching row from [plan.md § Remaining decisions](plan.md#remaining-decisions).
+When a choice changes, update [decisions.md](decisions.md) and delete the
+matching item from [todo.md](todo.md).
